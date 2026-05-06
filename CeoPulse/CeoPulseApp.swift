@@ -9,9 +9,22 @@ import SwiftUI
 
 @main
 struct CeoPulseApp: App {
+    @State private var isAuthenticated = false
+    
+    init() {
+        // Initialize Auth Listener if needed
+    }
+    
     var body: some Scene {
         WindowGroup {
-            MainTabView()
+            if isAuthenticated {
+                MainTabView()
+            } else {
+                LoginView()
+                    .onOpenURL { url in
+                        // Handle Supabase Auth Redirects if needed
+                    }
+            }
         }
     }
 }
