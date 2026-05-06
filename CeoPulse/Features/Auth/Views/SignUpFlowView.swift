@@ -169,7 +169,16 @@ struct SignUpStep1View: View {
                 }
             } catch {
                 await MainActor.run {
-                    errorMessage = error.localizedDescription
+                    let description = error.localizedDescription
+                    if description.contains("invalid format") && description.contains("email") {
+                        errorMessage = NSLocalizedString("error_invalid_email", comment: "Geçersiz e-posta adresi")
+                    } else if description.contains("already registered") {
+                        errorMessage = NSLocalizedString("error_user_exists", comment: "Bu e-posta adresi zaten kullanımda")
+                    } else if description.contains("Password") && description.contains("short") {
+                        errorMessage = NSLocalizedString("error_password_short", comment: "Şifre en az 6 karakter olmalıdır")
+                    } else {
+                        errorMessage = description
+                    }
                 }
             }
             await MainActor.run {
