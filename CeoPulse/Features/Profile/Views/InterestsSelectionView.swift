@@ -66,7 +66,7 @@ struct InterestsSelectionView: View {
                         
                         // Popular Areas Grid
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Popüler Alanlar")
+                            Text(NSLocalizedString("interests_title", comment: ""))
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white)
                             
@@ -85,14 +85,14 @@ struct InterestsSelectionView: View {
                         
                         // Other Areas / Search
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Diğer Alanlar")
+                            Text(NSLocalizedString("other_areas", comment: ""))
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(AppColors.textSecondary)
                             
                             HStack {
                                 Image(systemName: "magnifyingglass")
                                     .foregroundColor(AppColors.textSecondary)
-                                TextField("", text: $searchText, prompt: Text("Başka bir ilgi alanı ekleyin").foregroundColor(AppColors.textSecondary))
+                                TextField("", text: $searchText, prompt: Text(NSLocalizedString("search_area_placeholder", comment: "")).foregroundColor(AppColors.textSecondary))
                                     .foregroundColor(.white)
                                 Image(systemName: "chevron.down")
                                     .foregroundColor(AppColors.textSecondary)
@@ -108,11 +108,11 @@ struct InterestsSelectionView: View {
                         if !selectedInterests.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack {
-                                    Text("Seçilen \(selectedInterests.count) alan")
+                                    Text("\(selectedInterests.count) / 10")
                                         .font(.system(size: 14, weight: .bold))
                                         .foregroundColor(.white)
                                     Spacer()
-                                    Text("\(selectedInterests.count) / 10")
+                                    Text(NSLocalizedString("interests_min_max_info", comment: ""))
                                         .font(.system(size: 12))
                                         .foregroundColor(AppColors.textSecondary)
                                 }
@@ -137,14 +137,14 @@ struct InterestsSelectionView: View {
                 VStack {
                     Button(action: { presentationMode.wrappedValue.dismiss() }) {
                         HStack {
-                            Text("Devam Et")
+                            Text(NSLocalizedString("button_continue", comment: ""))
                             Image(systemName: "arrow.right")
                         }
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(selectedInterests.count >= 3 ? Color(hex: "6C38FF") : Color.white.opacity(0.1))
+                        .background(selectedInterests.count >= 3 ? Color(hex: "6C38FF") : Color.gray.opacity(0.3))
                         .cornerRadius(12)
                     }
                     .disabled(selectedInterests.count < 3)
@@ -155,9 +155,7 @@ struct InterestsSelectionView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            Task {
-                await configManager.fetchConfigs()
-            }
+            fetchInterests()
         }
     }
     
@@ -181,6 +179,15 @@ struct InterestsSelectionView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 10)
+    }
+    
+    private func fetchInterests() {
+        self.isLoading = true
+        Task {
+            await configManager.fetchConfigs()
+            self.interests = configManager.interestsList
+            self.isLoading = false
+        }
     }
     
     private func toggleInterest(_ title: String) {

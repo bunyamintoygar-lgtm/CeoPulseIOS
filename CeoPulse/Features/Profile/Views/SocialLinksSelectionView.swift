@@ -63,53 +63,80 @@ struct SocialLinksSelectionView: View {
                             Text("Bağlantı Ekle")
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white)
-                            
-                            VStack(spacing: 12) {
-                                ForEach(platforms) { platform in
-                                    PlatformRow(platform: platform)
-                                }
-                            }
-                        }
-                        
-                        // Connected Accounts Section
+                        // Connected Accounts
                         if !connectedAccounts.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
-                                Text("Bağlanan Hesaplar")
+                                Text(NSLocalizedString("social_connected_section", comment: ""))
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(.white)
                                 
-                                VStack(spacing: 12) {
-                                    ForEach(connectedAccounts) { account in
-                                        ConnectedAccountRow(account: account)
+                                ForEach(connectedAccounts, id: \.id) { account in
+                                    ConnectedAccountRow(account: account) {
+                                        connectedAccounts.removeAll { $0.id == account.id }
                                     }
                                 }
                             }
                         }
+                        
+                        // Add Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text(NSLocalizedString("social_add_section", comment: ""))
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                            
+                            VStack(spacing: 0) {
+                                SocialAddRow(platform: "LinkedIn", icon: "linkedin_icon")
+                                Divider().background(Color.white.opacity(0.05))
+                                SocialAddRow(platform: "X (Twitter)", icon: "x_icon")
+                                Divider().background(Color.white.opacity(0.05))
+                                SocialAddRow(platform: "GitHub", icon: "github_icon")
+                            }
+                            .background(Color.white.opacity(0.03))
+                            .cornerRadius(12)
+                        }
+                        
+                        // Visibility Setting
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text("Görünürlük Ayarı")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
+                                Spacer()
+                                Text(isPublic ? NSLocalizedString("visibility_public", comment: "") : NSLocalizedString("visibility_private", comment: ""))
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.purple)
+                            }
+                            
+                            Toggle(isOn: $isPublic) {
+                                Text(NSLocalizedString("social_privacy_note", comment: ""))
+                                    .font(.system(size: 14))
+                                    .foregroundColor(AppColors.textSecondary)
+                            }
+                            .tint(.purple)
+                            .padding()
+                            .background(Color.white.opacity(0.03))
+                            .cornerRadius(12)
+                        }
+                        
+                        // Info Box
+                        HStack(spacing: 16) {
+                            Image(systemName: "info.circle.fill")
+                                .foregroundColor(.purple)
+                            Text(NSLocalizedString("social_info_box", comment: ""))
+                                .font(.system(size: 12))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        .padding()
+                        .background(Color.purple.opacity(0.05))
+                        .cornerRadius(12)
                     }
                     .padding(.horizontal, 24)
                     .padding(.top, 20)
-                    .padding(.bottom, 40)
                 }
                 
                 // Footer
-                VStack(spacing: 12) {
+                VStack {
                     Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                        HStack {
-                            Text("Kaydet ve Devam Et")
-                            Image(systemName: "arrow.right")
-                        }
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color(hex: "6C38FF"))
-                        .cornerRadius(12)
-                    }
-                    
-                    HStack(spacing: 8) {
-                        Image(systemName: "lock.fill")
-                            .font(.system(size: 10))
-                        Text("Bağlantılarınızı dilediğiniz zaman düzenleyebilirsiniz.")
                             .font(.system(size: 11))
                     }
                     .foregroundColor(AppColors.textSecondary)

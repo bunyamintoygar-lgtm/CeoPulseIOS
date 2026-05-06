@@ -23,29 +23,56 @@ struct NotificationPreferencesView: View {
                 headerView
                 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 32) {
                         // Title Section
-                        VStack(spacing: 8) {
-                            Text("Bildirim Tercihlerinizi Ayarlayın")
+                        VStack(spacing: 12) {
+                            Text(NSLocalizedString("notifications_title", comment: ""))
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.white)
                                 .multilineTextAlignment(.center)
-                            Text("Sizin için önemli gelişmeleri kaçırmamak için bildirim tercihlerinizi özelleştirin.")
+                            Text(NSLocalizedString("notifications_subtitle", comment: ""))
                                 .font(.system(size: 14))
                                 .foregroundColor(AppColors.textSecondary)
                                 .multilineTextAlignment(.center)
                         }
                         .frame(maxWidth: .infinity)
                         
+                        // Channels Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text(NSLocalizedString("notifications_channels", comment: ""))
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                            
+                            VStack(spacing: 0) {
+                                NotificationToggleRow(title: "Push Bildirimleri", subtitle: "Anlık gelişmelerden haberdar olun", isOn: .constant(true))
+                                Divider().background(Color.white.opacity(0.05))
+                                NotificationToggleRow(title: "E-posta", subtitle: "Önemli özetleri e-posta ile alın", isOn: .constant(false))
+                                Divider().background(Color.white.opacity(0.05))
+                                NotificationToggleRow(title: "SMS", subtitle: "Kritik güvenlik uyarıları için", isOn: .constant(false))
+                            }
+                            .background(Color.white.opacity(0.03))
+                            .cornerRadius(12)
+                        }
+                        
+                        // Categories Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text(NSLocalizedString("notifications_categories", comment: ""))
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                            
+                            VStack(spacing: 0) {
+                                NotificationToggleRow(title: "Etkinlikler", subtitle: "Yeni etkinlik ve organizasyonlar", isOn: .constant(true))
+                                Divider().background(Color.white.opacity(0.05))
+                                NotificationToggleRow(title: "Haberler & Duyurular", subtitle: "Sektörel haberler ve uygulama duyuruları", isOn: .constant(true))
+                                Divider().background(Color.white.opacity(0.05))
+                                NotificationToggleRow(title: "Ağ Gelişmeleri", subtitle: "Yeni bağlantılar ve etkileşimler", isOn: .constant(true))
+                            }
+                            .background(Color.white.opacity(0.03))
+                            .cornerRadius(12)
+                        }
+                        
                         // Info Box
                         HStack(spacing: 16) {
-                            Image(systemName: "info.circle")
-                                .font(.system(size: 20))
-                                .foregroundColor(.purple)
-                            
-                            Text("Tercihlerinizi dilediğiniz zaman ayarlar bölümünden değiştirebilirsiniz.")
-                                .font(.system(size: 13))
-                                .foregroundColor(.white.opacity(0.8))
                             
                             Spacer()
                             

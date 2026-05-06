@@ -21,71 +21,67 @@ struct LocationSelectionView: View {
                 headerView
                 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 32) {
                         // Title Section
-                        VStack(spacing: 8) {
-                            Text("Lokasyonunuzu Ekleyin")
+                        VStack(spacing: 12) {
+                            Text(NSLocalizedString("location_title", comment: ""))
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.white)
-                            Text("Bulunduğunuz konum, size en uygun fırsatları görmenize yardımcı olur.")
+                            Text(NSLocalizedString("location_subtitle", comment: ""))
                                 .font(.system(size: 14))
                                 .foregroundColor(AppColors.textSecondary)
                                 .multilineTextAlignment(.center)
                         }
                         .frame(maxWidth: .infinity)
                         
-                        // Info Box
-                        HStack(spacing: 12) {
-                            Image(systemName: "info.circle")
-                                .foregroundColor(.purple)
-                            Text("Konum bilgileriniz yalnızca size özel fırsatları göstermek için kullanılır ve gizli tutulur.")
-                                .font(.system(size: 13))
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-                        .padding()
-                        .background(Color.white.opacity(0.03))
-                        .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
-                        
                         // Search Bar
-                        HStack {
+                        HStack(spacing: 12) {
                             Image(systemName: "magnifyingglass")
                                 .foregroundColor(AppColors.textSecondary)
-                            
-                            TextField("", text: $searchText, prompt: Text("Şehir, ülke veya bölge ara").foregroundColor(AppColors.textSecondary))
+                            TextField("", text: $searchText, prompt: Text(NSLocalizedString("location_search_placeholder", comment: "")).foregroundColor(AppColors.textSecondary))
                                 .foregroundColor(.white)
-                            
-                            Button(action: {}) {
-                                Image(systemName: "location.north.circle")
-                                    .foregroundColor(AppColors.textSecondary)
-                            }
                         }
                         .padding()
                         .background(Color.white.opacity(0.05))
                         .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
                         
-                        // Current Location
+                        // Current Location Section
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Mevcut Konumunuz")
+                            Text(NSLocalizedString("location_current_title", comment: ""))
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white)
                             
-                            LocationRow(title: "İstanbul, Türkiye", isSelected: selectedLocation == "İstanbul, Türkiye") {
-                                selectedLocation = "İstanbul, Türkiye"
+                            Button(action: { /* Detect location */ }) {
+                                HStack(spacing: 16) {
+                                    Image(systemName: "location.circle.fill")
+                                        .font(.system(size: 24))
+                                        .foregroundColor(.purple)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Current Location").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                                        Text("Detect automatically").font(.system(size: 11)).foregroundColor(AppColors.textSecondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(AppColors.textSecondary)
+                                }
+                                .padding()
+                                .background(Color.white.opacity(0.03))
+                                .cornerRadius(12)
                             }
                         }
                         
                         // Suggested Locations
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Önerilen Konumlar")
+                            Text(NSLocalizedString("location_suggested_title", comment: ""))
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white)
                             
-                            VStack(spacing: 12) {
-                                ForEach(suggestedLocations, id: \.self) { location in
-                                    LocationRow(title: location, isSelected: selectedLocation == location) {
-                                        selectedLocation = location
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                                ForEach(["Istanbul", "London", "New York", "Dubai", "Berlin", "Singapore"], id: \.self) { city in
+                                    CityCard(city: city, isSelected: selectedLocation == city) {
+                                        selectedLocation = city
                                     }
                                 }
                             }
@@ -98,17 +94,15 @@ struct LocationSelectionView: View {
                 // Footer
                 VStack {
                     Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                        HStack {
-                            Text("Devam Et")
-                            Image(systemName: "arrow.right")
-                        }
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color(hex: "6C38FF"))
-                        .cornerRadius(12)
+                        Text(NSLocalizedString("button_save", comment: ""))
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(selectedLocation != nil ? Color(hex: "6C38FF") : Color.gray.opacity(0.3))
+                            .cornerRadius(12)
                     }
+                    .disabled(selectedLocation == nil)
                     .padding(24)
                 }
                 .background(AppColors.background)
