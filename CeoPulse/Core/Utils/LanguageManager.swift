@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 class LanguageManager: ObservableObject {
     static let shared = LanguageManager()
@@ -11,12 +12,12 @@ class LanguageManager: ObservableObject {
     }
     
     private init() {
-        self.currentLanguage = (UserDefaults.standard.array(forKey: "AppleLanguages")?.first as? String) ?? "tr"
+        // Get initial language, stripping region code if present (e.g., "tr-US" -> "tr")
+        let fullLang = (UserDefaults.standard.array(forKey: "AppleLanguages")?.first as? String) ?? "tr"
+        self.currentLanguage = fullLang.prefix(2).lowercased()
     }
     
     func setLanguage(_ language: String) {
-        withAnimation {
-            currentLanguage = language
-        }
+        currentLanguage = language
     }
 }
