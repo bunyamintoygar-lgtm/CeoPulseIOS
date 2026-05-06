@@ -1,363 +1,188 @@
 import SwiftUI
+import PhotosUI
 
 struct ProfilePhotoView: View {
     @Environment(\.presentationMode) var presentationMode
-    @State private var currentStep = 1 // 1: Upload, 2: Verification, 3: Success
-    @State private var selectedImage: Image? = nil
+    @EnvironmentObject var supabaseManager: SupabaseManager
+    @State private var selectedImage: UIImage? = nil
+    @State private var showImagePicker = false
+    @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
     
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             
-            VStack(spacing: 0) {
-                // Header
-                HStack {
-                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                        Image(systemName: "arrow.left")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(12)
-                            .background(Color.white.opacity(0.05))
-                            .clipShape(Circle())
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
+            VStack(spacing: 32) {
+                // Header (No back button as requested)
+                Spacer().frame(height: 20)
                 
-                // Stepper
-                SignUpStepper(currentStep: 2) // We reuse the stepper but highlight step 2
-                    .padding(.top, 20)
-                
-                ScrollView {
-                    if currentStep == 1 {
-                        PhotoUploadStep(currentStep: $currentStep)
-                    } else if currentStep == 2 {
-                        PhotoVerificationStep(currentStep: $currentStep)
-                    } else {
-                        PhotoSuccessStep(presentationMode: presentationMode)
-                    }
+                VStack(spacing: 12) {
+                    Text("Profil Fotoğrafı")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("Profesyonel bir profil fotoğrafı, güven oluşturur\nve topluluk içinde fark edilmenizi sağlar.")
+                        .font(.system(size: 14))
+                        .foregroundColor(AppColors.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
                 }
-            }
-        }
-    }
-}
-
-// MARK: - Step 1: Upload
-struct PhotoUploadStep: View {
-    @Binding var currentStep: Int
-    
-    var body: some View {
-        VStack(spacing: 32) {
-            VStack(spacing: 12) {
-                Text("Profil Fotoğrafı")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
-                Text("Profesyonel bir profil fotoğrafı, güven oluşturur\nve daha güçlü bağlantılar kurmanıza yardımcı olur.")
-                    .font(.system(size: 13))
-                    .foregroundColor(AppColors.textSecondary)
-                    .multilineTextAlignment(.center)
-            }
-            
-            // Avatar Placeholder
-            ZStack(alignment: .bottomTrailing) {
-                Circle()
-                    .stroke(style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                
+                // Redesigned Photo Frame
+                ZStack {
+                    // Outer Ring
+                    Circle()
+                        .stroke(
+                            LinearGradient(
+                                colors: [.purple.opacity(0.5), .purple, .blue.opacity(0.5)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 2
+                        )
+                        .frame(width: 220, height: 220)
+                        .rotationEffect(.degrees(selectedImage == nil ? 0 : 360))
+                        .animation(.linear(duration: 4).repeatForever(autoreverses: false), value: selectedImage == nil)
+                    
+                    // Inner Circle
+                    Circle()
+                        .fill(Color.white.opacity(0.05))
+                        .frame(width: 200, height: 200)
+                        .overlay(
+                            Group {
+                                if let image = selectedImage {
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .clipShape(Circle())
+                                } else {
+                                    Image(systemName: "person.fill")
+                                        .font(.system(size: 80))
+                                        .foregroundColor(.white.opacity(0.2))
+                                }
+                            }
+                        )
+                    
+                    // Add/Edit Badge
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            Circle()
+                                .fill(Color(hex: "6C38FF"))
+                                .frame(width: 50, height: 50)
+                                .overlay(
+                                    Image(systemName: selectedImage == nil ? "camera.fill" : "pencil")
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 20, weight: .bold))
+                                )
+                                .shadow(color: Color(hex: "6C38FF").opacity(0.5), radius: 10)
+                        }
+                    }
                     .frame(width: 200, height: 200)
-                    .foregroundColor(Color.purple.opacity(0.3))
-                
-                Circle()
-                    .fill(LinearGradient(colors: [Color.purple.opacity(0.2), Color.purple.opacity(0.4)], startPoint: .top, endPoint: .bottom))
-                    .frame(width: 180, height: 180)
-                
-                Image(systemName: "person.fill")
-                    .font(.system(size: 80))
-                    .foregroundColor(.purple)
-                
-                Circle()
-                    .fill(Color(hex: "6C38FF"))
-                    .frame(width: 48, height: 48)
-                    .overlay(Image(systemName: "plus").foregroundColor(.white).font(.system(size: 20, weight: .bold)))
-                    .offset(x: -10, y: -10)
-            }
-            
-            Button(action: { withAnimation { currentStep = 2 } }) {
-                HStack {
-                    Image(systemName: "arrow.up.doc")
-                    Text("Fotoğraf Yükle")
                 }
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color(hex: "6C38FF"))
-                .cornerRadius(12)
-            }
-            .padding(.horizontal, 24)
-            
-            // Tips Grid
-            VStack(alignment: .leading, spacing: 16) {
-                Text("İyi bir profil fotoğrafı için ipuçları")
-                    .font(.system(size: 14, weight: .bold))
+                .padding(.vertical, 20)
+                
+                // Action Buttons
+                VStack(spacing: 16) {
+                    Button(action: {
+                        sourceType = .camera
+                        showImagePicker = true
+                    }) {
+                        HStack {
+                            Image(systemName: "camera")
+                            Text("Fotoğraf Çek")
+                        }
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color(hex: "6C38FF"))
+                        .cornerRadius(12)
+                    }
+                    
+                    Button(action: {
+                        sourceType = .photoLibrary
+                        showImagePicker = true
+                    }) {
+                        HStack {
+                            Image(systemName: "photo.on.rectangle")
+                            Text("Galeriden Seç")
+                        }
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.white.opacity(0.05))
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                    }
+                }
+                .padding(.horizontal, 32)
+                
+                Spacer()
+                
+                // Bottom Button
+                Button(action: {
+                    withAnimation {
+                        supabaseManager.isAuthenticated = true
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                }) {
+                    HStack {
+                        Text("Devam Et")
+                        Image(systemName: "arrow.right")
+                    }
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
-                
-                HStack(spacing: 20) {
-                    TipIconView(icon: "person.crop.circle.badge.checkmark", label: "Yüzünüz net\nve odakta olsun")
-                    TipIconView(icon: "sun.max.fill", label: "İyi aydınlatılmış\nbir ortam seçin")
-                    TipIconView(icon: "tshirt.fill", label: "Profesyonel\nkıyafet tercih edin")
-                    TipIconView(icon: "face.smiling.fill", label: "Doğal bir ifade\nkullanın")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background(selectedImage != nil ? Color(hex: "6C38FF") : Color.white.opacity(0.1))
+                    .cornerRadius(15)
                 }
+                .padding(.horizontal, 32)
+                .padding(.bottom, 40)
             }
-            .padding(20)
-            .background(Color.white.opacity(0.03))
-            .cornerRadius(20)
-            
-            // Examples
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Örnek profil fotoğrafları")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
-                
-                HStack(spacing: 12) {
-                    PhotoExampleView(imageName: "example1", isGood: true, label: "Doğru")
-                    PhotoExampleView(imageName: "example2", isGood: true, label: "Doğru")
-                    PhotoExampleView(imageName: "example3", isGood: false, label: "Koyu")
-                    PhotoExampleView(imageName: "example4", isGood: false, label: "Uygun değil")
-                }
-            }
-            
-            HStack {
-                Image(systemName: "info.circle").foregroundColor(.purple)
-                Text("JPG, PNG formatları desteklenir. Maks. 5MB boyut.")
-                    .font(.system(size: 12))
-                    .foregroundColor(AppColors.textSecondary)
-            }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(Color.white.opacity(0.03))
-            .cornerRadius(12)
-            
-            Button(action: {}) {
-                HStack {
-                    Text("Devam Et")
-                    Image(systemName: "arrow.right")
-                }
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.white.opacity(0.1))
-                .cornerRadius(12)
-            }
-            .padding(.bottom, 40)
         }
-        .padding(.horizontal, 24)
+        .sheet(isPresented: $showImagePicker) {
+            ImagePicker(image: $selectedImage, sourceType: sourceType)
+        }
     }
 }
 
-// MARK: - Step 2: Verification
-struct PhotoVerificationStep: View {
-    @Binding var currentStep: Int
+// MARK: - Image Picker Helper
+struct ImagePicker: UIViewControllerRepresentable {
+    @Binding var image: UIImage?
+    var sourceType: UIImagePickerController.SourceType = .photoLibrary
     
-    var body: some View {
-        VStack(spacing: 32) {
-            VStack(spacing: 12) {
-                Text("Profil Fotoğrafı Doğrulama")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
-                Text("Güvenliğiniz ve topluluk kalitesini korumak için\nprofil fotoğrafınızı doğrulamanız gerekiyor.")
-                    .font(.system(size: 13))
-                    .foregroundColor(AppColors.textSecondary)
-                    .multilineTextAlignment(.center)
-            }
-            
-            // Photo with Verification Badge
-            ZStack(alignment: .bottomTrailing) {
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 180, height: 180)
-                    .overlay(Text("Fotoğraf Buraya").font(.system(size: 12)))
-                
-                Circle()
-                    .fill(Color(hex: "6C38FF"))
-                    .frame(width: 44, height: 44)
-                    .overlay(Image(systemName: "shield.checkered").foregroundColor(.white))
-                    .offset(x: -5, y: -5)
-            }
-            
-            // Checklist
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Fotoğrafınız doğrulama gereksinimlerini karşılıyor mu?")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.bottom, 8)
-                
-                VerificationRow(icon: "person", text: "Yüzünüz net ve görünür olmalı", isMet: true)
-                VerificationRow(icon: "sun.max", text: "İyi aydınlatılmış bir ortamda çekilmeli", isMet: true)
-                VerificationRow(icon: "person.fill", text: "Sadece siz olmalısınız (tek başınıza)", isMet: true)
-                VerificationRow(icon: "tshirt", text: "Profesyonel bir görünüm tercih edilmeli", isMet: true)
-                VerificationRow(icon: "face.smiling", text: "Doğal bir ifade kullanılmalı", isMet: true)
-                VerificationRow(icon: "nose.fill", text: "Filtre, şapka, güneş gözlüğü kullanılmamalı", isMet: false)
-            }
-            .padding(20)
-            .background(Color.white.opacity(0.03))
-            .cornerRadius(20)
-            
-            Button(action: { withAnimation { currentStep = 3 } }) {
-                HStack {
-                    Image(systemName: "camera")
-                    Text("Yeni Fotoğraf Çek")
-                }
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color(hex: "6C38FF"))
-                .cornerRadius(12)
-            }
-            
-            Button(action: {}) {
-                HStack {
-                    Image(systemName: "photo")
-                    Text("Galeriden Seç")
-                }
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(12)
-            }
-            
-            Button(action: {}) {
-                HStack {
-                    Image(systemName: "questionmark.circle")
-                    Text("Neden doğrulama istiyoruz?")
-                    Image(systemName: "chevron.down")
-                }
-                .font(.system(size: 12))
-                .foregroundColor(AppColors.textSecondary)
-            }
-            .padding(.bottom, 40)
-        }
-        .padding(.horizontal, 24)
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.delegate = context.coordinator
+        picker.sourceType = sourceType
+        return picker
     }
-}
-
-// MARK: - Step 3: Success
-struct PhotoSuccessStep: View {
-    let presentationMode: Binding<PresentationMode>
     
-    var body: some View {
-        VStack(spacing: 32) {
-            VStack(spacing: 12) {
-                Text("Profil Fotoğrafınızı Tamamlayın")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
-                Text("Profesyonel görünümünüz, güven oluşturur.\nEn iyi sonucu almak için ipuçlarımızı takip edin.")
-                    .font(.system(size: 13))
-                    .foregroundColor(AppColors.textSecondary)
-                    .multilineTextAlignment(.center)
-            }
-            
-            ZStack(alignment: .bottom) {
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 180, height: 180)
-                
-                HStack(spacing: 4) {
-                    Image(systemName: "checkmark.circle.fill")
-                    Text("Harika! Fotoğrafınız doğrulandı.")
-                }
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.green)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 16)
-                .background(Color.black.opacity(0.8))
-                .cornerRadius(20)
-                .offset(y: 20)
-            }
-            .padding(.bottom, 20)
-            
-            Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                HStack {
-                    Text("Fotoğrafımı Tamamla")
-                    Image(systemName: "arrow.right")
-                }
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color(hex: "6C38FF"))
-                .cornerRadius(12)
-            }
-            .padding(.bottom, 40)
-        }
-        .padding(.horizontal, 24)
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
     }
-}
-
-// MARK: - Subcomponents
-struct TipIconView: View {
-    let icon: String
-    let label: String
-    var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundColor(.purple)
-                .frame(width: 44, height: 44)
-                .background(Color.white.opacity(0.05))
-                .clipShape(Circle())
-            Text(label)
-                .font(.system(size: 9))
-                .foregroundColor(AppColors.textSecondary)
-                .multilineTextAlignment(.center)
+    
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let parent: ImagePicker
+        
+        init(_ parent: ImagePicker) {
+            self.parent = parent
         }
-        .frame(maxWidth: .infinity)
-    }
-}
-
-struct PhotoExampleView: View {
-    let imageName: String
-    let isGood: Bool
-    let label: String
-    var body: some View {
-        VStack(spacing: 8) {
-            ZStack(alignment: .bottomTrailing) {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.white.opacity(0.1))
-                    .frame(height: 80)
-                
-                Image(systemName: isGood ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundColor(isGood ? .green : .red)
-                    .background(Color.white.clipShape(Circle()))
-                    .offset(x: 5, y: 5)
+        
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let uiImage = info[.originalImage] as? UIImage {
+                parent.image = uiImage
             }
-            Text(label)
-                .font(.system(size: 10))
-                .foregroundColor(AppColors.textSecondary)
+            picker.dismiss(animated: true)
         }
-        .frame(maxWidth: .infinity)
-    }
-}
-
-struct VerificationRow: View {
-    let icon: String
-    let text: String
-    let isMet: Bool
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundColor(AppColors.textSecondary)
-                .frame(width: 20)
-            Text(text)
-                .font(.system(size: 12))
-                .foregroundColor(.white.opacity(0.8))
-            Spacer()
-            Image(systemName: isMet ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(isMet ? .green : .red)
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            picker.dismiss(animated: true)
         }
     }
 }
