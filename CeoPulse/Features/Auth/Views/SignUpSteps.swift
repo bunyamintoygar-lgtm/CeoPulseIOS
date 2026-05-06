@@ -1,4 +1,5 @@
 import SwiftUI
+import Supabase
 
 // MARK: - Step 2: Profesyonel Bilgiler
 struct SignUpStep2View: View {
@@ -22,18 +23,20 @@ struct SignUpStep2View: View {
             do {
                 let currentUser = try await SupabaseManager.shared.client.auth.session.user
                 
+                let profileUpdate: [String: AnyJSON] = [
+                    "position": .string(position),
+                    "company": .string(company),
+                    "company_size": .string(companySize),
+                    "duration": .string(duration),
+                    "sector": .string(sector),
+                    "skills": .array(skills.map { .string($0) }),
+                    "bio": .string(bio),
+                    "is_public": .bool(isPublicProfile)
+                ]
+                
                 try await SupabaseManager.shared.client
                     .from("profiles")
-                    .update([
-                        "position": .string(position),
-                        "company": .string(company),
-                        "company_size": .string(companySize),
-                        "duration": .string(duration),
-                        "sector": .string(sector),
-                        "skills": .array(skills.map { .string($0) }),
-                        "bio": .string(bio),
-                        "is_public": .bool(isPublicProfile)
-                    ])
+                    .update(profileUpdate)
                     .eq("id", value: currentUser.id)
                     .execute()
                 
@@ -530,6 +533,39 @@ struct PersonalizationRow: View {
             .background(Color.white.opacity(0.03))
             .cornerRadius(12)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
+        }
+    }
+}
+
+struct StepIndicator: View {
+    let stepNumber: Int
+    let title: String
+    let isCurrent: Bool
+    let isCompleted: Bool
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .fill(isCompleted ? Color.purple : (isCurrent ? Color.purple : Color.white.opacity(0.1)))
+                    .frame(width: 24, height: 24)
+                
+                if isCompleted {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.white)
+                } else {
+                    Text("\(stepNumber)")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(isCurrent ? .white : AppColors.textSecondary)
+                }
+            }
+            
+            Text(title)
+                .font(.system(size: 9))
+                .foregroundColor(isCurrent || isCompleted ? .white : AppColors.textSecondary)
+                .frame(width: 70)
+                .multilineTextAlignment(.center)
         }
     }
 }

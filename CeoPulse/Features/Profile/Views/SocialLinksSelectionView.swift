@@ -215,6 +215,7 @@ struct PlatformRow: View {
 
 struct ConnectedAccountRow: View {
     let account: ConnectedAccount
+    let onDelete: () -> Void
     
     var body: some View {
         HStack(spacing: 16) {
@@ -236,9 +237,8 @@ struct ConnectedAccountRow: View {
                 .foregroundColor(account.visibility == .public ? .green : .orange)
                 .cornerRadius(6)
             
-            Button(action: {}) {
-                Image(systemName: "ellipsis")
-                    .rotationEffect(.degrees(90))
+            Button(action: onDelete) {
+                Image(systemName: "xmark.circle.fill")
                     .foregroundColor(AppColors.textSecondary)
             }
         }

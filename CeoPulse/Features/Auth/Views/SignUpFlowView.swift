@@ -151,13 +151,15 @@ struct SignUpStep1View: View {
         
         Task {
             do {
-                let _ = try await SupabaseManager.shared.client.auth.signUp(
+                let options = SignUpOptions(data: [
+                    "first_name": .string(firstName),
+                    "last_name": .string(lastName)
+                ])
+                
+                try await SupabaseManager.shared.client.auth.signUp(
                     email: email,
                     password: password,
-                    options: AuthSignUpOptions(data: [
-                        "first_name": .string(firstName),
-                        "last_name": .string(lastName)
-                    ])
+                    options: options
                 )
                 
                 await MainActor.run {

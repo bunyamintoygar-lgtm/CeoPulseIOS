@@ -301,16 +301,18 @@ struct InterestTag: View {
     }
 }
 
-struct FlowLayout: View {
+struct FlowLayout<Content: View>: View {
     var spacing: CGFloat
-    let content: AnyView
+    let content: Content
 
-    init<Content: View>(spacing: CGFloat = 8, @ViewBuilder content: () -> Content) {
+    init(spacing: CGFloat = 8, @ViewBuilder content: () -> Content) {
         self.spacing = spacing
-        self.content = AnyView(content())
+        self.content = content()
     }
 
     var body: some View {
+        // For now, keeping it simple as the original was just a wrapper
+        // but this fix solves the compiler error
         content
     }
 }

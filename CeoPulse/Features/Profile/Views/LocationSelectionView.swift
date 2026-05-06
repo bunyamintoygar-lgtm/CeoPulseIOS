@@ -3,7 +3,7 @@ import SwiftUI
 struct LocationSelectionView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var searchText = ""
-    @State private var selectedLocation = "İstanbul, Türkiye"
+    @State private var selectedLocation: String? = "İstanbul, Türkiye"
     
     let suggestedLocations = [
         "Ankara, Türkiye",
