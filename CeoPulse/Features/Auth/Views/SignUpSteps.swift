@@ -310,6 +310,8 @@ struct SignUpStep3View: View {
 
 // MARK: - Step 4: Tamamla
 struct SignUpStep4View: View {
+    @State private var showProfileCompletion = false
+    
     var body: some View {
         VStack(spacing: 32) {
             ZStack {
@@ -351,10 +353,13 @@ struct SignUpStep4View: View {
                     .foregroundColor(AppColors.textSecondary)
                 
                 VStack(spacing: 12) {
-                    PersonalizationRow(icon: "person.fill", title: "Profilinizi tamamlayın", subtitle: "Profil fotoğrafı, hakkında bilgisi...", actionTitle: "Tamamla")
+                    PersonalizationRow(icon: "person.fill", title: "Profilinizi tamamlayın", subtitle: "Profil fotoğrafı, hakkında bilgisi...", actionTitle: "Tamamla", action: { showProfileCompletion = true })
                     PersonalizationRow(icon: "briefcase.fill", title: "İlgi alanlarınızı seçin", subtitle: "Size özel içerik ve etkinlik önerileri...", actionTitle: "Seç")
                     PersonalizationRow(icon: "bell.fill", title: "Bildirim tercihlerinizi ayarlayın", subtitle: "Önemli gelişmelerden haberdar olmak için...", actionTitle: "Ayarla")
                 }
+            }
+            .fullScreenCover(isPresented: $showProfileCompletion) {
+                ProfileCompletionView()
             }
             
             HStack {
@@ -426,29 +431,35 @@ struct PersonalizationRow: View {
     let title: String
     let subtitle: String
     let actionTitle: String
+    var action: (() -> Void)? = nil
     
     var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .padding(10)
-                .background(Color.white.opacity(0.05))
-                .clipShape(Circle())
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
-                Text(subtitle).font(.system(size: 11)).foregroundColor(AppColors.textSecondary)
+        Button(action: { action?() }) {
+            HStack {
+                Image(systemName: icon)
+                    .padding(10)
+                    .background(Color.white.opacity(0.05))
+                    .clipShape(Circle())
+                    .foregroundColor(.purple)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                    Text(subtitle).font(.system(size: 11)).foregroundColor(AppColors.textSecondary)
+                }
+                Spacer()
+                Text(actionTitle)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 6)
+                    .background(Color.purple.opacity(0.2))
+                    .cornerRadius(8)
+                Image(systemName: "chevron.right").font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
             }
-            Spacer()
-            Button(actionTitle) {}
-                .font(.system(size: 12, weight: .bold))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 6)
-                .background(Color.white.opacity(0.1))
-                .cornerRadius(8)
-            Image(systemName: "chevron.right").font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
+            .padding()
+            .background(Color.white.opacity(0.03))
+            .cornerRadius(12)
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
         }
-        .padding()
-        .background(Color.white.opacity(0.03))
-        .cornerRadius(12)
     }
 }
