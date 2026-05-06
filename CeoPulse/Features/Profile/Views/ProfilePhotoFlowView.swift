@@ -48,8 +48,6 @@ struct ProfilePhotoFlowView: View {
         }
     }
     
-    // ... rest of the views (I will update the buttons in step2Verification)
-    
     // MARK: - Subviews
     
     private var headerView: some View {
@@ -187,7 +185,6 @@ struct ProfilePhotoFlowView: View {
                 .font(.system(size: 12))
                 .foregroundColor(AppColors.textSecondary)
             
-            // Tips (Mock translation for now as they are very specific)
             VStack(alignment: .leading, spacing: 16) {
                 Text("Tips for a great profile photo")
                     .font(.system(size: 13, weight: .bold))
@@ -318,62 +315,31 @@ struct ProfilePhotoFlowView: View {
                     .offset(x: -5, y: -5)
             }
             
-            HStack(spacing: 4) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-                Text("Harika! Fotoğrafınız doğrulandı.")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.green)
-            }
-            
-            // Tips Recap
             VStack(alignment: .leading, spacing: 16) {
-                Text("Daha güçlü bir profil için ipuçları")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.white)
-                
-                VStack(spacing: 12) {
-                    ChecklistItemMini(text: "Yüzünüz net ve odakta olsun", isMet: true)
-                    ChecklistItemMini(text: "İyi aydınlatılmış bir ortam seçin", isMet: true)
-                    ChecklistItemMini(text: "Profesyonel bir görünüm tercih edin", isMet: true)
-                    ChecklistItemMini(text: "Doğal bir ifade kullanın", isMet: true)
-                }
+                PhotoRequirementItem(icon: "checkmark.circle.fill", title: "Yüzünüz net görünüyor", subtitle: "Işıklandırma ve odaklanma mükemmel.")
+                PhotoRequirementItem(icon: "checkmark.circle.fill", title: "Profesyonel arka plan", subtitle: "Arka planınız dikkat dağıtmıyor.")
+                PhotoRequirementItem(icon: "checkmark.circle.fill", title: "Güncel fotoğraf", subtitle: "Fotoğrafınız sizi yansıtıyor.")
             }
             .padding()
             .background(Color.white.opacity(0.03))
             .cornerRadius(16)
-            
-            // Examples Mini
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Örnek fotoğraflar")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
-                
-                HStack(spacing: 10) {
-                    ExamplePhotoMini(imageName: "example1", label: "Doğru", isValid: true)
-                    ExamplePhotoMini(imageName: "example2", label: "Doğru", isValid: true)
-                    ExamplePhotoMini(imageName: "example3", label: "Doğru", isValid: true)
-                    ExamplePhotoMini(imageName: "example4", label: "Koyu", isValid: false)
-                    ExamplePhotoMini(imageName: "example5", label: "Uygun değil", isValid: false)
-                }
-            }
         }
     }
     
     // MARK: - Step 4: Success
     private var step4Success: some View {
         VStack(spacing: 32) {
+            // Success Icon
             ZStack {
-                // Confetti Placeholder
                 Circle()
-                    .fill(RadialGradient(colors: [.purple.opacity(0.2), .clear], center: .center, startRadius: 0, endRadius: 150))
-                    .frame(width: 300, height: 300)
+                    .fill(Color.green.opacity(0.1))
+                    .frame(width: 120, height: 120)
                 
                 if let uiImage = selectedImage {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 180, height: 180)
+                        .frame(width: 110, height: 110)
                         .clipShape(Circle())
                         .overlay(
                             ZStack {
@@ -408,26 +374,6 @@ struct ProfilePhotoFlowView: View {
             .padding()
             .background(Color.white.opacity(0.03))
             .cornerRadius(16)
-            
-            // Next Step Promo
-            HStack {
-                Image(systemName: "star.fill")
-                    .foregroundColor(.purple)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Sonraki adım önerisi").font(.system(size: 13, weight: .bold)).foregroundColor(.white)
-                    Text("Profilinizi daha da güçlendirmek için yeteneklerinizi ve deneyimlerinizi eklemeyi unutmayın.").font(.system(size: 10)).foregroundColor(AppColors.textSecondary)
-                }
-                Spacer()
-                Button("Profilimi Güçlendir") {}
-                    .font(.system(size: 11, weight: .bold))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(8)
-            }
-            .padding()
-            .background(Color.white.opacity(0.03))
-            .cornerRadius(12)
         }
     }
 }
@@ -453,88 +399,7 @@ struct TipItem: View {
     }
 }
 
-struct ExamplePhoto: View {
-    let imageName: String
-    let isValid: Bool
-    var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            Rectangle()
-                .fill(Color.white.opacity(0.1))
-                .aspectRatio(1, contentMode: .fit)
-                .cornerRadius(12)
-            
-            Image(systemName: isValid ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(isValid ? .green : .red)
-                .background(Circle().fill(.white))
-                .padding(6)
-        }
-    }
-}
-
-struct ExamplePhotoMini: View {
-    let imageName: String
-    let label: String
-    let isValid: Bool
-    var body: some View {
-        VStack(spacing: 4) {
-            ZStack(alignment: .bottomTrailing) {
-                Rectangle()
-                    .fill(Color.white.opacity(0.1))
-                    .frame(width: 55, height: 55)
-                    .cornerRadius(8)
-                
-                Image(systemName: isValid ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .font(.system(size: 14))
-                    .foregroundColor(isValid ? .green : .red)
-                    .background(Circle().fill(.white))
-                    .offset(x: 4, y: 4)
-            }
-            Text(label)
-                .font(.system(size: 10))
-                .foregroundColor(AppColors.textSecondary)
-        }
-    }
-}
-
-struct ChecklistItem: View {
-    let text: String
-    let isMet: Bool
-    var body: some View {
-        HStack {
-            Image(systemName: "person.crop.circle")
-                .foregroundColor(AppColors.textSecondary)
-            Text(text)
-                .font(.system(size: 13))
-                .foregroundColor(AppColors.textSecondary)
-            Spacer()
-            Image(systemName: isMet ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(isMet ? .green : .red)
-        }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 4)
-        Divider().background(Color.white.opacity(0.05))
-    }
-}
-
-struct ChecklistItemMini: View {
-    let text: String
-    let isMet: Bool
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "person.crop.circle")
-                .foregroundColor(.purple)
-            Text(text)
-                .font(.system(size: 12))
-                .foregroundColor(AppColors.textSecondary)
-            Spacer()
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.green)
-                .font(.system(size: 14))
-        }
-    }
-}
-
-struct SuccessBenefitRow: View {
+struct PhotoRequirementItem: View {
     let icon: String
     let title: String
     let subtitle: String
@@ -553,6 +418,25 @@ struct SuccessBenefitRow: View {
             Spacer()
             Image(systemName: "checkmark.circle.fill")
                 .foregroundColor(.green.opacity(0.5))
+        }
+    }
+}
+
+struct SuccessBenefitRow: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    var body: some View {
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundColor(.purple)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.system(size: 13, weight: .bold)).foregroundColor(.white)
+                Text(subtitle).font(.system(size: 11)).foregroundColor(AppColors.textSecondary)
+            }
+            Spacer()
         }
     }
 }
