@@ -328,6 +328,7 @@ struct SignUpStep4View: View {
     @State private var showProfileCompletion = false
     @State private var showInterestsSelection = false
     @State private var showNotificationPreferences = false
+    @EnvironmentObject var supabaseManager: SupabaseManager
     
     var body: some View {
         VStack(spacing: 32) {
@@ -418,7 +419,11 @@ struct SignUpStep4View: View {
             .background(Color.white.opacity(0.03))
             .cornerRadius(12)
             
-            Button(action: {}) {
+            Button(action: {
+                withAnimation {
+                    supabaseManager.isAuthenticated = true
+                }
+            }) {
                 HStack {
                     Text(NSLocalizedString("button_start_app", comment: ""))
                     Image(systemName: "arrow.right")

@@ -7,6 +7,7 @@ class SupabaseManager: ObservableObject {
     static let shared = SupabaseManager()
     
     let client: SupabaseClient
+    @Published var isAuthenticated = false
     
     private init() {
         self.client = SupabaseClient(

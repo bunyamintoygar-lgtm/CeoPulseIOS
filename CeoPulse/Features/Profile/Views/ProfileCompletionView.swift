@@ -3,22 +3,16 @@ import SwiftUI
 struct ProfileCompletionView: View {
     @State private var completionRate: Double = 0.65
     @State private var showPhotoFlow = false
+    @EnvironmentObject var supabaseManager: SupabaseManager
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header
+                // Header (Removed back button as per user request)
                 HStack {
-                    Button(action: {}) {
-                        Image(systemName: "arrow.left")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(12)
-                            .background(Color.white.opacity(0.05))
-                            .clipShape(Circle())
-                    }
                     Spacer()
                 }
                 .padding(.horizontal, 20)
@@ -128,7 +122,12 @@ struct ProfileCompletionView: View {
                         .background(Color.white.opacity(0.03))
                         .cornerRadius(16)
                         
-                        Button(action: {}) {
+                        Button(action: {
+                            withAnimation {
+                                supabaseManager.isAuthenticated = true
+                                dismiss()
+                            }
+                        }) {
                             HStack {
                                 Text("Devam Et")
                                 Image(systemName: "arrow.right")

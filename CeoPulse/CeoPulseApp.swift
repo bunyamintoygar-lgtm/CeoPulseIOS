@@ -9,18 +9,15 @@ import SwiftUI
 
 @main
 struct CeoPulseApp: App {
-    @State private var isAuthenticated = false
-    
-    init() {
-        // Initialize Auth Listener if needed
-    }
+    @StateObject private var supabaseManager = SupabaseManager.shared
     
     var body: some Scene {
         WindowGroup {
-            if isAuthenticated {
+            if supabaseManager.isAuthenticated {
                 MainTabView()
             } else {
                 LoginView()
+                    .environmentObject(supabaseManager)
                     .onOpenURL { url in
                         // Handle Supabase Auth Redirects if needed
                     }
