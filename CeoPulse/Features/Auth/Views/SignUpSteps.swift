@@ -361,41 +361,9 @@ struct SignUpStep4View: View {
                 }
             }
             
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Hesabınızı kişiselleştirin")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
-                
-                Text("Daha iyi bir deneyim için aşağıdaki adımları tamamlamanızı öneririz.")
-                    .font(.system(size: 13))
-                    .foregroundColor(AppColors.textSecondary)
-                
-                VStack(spacing: 12) {
-                    PersonalizationRow(
-                        icon: "person.fill",
-                        title: "Profilinizi tamamlayın...",
-                        subtitle: "Profil fotoğrafı, hakkında...",
-                        actionTitle: "Tamamla",
-                        action: { showPhotoFlow = true }
-                    )
-                    
-                    PersonalizationRow(
-                        icon: "briefcase.fill",
-                        title: "İlgi alanlarınızı seçin",
-                        subtitle: "Size özel içerik ve etkinlik ön...",
-                        actionTitle: "İleri",
-                        action: { /* Navigate to interests if needed */ }
-                    )
-                    
-                    PersonalizationRow(
-                        icon: "bell.fill",
-                        title: "Bildirim tercihlerini ay...",
-                        subtitle: "Önemli gelişmelerden haberd...",
-                        actionTitle: "İleri",
-                        action: { /* Navigate to notifications if needed */ }
-                    )
-                }
-            }
+            // List removed as per user request
+            Spacer()
+            
             .fullScreenCover(isPresented: $showPhotoFlow) {
                 ProfilePhotoView()
             }
@@ -416,9 +384,7 @@ struct SignUpStep4View: View {
             .cornerRadius(12)
             
             Button(action: {
-                withAnimation {
-                    supabaseManager.isAuthenticated = true
-                }
+                showPhotoFlow = true
             }) {
                 HStack {
                     Text(NSLocalizedString("button_start_app", comment: ""))
