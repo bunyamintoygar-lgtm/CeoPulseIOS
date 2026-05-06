@@ -67,7 +67,7 @@ struct LoginView: View {
                                 HStack {
                                     Image(systemName: "envelope")
                                         .foregroundColor(AppColors.textSecondary)
-                                    TextField("", text: $email, prompt: Text("ornek@email.com").foregroundColor(AppColors.textSecondary))
+                                    TextField("", text: $email, prompt: Text("ornek@email.com").foregroundColor(Color.white.opacity(0.4)))
                                         .foregroundColor(.white)
                                         .keyboardType(.emailAddress)
                                         .autocapitalization(.none)
@@ -88,10 +88,10 @@ struct LoginView: View {
                                     Image(systemName: "lock")
                                         .foregroundColor(AppColors.textSecondary)
                                     if isPasswordVisible {
-                                        TextField("", text: $password, prompt: Text("Şifrenizi giriniz").foregroundColor(AppColors.textSecondary))
+                                        TextField("", text: $password, prompt: Text("Şifrenizi giriniz").foregroundColor(Color.white.opacity(0.4)))
                                             .foregroundColor(.white)
                                     } else {
-                                        SecureField("", text: $password, prompt: Text("Şifrenizi giriniz").foregroundColor(AppColors.textSecondary))
+                                        SecureField("", text: $password, prompt: Text("Şifrenizi giriniz").foregroundColor(Color.white.opacity(0.4)))
                                             .foregroundColor(.white)
                                     }
                                     Button(action: { isPasswordVisible.toggle() }) {
@@ -113,6 +113,13 @@ struct LoginView: View {
                                         .font(.system(size: 13))
                                         .foregroundColor(Color.purple)
                                 }
+                            }
+                            
+                            if let error = errorMessage {
+                                Text(error)
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.red)
+                                    .padding(.top, 4)
                             }
                             
                             // Login Button
@@ -179,11 +186,20 @@ struct LoginView: View {
         Task {
             do {
                 try await SupabaseManager.shared.client.auth.signIn(email: email, password: password)
-                // Success - will be handled by auth state listener in App
+                // Success - update global state
+                await MainActor.run {
+                    withAnimation {
+                        SupabaseManager.shared.isAuthenticated = true
+                    }
+                }
             } catch {
-                errorMessage = error.localizedDescription
+                await MainActor.run {
+                    errorMessage = "Giriş başarısız. Lütfen bilgilerinizi kontrol edin."
+                }
             }
-            isLoading = false
+            await MainActor.run {
+                isLoading = false
+            }
         }
     }
 }
