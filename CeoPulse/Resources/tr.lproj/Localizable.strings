@@ -320,3 +320,6 @@
 "button_explore" = "Keşfet";
 "button_start_app" = "CEO Pulse'a Başla";
 "dropdown_select" = "Seçiniz";
+"error_invalid_email" = "Geçersiz e-posta adresi.";
+"error_user_exists" = "Bu e-posta adresi zaten kullanımda.";
+"error_password_short" = "Şifre en az 6 karakter olmalıdır.";

@@ -320,3 +320,6 @@
 "button_explore" = "Explore";
 "button_start_app" = "Start CEO Pulse";
 "dropdown_select" = "Select";
+"error_invalid_email" = "Invalid email address.";
+"error_user_exists" = "This email is already in use.";
+"error_password_short" = "Password must be at least 6 characters.";
