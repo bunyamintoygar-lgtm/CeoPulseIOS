@@ -1,7 +1,6 @@
 import SwiftUI
 import Supabase
 import Auth
-import GoTrue
 
 struct SignUpFlowView: View {
     @Environment(\.presentationMode) var presentationMode
