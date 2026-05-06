@@ -7,6 +7,10 @@ struct LoginView: View {
     @State private var isPasswordVisible = false
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var rememberMe = true
+    
+    private let rememberMeKey = "saved_email"
+    private let rememberMeStatusKey = "remember_me_status"
     
     var body: some View {
         NavigationView {
@@ -105,9 +109,20 @@ struct LoginView: View {
                                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
                             }
                             
-                            // Forgot Password
+                            // Remember Me & Forgot Password
                             HStack {
+                                Button(action: { rememberMe.toggle() }) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: rememberMe ? "checkmark.square.fill" : "square")
+                                            .foregroundColor(rememberMe ? Color(hex: "8A56FF") : AppColors.textSecondary)
+                                        Text("Beni Hatırla")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+                                }
+                                
                                 Spacer()
+                                
                                 NavigationLink(destination: ForgotPasswordView()) {
                                     Text("Şifremi Unuttum?")
                                         .font(.system(size: 13))
@@ -174,6 +189,27 @@ struct LoginView: View {
                 }
             }
             .navigationBarHidden(true)
+            .onAppear {
+                loadRememberedInfo()
+            }
+        }
+    }
+    
+    private func loadRememberedInfo() {
+        rememberMe = UserDefaults.standard.bool(forKey: rememberMeStatusKey)
+        if rememberMe {
+            if let savedEmail = UserDefaults.standard.string(forKey: rememberMeKey) {
+                email = savedEmail
+            }
+        }
+    }
+    
+    private func saveRememberedInfo() {
+        UserDefaults.standard.set(rememberMe, forKey: rememberMeStatusKey)
+        if rememberMe {
+            UserDefaults.standard.set(email, forKey: rememberMeKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: rememberMeKey)
         }
     }
     
@@ -187,6 +223,7 @@ struct LoginView: View {
             do {
                 try await SupabaseManager.shared.client.auth.signIn(email: email, password: password)
                 // Success - update global state
+                saveRememberedInfo()
                 await MainActor.run {
                     withAnimation {
                         SupabaseManager.shared.isAuthenticated = true
