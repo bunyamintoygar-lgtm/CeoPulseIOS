@@ -88,7 +88,8 @@ struct ForgotPasswordView: View {
                                 HStack {
                                     Image(systemName: "envelope")
                                         .foregroundColor(AppColors.textSecondary)
-                                    TextField("ornek@email.com", text: $email)
+                                    TextField("", text: $email, prompt: Text("ornek@email.com").foregroundColor(AppColors.textSecondary))
+                                        .foregroundColor(.white)
                                         .keyboardType(.emailAddress)
                                         .autocapitalization(.none)
                                 }
