@@ -9,6 +9,7 @@ class ConfigManager: ObservableObject {
     @Published var durations: [String] = []
     @Published var sectors: [String] = []
     @Published var skillsList: [String] = []
+    @Published var interestsList: [String] = []
     @Published var isLoading = false
     
     private init() {}
@@ -23,16 +24,15 @@ class ConfigManager: ObservableObject {
                 .execute()
                 .value
             
-            for config in configs {
                 switch config.key {
                 case "positions": self.positions = config.value
                 case "company_sizes": self.companySizes = config.value
                 case "durations": self.durations = config.value
                 case "sectors": self.sectors = config.value
                 case "skills_list": self.skillsList = config.value
+                case "interests_list": self.interestsList = config.value
                 default: break
                 }
-            }
         } catch {
             print("Config fetch error: \(error.localizedDescription)")
         }

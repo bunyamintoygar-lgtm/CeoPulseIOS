@@ -311,6 +311,7 @@ struct SignUpStep3View: View {
 // MARK: - Step 4: Tamamla
 struct SignUpStep4View: View {
     @State private var showProfileCompletion = false
+    @State private var showInterestsSelection = false
     
     var body: some View {
         VStack(spacing: 32) {
@@ -354,12 +355,15 @@ struct SignUpStep4View: View {
                 
                 VStack(spacing: 12) {
                     PersonalizationRow(icon: "person.fill", title: "Profilinizi tamamlayın", subtitle: "Profil fotoğrafı, hakkında bilgisi...", actionTitle: "Tamamla", action: { showProfileCompletion = true })
-                    PersonalizationRow(icon: "briefcase.fill", title: "İlgi alanlarınızı seçin", subtitle: "Size özel içerik ve etkinlik önerileri...", actionTitle: "Seç")
+                    PersonalizationRow(icon: "briefcase.fill", title: "İlgi alanlarınızı seçin", subtitle: "Size özel içerik ve etkinlik önerileri...", actionTitle: "Seç", action: { showInterestsSelection = true })
                     PersonalizationRow(icon: "bell.fill", title: "Bildirim tercihlerinizi ayarlayın", subtitle: "Önemli gelişmelerden haberdar olmak için...", actionTitle: "Ayarla")
                 }
             }
             .fullScreenCover(isPresented: $showProfileCompletion) {
                 ProfileCompletionView()
+            }
+            .fullScreenCover(isPresented: $showInterestsSelection) {
+                InterestsSelectionView()
             }
             
             HStack {
