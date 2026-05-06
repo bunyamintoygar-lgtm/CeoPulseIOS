@@ -361,36 +361,39 @@ struct SignUpStep4View: View {
                 }
             }
             
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Profilini Güçlendir")
-                    .font(.system(size: 16, weight: .bold))
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Hesabınızı kişiselleştirin")
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
                 
-                Button(action: { showPhotoFlow = true }) {
-                    HStack(spacing: 16) {
-                        Image(systemName: "camera.fill")
-                            .padding(12)
-                            .background(Color.purple.opacity(0.1))
-                            .clipShape(Circle())
-                            .foregroundColor(.purple)
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Profil Fotoğrafı Ekle")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.white)
-                            Text("Profesyonel bir görünüm için fotoğrafınızı yükleyin.")
-                                .font(.system(size: 12))
-                                .foregroundColor(AppColors.textSecondary)
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 14))
-                            .foregroundColor(AppColors.textSecondary)
-                    }
-                    .padding()
-                    .background(Color.white.opacity(0.03))
-                    .cornerRadius(16)
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.05), lineWidth: 1))
+                Text("Daha iyi bir deneyim için aşağıdaki adımları tamamlamanızı öneririz.")
+                    .font(.system(size: 13))
+                    .foregroundColor(AppColors.textSecondary)
+                
+                VStack(spacing: 12) {
+                    PersonalizationRow(
+                        icon: "person.fill",
+                        title: "Profilinizi tamamlayın...",
+                        subtitle: "Profil fotoğrafı, hakkında...",
+                        actionTitle: "Tamamla",
+                        action: { showPhotoFlow = true }
+                    )
+                    
+                    PersonalizationRow(
+                        icon: "briefcase.fill",
+                        title: "İlgi alanlarınızı seçin",
+                        subtitle: "Size özel içerik ve etkinlik ön...",
+                        actionTitle: "İleri",
+                        action: { /* Navigate to interests if needed */ }
+                    )
+                    
+                    PersonalizationRow(
+                        icon: "bell.fill",
+                        title: "Bildirim tercihlerini ay...",
+                        subtitle: "Önemli gelişmelerden haberd...",
+                        actionTitle: "İleri",
+                        action: { /* Navigate to notifications if needed */ }
+                    )
                 }
             }
             .fullScreenCover(isPresented: $showPhotoFlow) {
