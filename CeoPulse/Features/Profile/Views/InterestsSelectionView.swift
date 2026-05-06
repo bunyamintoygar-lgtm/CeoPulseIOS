@@ -76,7 +76,7 @@ struct InterestsSelectionView: View {
                             }
                             .padding(.top, 40)
                         } else {
-                            FlowLayout(itemSpacing: 10) {
+                            CeoPulseFlowLayout(itemSpacing: 10) {
                                 ForEach(interests, id: \.id) { interest in
                                     InterestTag(
                                         title: configManager.getLocalizedValue(interest),
@@ -301,7 +301,7 @@ struct InterestTag: View {
     }
 }
 
-struct FlowLayout<Content: View>: View {
+struct CeoPulseFlowLayout<Content: View>: View {
     let itemSpacing: CGFloat
     let content: Content
 
