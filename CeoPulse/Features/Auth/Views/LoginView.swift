@@ -153,7 +153,7 @@ struct LoginView: View {
                             Text("Hesabınız yok mu?")
                                 .font(.system(size: 14))
                                 .foregroundColor(AppColors.textSecondary)
-                            Button(action: {}) {
+                            NavigationLink(destination: SignUpFlowView()) {
                                 Text("Hesap Oluşturun")
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(Color.purple)
