@@ -58,11 +58,11 @@ struct SignUpFlowView: View {
                 
                 // Title Section
                 VStack(spacing: 8) {
-                    Text(currentStep == 3 ? "Doğrulama" : "Hesap Oluşturun")
+                    Text(currentStep == 2 ? "Doğrulama" : "Hesap Oluşturun")
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(.white)
                     
-                    Text(currentStep == 3 ? "\(email) adresine gönderilen\n8 haneli kodu aşağıya girin." : "Liderlerle bağlantı kurun, görüşlerinizi paylaşın\nve iş dünyasının nabzını tutun.")
+                    Text(currentStep == 2 ? "\(email) adresine gönderilen\n8 haneli kodu aşağıya girin." : "Liderlerle bağlantı kurun, görüşlerinizi paylaşın\nve iş dünyasının nabzını tutun.")
                         .font(.system(size: 13))
                         .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
@@ -75,9 +75,9 @@ struct SignUpFlowView: View {
                     if currentStep == 1 {
                         SignUpStep1View(currentStep: $currentStep, firstName: $firstName, lastName: $lastName, email: $email, password: $password, confirmPassword: $confirmPassword, acceptTerms: $acceptTerms)
                     } else if currentStep == 2 {
-                        SignUpStep2View(currentStep: $currentStep, position: $position, company: $company, companySize: $companySize, duration: $duration, sector: $sector, skills: $skills, bio: $bio, isPublicProfile: $isPublicProfile)
-                    } else if currentStep == 3 {
                         SignUpStep3View(currentStep: $currentStep, email: email, otpCode: $otpCode)
+                    } else if currentStep == 3 {
+                        SignUpStep2View(currentStep: $currentStep, position: $position, company: $company, companySize: $companySize, duration: $duration, sector: $sector, skills: $skills, bio: $bio, isPublicProfile: $isPublicProfile)
                     } else {
                         SignUpStep4View()
                     }
@@ -91,7 +91,7 @@ struct SignUpFlowView: View {
 
 struct SignUpStepper: View {
     let currentStep: Int
-    let steps = ["Hesap Bilgileri", "Profesyonel Bilgiler", "Doğrulama", "Tamamla"]
+    let steps = ["Hesap Bilgileri", "Doğrulama", "Profesyonel Bilgiler", "Tamamla"]
     
     var body: some View {
         HStack(spacing: 0) {

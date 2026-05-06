@@ -42,11 +42,17 @@ struct SignUpStep2View: View {
                 
                 await MainActor.run {
                     withAnimation {
-                        currentStep = 3
+                        currentStep = 4
                     }
                 }
             } catch {
                 print("Profile update error: \(error.localizedDescription)")
+                // Hata olsa bile kullanıcıyı ilerletelim, profilini sonra da düzenleyebilir
+                await MainActor.run {
+                    withAnimation {
+                        currentStep = 4
+                    }
+                }
             }
             await MainActor.run {
                 isLoading = false
@@ -82,61 +88,6 @@ struct SignUpStep2View: View {
                     }
                 }
                 
-                // Skills Tags
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach(skills, id: \.self) { skill in
-                            HStack(spacing: 4) {
-                                Text(skill)
-                                Image(systemName: "xmark")
-                                    .font(.system(size: 10))
-                            }
-                            .font(.system(size: 12))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color.purple.opacity(0.1))
-                            .cornerRadius(20)
-                            .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.purple.opacity(0.5), lineWidth: 1))
-                        }
-                        Button(action: {}) {
-                            HStack {
-                                Image(systemName: "plus")
-                                Text("Ekle")
-                            }
-                            .font(.system(size: 12))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color.white.opacity(0.05))
-                            .cornerRadius(20)
-                        }
-                    }
-                }
-                
-                // Bio
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Kısa Biyografi (İsteğe bağlı)")
-                        .font(.system(size: 12))
-                        .foregroundColor(AppColors.textSecondary)
-                    
-                    TextEditor(text: $bio)
-                        .frame(height: 100)
-                        .padding(8)
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(12)
-                        .overlay(
-                            VStack {
-                                Spacer()
-                                HStack {
-                                    Spacer()
-                                    Text("\(bio.count) / 300")
-                                        .font(.system(size: 10))
-                                        .foregroundColor(AppColors.textSecondary)
-                                        .padding(8)
-                                }
-                            }
-                        )
-                }
-                
                 Toggle("Profilimi herkese açık hale getir", isOn: $isPublicProfile)
                     .font(.system(size: 13))
                     .foregroundColor(.white)
@@ -159,7 +110,7 @@ struct SignUpStep2View: View {
                     .cornerRadius(12)
                 }
                 
-                Button(action: { withAnimation { currentStep = 3 } }) {
+                Button(action: { withAnimation { currentStep = 4 } }) {
                     VStack(spacing: 8) {
                         Text("Atlayın").font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
                         Text("Bu adımı atla")
@@ -208,7 +159,7 @@ struct SignUpStep3View: View {
                 
                 await MainActor.run {
                     withAnimation {
-                        currentStep = 4
+                        currentStep = 3
                     }
                 }
             } catch {
