@@ -325,8 +325,7 @@ struct SignUpStepHeader: View {
 
 // MARK: - Step 4: Tamamla
 struct SignUpStep4View: View {
-    @State private var showProfileCompletion = false
-    @State private var showInterestsSelection = false
+    @State private var showPhotoFlow = false
     @State private var showNotificationPreferences = false
     @EnvironmentObject var supabaseManager: SupabaseManager
     
@@ -362,46 +361,40 @@ struct SignUpStep4View: View {
                 }
             }
             
-            VStack(alignment: .leading, spacing: 16) {
-                Text(NSLocalizedString("personalize_title", comment: ""))
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Profilini Güçlendir")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
-                Text(NSLocalizedString("personalize_subtitle", comment: ""))
-                    .font(.system(size: 13))
-                    .foregroundColor(AppColors.textSecondary)
                 
-                VStack(spacing: 12) {
-                    PersonalizationRow(
-                        icon: "person.fill", 
-                        title: NSLocalizedString("row_profile_complete_title", comment: ""), 
-                        subtitle: NSLocalizedString("row_profile_complete_subtitle", comment: ""), 
-                        actionTitle: NSLocalizedString("button_complete", comment: ""), 
-                        action: { showProfileCompletion = true }
-                    )
-                    PersonalizationRow(
-                        icon: "briefcase.fill", 
-                        title: NSLocalizedString("row_interests_title", comment: ""), 
-                        subtitle: NSLocalizedString("row_interests_subtitle", comment: ""), 
-                        actionTitle: NSLocalizedString("button_next", comment: ""), 
-                        action: { showInterestsSelection = true }
-                    )
-                    PersonalizationRow(
-                        icon: "bell.fill", 
-                        title: NSLocalizedString("row_notifications_title", comment: ""), 
-                        subtitle: NSLocalizedString("row_notifications_subtitle", comment: ""), 
-                        actionTitle: NSLocalizedString("button_next", comment: ""), 
-                        action: { showNotificationPreferences = true }
-                    )
+                Button(action: { showPhotoFlow = true }) {
+                    HStack(spacing: 16) {
+                        Image(systemName: "camera.fill")
+                            .padding(12)
+                            .background(Color.purple.opacity(0.1))
+                            .clipShape(Circle())
+                            .foregroundColor(.purple)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Profil Fotoğrafı Ekle")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                            Text("Profesyonel bir görünüm için fotoğrafınızı yükleyin.")
+                                .font(.system(size: 12))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                    .padding()
+                    .background(Color.white.opacity(0.03))
+                    .cornerRadius(16)
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.05), lineWidth: 1))
                 }
             }
-            .fullScreenCover(isPresented: $showProfileCompletion) {
-                ProfileCompletionView()
-            }
-            .fullScreenCover(isPresented: $showInterestsSelection) {
-                InterestsSelectionView()
-            }
-            .fullScreenCover(isPresented: $showNotificationPreferences) {
-                NotificationPreferencesView()
+            .fullScreenCover(isPresented: $showPhotoFlow) {
+                ProfilePhotoView()
             }
             
             HStack {
