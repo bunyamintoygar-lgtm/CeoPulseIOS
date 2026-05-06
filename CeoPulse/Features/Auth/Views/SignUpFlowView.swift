@@ -24,7 +24,7 @@ struct SignUpFlowView: View {
     @State var isPublicProfile = true
     
     // Step 3 Data
-    @State var otpCode = ["", "", "", "", "", ""]
+    @State var otpCode = ["", "", "", "", "", "", "", ""]
     
     var body: some View {
         ZStack {
@@ -58,11 +58,11 @@ struct SignUpFlowView: View {
                 
                 // Title Section
                 VStack(spacing: 8) {
-                    Text("Hesap Oluşturun")
+                    Text(currentStep == 3 ? "Doğrulama" : "Hesap Oluşturun")
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(.white)
                     
-                    Text("Liderlerle bağlantı kurun, görüşlerinizi paylaşın\nve iş dünyasının nabzını tutun.")
+                    Text(currentStep == 3 ? "\(email) adresine gönderilen\n8 haneli kodu aşağıya girin." : "Liderlerle bağlantı kurun, görüşlerinizi paylaşın\nve iş dünyasının nabzını tutun.")
                         .font(.system(size: 13))
                         .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
