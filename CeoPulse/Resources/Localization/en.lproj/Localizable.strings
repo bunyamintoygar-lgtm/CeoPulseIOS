@@ -1,0 +1,31 @@
+/* Common Actions */
+"button_continue" = "Continue";
+"button_save" = "Save & Continue";
+"button_back" = "Back";
+"button_complete" = "Complete";
+
+/* Profile Photo */
+"photo_title" = "Profile Photo";
+"photo_subtitle" = "A professional profile photo helps build trust and network connections.";
+"photo_upload_button" = "Upload Photo";
+"photo_drag_drop" = "or drag and drop";
+"photo_verification_title" = "Photo Verification";
+"photo_success_title" = "Success!";
+"photo_take_new" = "Take New Photo";
+"photo_select_gallery" = "Select from Gallery";
+
+/* Interests */
+"interests_title" = "Select Your Interests";
+"interests_subtitle" = "Define your interests to receive personalized content and event suggestions.";
+"interests_min_max_info" = "You can select at least 3 and at most 10 interests.";
+
+/* Notifications */
+"notifications_title" = "Set Notification Preferences";
+"notifications_subtitle" = "Customize your notification preferences to never miss important updates.";
+"notifications_channels" = "Notification Channels";
+"notifications_categories" = "Notification Categories";
+
+/* Location */
+"location_title" = "Add Your Location";
+"location_subtitle" = "Your location helps you see the most relevant opportunities.";
+"location_search_placeholder" = "Search city, country or region";

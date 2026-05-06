@@ -1,0 +1,31 @@
+/* Genel Aksiyonlar */
+"button_continue" = "Devam Et";
+"button_save" = "Kaydet ve Devam Et";
+"button_back" = "Geri";
+"button_complete" = "Tamamla";
+
+/* Profil Fotoğrafı */
+"photo_title" = "Profil Fotoğrafı";
+"photo_subtitle" = "Profesyonel bir profil fotoğrafı, güven oluşturur ve bağlantılar kurmanıza yardımcı olur.";
+"photo_upload_button" = "Fotoğraf Yükle";
+"photo_drag_drop" = "veya sürükleyip bırakın";
+"photo_verification_title" = "Profil Fotoğrafı Doğrulama";
+"photo_success_title" = "Başarıyla Tamamlandı!";
+"photo_take_new" = "Yeni Fotoğraf Çek";
+"photo_select_gallery" = "Galeriden Seç";
+
+/* İlgi Alanları */
+"interests_title" = "İlgi Alanlarınızı Seçin";
+"interests_subtitle" = "Size özel içerik ve etkinlik önerileri almak için ilgi alanlarınızı belirleyin.";
+"interests_min_max_info" = "En az 3, en fazla 10 ilgi alanı seçebilirsiniz.";
+
+/* Bildirimler */
+"notifications_title" = "Bildirim Tercihlerinizi Ayarlayın";
+"notifications_subtitle" = "Sizin için önemli gelişmeleri kaçırmamak için bildirim tercihlerinizi özelleştirin.";
+"notifications_channels" = "Bildirim Kanalları";
+"notifications_categories" = "Bildirim Kategorileri";
+
+/* Lokasyon */
+"location_title" = "Lokasyonunuzu Ekleyin";
+"location_subtitle" = "Bulunduğunuz konum, size en uygun fırsatları görmenize yardımcı olur.";
+"location_search_placeholder" = "Şehir, ülke veya bölge ara";
