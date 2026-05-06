@@ -97,10 +97,14 @@ struct SignUpStep2View: View {
                     .foregroundColor(.white)
                     .toggleStyle(SwitchToggleStyle(tint: .purple))
                 
-                Button(action: { withAnimation { currentStep = 3 } }) {
+                Button(action: handleProfileUpdate) {
                     HStack {
-                        Text("Devam Et")
-                        Image(systemName: "arrow.right")
+                        if isLoading {
+                            ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text("Devam Et")
+                            Image(systemName: "arrow.right")
+                        }
                     }
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
@@ -109,6 +113,40 @@ struct SignUpStep2View: View {
                     .background(Color(hex: "6C38FF"))
                     .cornerRadius(12)
                 }
+...
+    @State private var isLoading = false
+    
+    func handleProfileUpdate() {
+        isLoading = true
+        
+        Task {
+            do {
+                let currentUser = try await SupabaseManager.shared.client.auth.session.user
+                
+                try await SupabaseManager.shared.client
+                    .from("profiles")
+                    .update([
+                        "position": .string(position),
+                        "company": .string(company),
+                        "company_size": .string(companySize),
+                        "duration": .string(duration),
+                        "sector": .string(sector),
+                        "skills": .array(skills.map { .string($0) }),
+                        "bio": .string(bio),
+                        "is_public": .bool(isPublicProfile)
+                    ])
+                    .eq("id", value: currentUser.id)
+                    .execute()
+                
+                withAnimation {
+                    currentStep = 3
+                }
+            } catch {
+                print("Profile update error: \(error.localizedDescription)")
+            }
+            isLoading = false
+        }
+    }
                 
                 Button(action: { withAnimation { currentStep = 3 } }) {
                     VStack(spacing: 8) {

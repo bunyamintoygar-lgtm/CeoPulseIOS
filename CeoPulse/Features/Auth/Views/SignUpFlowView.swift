@@ -189,10 +189,14 @@ struct SignUpStep1View: View {
                 }
                 .toggleStyle(CheckboxToggleStyle())
                 
-                Button(action: { withAnimation { currentStep = 2 } }) {
+                Button(action: handleSignUp) {
                     HStack {
-                        Text("Devam Et")
-                        Image(systemName: "arrow.right")
+                        if isLoading {
+                            ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text("Devam Et")
+                            Image(systemName: "arrow.right")
+                        }
                     }
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
@@ -201,7 +205,45 @@ struct SignUpStep1View: View {
                     .background(Color(hex: "6C38FF"))
                     .cornerRadius(12)
                 }
+                .disabled(isLoading || !acceptTerms || firstName.isEmpty || lastName.isEmpty || email.isEmpty || password.isEmpty)
                 .padding(.top, 10)
+                
+                // Error Message
+                if let error = errorMessage {
+                    Text(error)
+                        .font(.system(size: 12))
+                        .foregroundColor(.red)
+                        .padding(.top, 8)
+                }
+...
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    
+    func handleSignUp() {
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                // SignUp with user metadata
+                let _ = try await SupabaseManager.shared.client.auth.signUp(
+                    email: email,
+                    password: password,
+                    options: AuthSignUpOptions(data: [
+                        "first_name": .string(firstName),
+                        "last_name": .string(lastName)
+                    ])
+                )
+                
+                withAnimation {
+                    currentStep = 2
+                }
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
                 
                 // Social Section
                 VStack(spacing: 16) {
