@@ -183,6 +183,34 @@ struct SignUpStep3View: View {
     @Binding var otpCode: [String]
     @FocusState private var activeField: Int?
     
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    
+    func handleOTPVerification() {
+        isLoading = true
+        errorMessage = nil
+        
+        let token = otpCode.joined()
+        
+        Task {
+            do {
+                try await SupabaseManager.shared.client.auth.verifyOTP(
+                    email: email,
+                    token: token,
+                    type: .signup
+                )
+                
+                withAnimation {
+                    currentStep = 4
+                }
+            } catch {
+                errorMessage = "Hatalı veya süresi dolmuş kod. Lütfen tekrar deneyin."
+                print("OTP Error: \(error.localizedDescription)")
+            }
+            isLoading = false
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Doğrulama")
@@ -197,25 +225,25 @@ struct SignUpStep3View: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 20)
                         .fill(Color.white.opacity(0.05))
-                        .frame(height: 200)
+                        .frame(height: 180)
                     
-                    VStack(spacing: 16) {
+                    VStack(spacing: 12) {
                         ZStack {
                             Image(systemName: "envelope.fill")
-                                .font(.system(size: 80))
+                                .font(.system(size: 60))
                                 .foregroundColor(.purple.opacity(0.3))
                             Image(systemName: "shield.fill")
-                                .font(.system(size: 30))
+                                .font(.system(size: 20))
                                 .foregroundColor(.white)
                                 .offset(y: 5)
                         }
                         
                         VStack(spacing: 4) {
                             Text("E-postanıza kod gönderdik!")
-                                .font(.system(size: 18, weight: .bold))
+                                .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white)
                             Text("\(email) adresine gönderilen\n6 haneli kodu aşağıya girin.")
-                                .font(.system(size: 13))
+                                .font(.system(size: 12))
                                 .foregroundColor(AppColors.textSecondary)
                                 .multilineTextAlignment(.center)
                         }
@@ -223,12 +251,14 @@ struct SignUpStep3View: View {
                 }
                 
                 // OTP Input
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     ForEach(0..<6, id: \.self) { index in
                         TextField("", text: $otpCode[index])
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.center)
-                            .frame(width: 45, height: 55)
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 42, height: 50)
                             .background(Color.white.opacity(0.05))
                             .cornerRadius(10)
                             .overlay(RoundedRectangle(cornerRadius: 10).stroke(activeField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1))
@@ -236,8 +266,16 @@ struct SignUpStep3View: View {
                             .onChange(of: otpCode[index]) { newValue in
                                 if newValue.count > 1 { otpCode[index] = String(newValue.last!) }
                                 if !newValue.isEmpty && index < 5 { activeField = index + 1 }
+                                if newValue.isEmpty && index > 0 { activeField = index - 1 }
                             }
                     }
+                }
+                
+                if let error = errorMessage {
+                    Text(error)
+                        .font(.system(size: 12))
+                        .foregroundColor(.red)
+                        .padding(.top, 4)
                 }
                 
                 HStack {
@@ -247,22 +285,14 @@ struct SignUpStep3View: View {
                 .font(.system(size: 13))
                 .foregroundColor(AppColors.textSecondary)
                 
-                Button(action: {}) {
+                Button(action: handleOTPVerification) {
                     HStack {
-                        Image(systemName: "envelope")
-                        Text("Kodu yeniden gönder")
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                    }
-                    .padding()
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(12)
-                }
-                
-                Button(action: { withAnimation { currentStep = 4 } }) {
-                    HStack {
-                        Text("Doğrula ve Devam Et")
-                        Image(systemName: "arrow.right")
+                        if isLoading {
+                            ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text("Doğrula ve Devam Et")
+                            Image(systemName: "arrow.right")
+                        }
                     }
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
@@ -271,6 +301,7 @@ struct SignUpStep3View: View {
                     .background(Color(hex: "6C38FF"))
                     .cornerRadius(12)
                 }
+                .disabled(isLoading || otpCode.joined().count < 6)
             }
             .padding(.horizontal, 24)
         }
