@@ -323,3 +323,17 @@
 "error_invalid_email" = "Geçersiz e-posta adresi.";
 "error_user_exists" = "Bu e-posta adresi zaten kullanımda.";
 "error_password_short" = "Şifre en az 6 karakter olmalıdır.";
+
+"login_subtitle_1" = "Tek platform.\nSınırsız profesyonel fırsatlar.";
+"login_subtitle_2" = "Giriş yaparak fırsatları keşfetmeye başlayın.";
+"login_email_label" = "E-posta adresiniz";
+"login_password_label" = "Şifreniz";
+"login_forgot_password" = "Şifremi Unuttum?";
+"login_remember_me" = "Beni Hatırla";
+"login_button" = "Giriş Yap";
+"login_or" = "veya";
+"login_no_account" = "Hesabınız yok mu?";
+"login_create_account" = "Hesap Oluşturun";
+"login_failed" = "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.";
+"login_email_placeholder" = "ornek@email.com";
+"login_password_placeholder" = "Şifrenizi giriniz";

@@ -323,3 +323,17 @@
 "error_invalid_email" = "Invalid email address.";
 "error_user_exists" = "This email is already in use.";
 "error_password_short" = "Password must be at least 6 characters.";
+
+"login_subtitle_1" = "Single platform.\nUnlimited professional opportunities.";
+"login_subtitle_2" = "Start exploring opportunities by logging in.";
+"login_email_label" = "Email Address";
+"login_password_label" = "Password";
+"login_forgot_password" = "Forgot Password?";
+"login_remember_me" = "Remember Me";
+"login_button" = "Login";
+"login_or" = "or";
+"login_no_account" = "Don't have an account?";
+"login_create_account" = "Create Account";
+"login_failed" = "Login failed. Please check your information.";
+"login_email_placeholder" = "example@email.com";
+"login_password_placeholder" = "Enter your password";

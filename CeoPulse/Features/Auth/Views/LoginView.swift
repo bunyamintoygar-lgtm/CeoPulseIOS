@@ -2,6 +2,7 @@ import SwiftUI
 import Supabase
 
 struct LoginView: View {
+    @StateObject private var langManager = LanguageManager.shared
     @State private var email = ""
     @State private var password = ""
     @State private var isPasswordVisible = false
@@ -16,6 +17,33 @@ struct LoginView: View {
         NavigationView {
             ZStack {
                 AppColors.background.ignoresSafeArea()
+                
+                // Language Switcher (Top Right)
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            langManager.setLanguage(langManager.currentLanguage == "tr" ? "en" : "tr")
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "globe")
+                                    .font(.system(size: 14))
+                                Text(langManager.currentLanguage == "tr" ? "EN" : "TR")
+                                    .font(.system(size: 14, weight: .bold))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 12)
+                            .background(Color.white.opacity(0.1))
+                            .cornerRadius(20)
+                            .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                        }
+                        .padding(.trailing, 20)
+                        .padding(.top, 10)
+                    }
+                    Spacer()
+                }
+                .zIndex(10)
                 
                 // Bottom Mesh/Wave Pattern Placeholder
                 VStack {
@@ -50,12 +78,12 @@ struct LoginView: View {
                             }
                             .padding(.top, 40)
                             
-                            Text("Tek platform.\nSınırsız profesyonel fırsatlar.")
+                            Text("login_subtitle_1".localized())
                                 .font(.system(size: 24, weight: .bold))
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(.white)
                             
-                            Text("Giriş yaparak fırsatları keşfetmeye başlayın.")
+                            Text("login_subtitle_2".localized())
                                 .font(.system(size: 14))
                                 .foregroundColor(AppColors.textSecondary)
                         }
@@ -64,14 +92,14 @@ struct LoginView: View {
                         VStack(alignment: .leading, spacing: 20) {
                             // Email Field
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("E-posta adresiniz")
+                                Text("login_email_label".localized())
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundColor(.white)
                                 
                                 HStack {
                                     Image(systemName: "envelope")
                                         .foregroundColor(AppColors.textSecondary)
-                                    TextField("", text: $email, prompt: Text("ornek@email.com").foregroundColor(Color.white.opacity(0.4)))
+                                    TextField("", text: $email, prompt: Text("login_email_placeholder".localized()).foregroundColor(Color.white.opacity(0.4)))
                                         .foregroundColor(.white)
                                         .keyboardType(.emailAddress)
                                         .autocapitalization(.none)
@@ -84,7 +112,7 @@ struct LoginView: View {
                             
                             // Password Field
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Şifreniz")
+                                Text("login_password_label".localized())
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundColor(.white)
                                 
@@ -92,10 +120,10 @@ struct LoginView: View {
                                     Image(systemName: "lock")
                                         .foregroundColor(AppColors.textSecondary)
                                     if isPasswordVisible {
-                                        TextField("", text: $password, prompt: Text("Şifrenizi giriniz").foregroundColor(Color.white.opacity(0.4)))
+                                        TextField("", text: $password, prompt: Text("login_password_placeholder".localized()).foregroundColor(Color.white.opacity(0.4)))
                                             .foregroundColor(.white)
                                     } else {
-                                        SecureField("", text: $password, prompt: Text("Şifrenizi giriniz").foregroundColor(Color.white.opacity(0.4)))
+                                        SecureField("", text: $password, prompt: Text("login_password_placeholder".localized()).foregroundColor(Color.white.opacity(0.4)))
                                             .foregroundColor(.white)
                                     }
                                     Button(action: { isPasswordVisible.toggle() }) {
@@ -115,7 +143,7 @@ struct LoginView: View {
                                     HStack(spacing: 8) {
                                         Image(systemName: rememberMe ? "checkmark.square.fill" : "square")
                                             .foregroundColor(rememberMe ? Color(hex: "8A56FF") : AppColors.textSecondary)
-                                        Text("Beni Hatırla")
+                                        Text("login_remember_me".localized())
                                             .font(.system(size: 13))
                                             .foregroundColor(.white.opacity(0.8))
                                     }
@@ -124,7 +152,7 @@ struct LoginView: View {
                                 Spacer()
                                 
                                 NavigationLink(destination: ForgotPasswordView()) {
-                                    Text("Şifremi Unuttum?")
+                                    Text("login_forgot_password".localized())
                                         .font(.system(size: 13))
                                         .foregroundColor(Color.purple)
                                 }
@@ -143,7 +171,7 @@ struct LoginView: View {
                                     if isLoading {
                                         ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
                                     } else {
-                                        Text("Giriş Yap")
+                                        Text("login_button".localized())
                                             .font(.system(size: 16, weight: .bold))
                                         Image(systemName: "arrow.right")
                                     }
@@ -162,24 +190,24 @@ struct LoginView: View {
                         VStack(spacing: 16) {
                             HStack {
                                 Rectangle().fill(Color.white.opacity(0.1)).frame(height: 1)
-                                Text("veya").font(.system(size: 12)).foregroundColor(AppColors.textSecondary).padding(.horizontal, 8)
+                                Text("login_or".localized()).font(.system(size: 12)).foregroundColor(AppColors.textSecondary).padding(.horizontal, 8)
                                 Rectangle().fill(Color.white.opacity(0.1)).frame(height: 1)
                             }
                             .padding(.horizontal, 24)
                             
-                            SocialLoginButton(icon: "linkedin_logo", title: "LinkedIn ile Giriş Yap", color: .white)
-                            SocialLoginButton(icon: "google_logo", title: "Google ile Giriş Yap", color: .white)
-                            SocialLoginButton(icon: "apple_logo", title: "Apple ile Giriş Yap", color: .white)
+                            SocialLoginButton(icon: "linkedin_logo", title: "\("LinkedIn") \("login_or".localized() == "veya" ? "ile Giriş Yap" : "Login")", color: .white)
+                            SocialLoginButton(icon: "google_logo", title: "\("Google") \("login_or".localized() == "veya" ? "ile Giriş Yap" : "Login")", color: .white)
+                            SocialLoginButton(icon: "apple_logo", title: "\("Apple") \("login_or".localized() == "veya" ? "ile Giriş Yap" : "Login")", color: .white)
                         }
                         .padding(.horizontal, 24)
                         
                         // Footer
                         VStack(spacing: 8) {
-                            Text("Hesabınız yok mu?")
+                            Text("login_no_account".localized())
                                 .font(.system(size: 14))
                                 .foregroundColor(AppColors.textSecondary)
                             NavigationLink(destination: SignUpFlowView()) {
-                                Text("Hesap Oluşturun")
+                                Text("login_create_account".localized())
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(Color.purple)
                             }
@@ -193,7 +221,54 @@ struct LoginView: View {
                 loadRememberedInfo()
             }
         }
+        .id(langManager.currentLanguage) // Force view reload on language change
     }
+    
+    private func loadRememberedInfo() {
+        rememberMe = UserDefaults.standard.bool(forKey: rememberMeStatusKey)
+        if rememberMe {
+            if let savedEmail = UserDefaults.standard.string(forKey: rememberMeKey) {
+                email = savedEmail
+            }
+        }
+    }
+    
+    private func saveRememberedInfo() {
+        UserDefaults.standard.set(rememberMe, forKey: rememberMeStatusKey)
+        if rememberMe {
+            UserDefaults.standard.set(email, forKey: rememberMeKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: rememberMeKey)
+        }
+    }
+    
+    func signIn() {
+        guard !email.isEmpty && !password.isEmpty else { return }
+        
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                try await SupabaseManager.shared.client.auth.signIn(email: email, password: password)
+                // Success - update global state
+                saveRememberedInfo()
+                await MainActor.run {
+                    withAnimation {
+                        SupabaseManager.shared.isAuthenticated = true
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "login_failed".localized()
+                }
+            }
+            await MainActor.run {
+                isLoading = false
+            }
+        }
+    }
+}
     
     private func loadRememberedInfo() {
         rememberMe = UserDefaults.standard.bool(forKey: rememberMeStatusKey)
