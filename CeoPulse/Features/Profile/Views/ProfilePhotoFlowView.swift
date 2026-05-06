@@ -71,14 +71,12 @@ struct ProfilePhotoFlowView: View {
             
             Spacer()
             
-            Image("ceopulse_logo") // Logo placeholder
-                .resizable()
-                .scaledToFit()
-                .frame(height: 24)
+            Text(NSLocalizedString("photo_title", comment: ""))
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(.white)
             
             Spacer()
             
-            // Empty placeholder for balance
             Color.clear.frame(width: 40)
         }
         .padding(.horizontal, 20)
@@ -90,7 +88,7 @@ struct ProfilePhotoFlowView: View {
             if currentSubStep == 4 {
                 Button(action: { presentationMode.wrappedValue.dismiss() }) {
                     HStack {
-                        Text("Devam Et")
+                        Text(NSLocalizedString("button_continue", comment: ""))
                         Image(systemName: "arrow.right")
                     }
                     .font(.system(size: 16, weight: .bold))
@@ -100,12 +98,6 @@ struct ProfilePhotoFlowView: View {
                     .background(Color(hex: "6C38FF"))
                     .cornerRadius(12)
                 }
-                
-                Button("Profilimi Görüntüle") {
-                    // Navigate to profile
-                }
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(AppColors.textSecondary)
             } else if currentSubStep != 2 {
                 Button(action: {
                     withAnimation {
@@ -113,7 +105,7 @@ struct ProfilePhotoFlowView: View {
                     }
                 }) {
                     HStack {
-                        Text(currentSubStep == 3 ? "Fotoğrafımı Tamamla" : "Devam Et")
+                        Text(currentSubStep == 3 ? NSLocalizedString("button_complete", comment: "") : NSLocalizedString("button_continue", comment: ""))
                         Image(systemName: "arrow.right")
                     }
                     .font(.system(size: 16, weight: .bold))
@@ -133,10 +125,10 @@ struct ProfilePhotoFlowView: View {
     private var step1InitialUpload: some View {
         VStack(spacing: 24) {
             VStack(spacing: 8) {
-                Text("Profil Fotoğrafı")
+                Text(NSLocalizedString("photo_title", comment: ""))
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
-                Text("Profesyonel bir profil fotoğrafı, güven oluşturur ve bağlantılar kurmanıza yardımcı olur.")
+                Text(NSLocalizedString("photo_subtitle", comment: ""))
                     .font(.system(size: 14))
                     .foregroundColor(AppColors.textSecondary)
                     .multilineTextAlignment(.center)
@@ -181,7 +173,7 @@ struct ProfilePhotoFlowView: View {
             }) {
                 HStack {
                     Image(systemName: "arrow.up.circle")
-                    Text("Fotoğraf Yükle")
+                    Text(NSLocalizedString("photo_upload_button", comment: ""))
                 }
                 .font(.system(size: 16, weight: .bold))
                 .padding(.horizontal, 24)
@@ -191,42 +183,28 @@ struct ProfilePhotoFlowView: View {
                 .foregroundColor(.white)
             }
             
-            Text("veya sürükleyip bırakın")
+            Text(NSLocalizedString("photo_drag_drop", comment: ""))
                 .font(.system(size: 12))
                 .foregroundColor(AppColors.textSecondary)
             
-            // Tips
+            // Tips (Mock translation for now as they are very specific)
             VStack(alignment: .leading, spacing: 16) {
-                Text("İyi bir profil fotoğrafı için ipuçları")
+                Text("Tips for a great profile photo")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                 
                 HStack(spacing: 12) {
-                    TipItem(icon: "person.crop.circle.badge.checkmark", text: "Yüzünüz net ve odakta olsun")
-                    TipItem(icon: "sun.max", text: "İyi aydınlatılmış bir ortam seçin")
-                    TipItem(icon: "tshirt", text: "Profesyonel kıyafet tercih edin")
-                    TipItem(icon: "face.smiling", text: "Doğal bir ifade kullanın")
+                    TipItem(icon: "person.crop.circle.badge.checkmark", text: "Face in focus")
+                    TipItem(icon: "sun.max", text: "Good lighting")
+                    TipItem(icon: "tshirt", text: "Professional look")
+                    TipItem(icon: "face.smiling", text: "Natural expression")
                 }
             }
             .padding()
             .background(Color.white.opacity(0.03))
             .cornerRadius(16)
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.05), lineWidth: 1))
-            
-            // Examples
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Örnek profil fotoğrafları")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
-                
-                HStack(spacing: 12) {
-                    ExamplePhoto(imageName: "example1", isValid: true)
-                    ExamplePhoto(imageName: "example2", isValid: true)
-                    ExamplePhoto(imageName: "example3", isValid: true)
-                    ExamplePhoto(imageName: "example4", isValid: false)
-                }
-            }
         }
     }
     
@@ -234,10 +212,10 @@ struct ProfilePhotoFlowView: View {
     private var step2Verification: some View {
         VStack(spacing: 24) {
             VStack(spacing: 8) {
-                Text("Profil Fotoğrafı Doğrulama")
+                Text(NSLocalizedString("photo_verification_title", comment: ""))
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
-                Text("Güvenliğiniz ve topluluk kalitesini korumak için profil fotoğrafınızı doğrulamanız gerekiyor.")
+                Text(NSLocalizedString("photo_subtitle", comment: ""))
                     .font(.system(size: 14))
                     .foregroundColor(AppColors.textSecondary)
                     .multilineTextAlignment(.center)
@@ -261,48 +239,6 @@ struct ProfilePhotoFlowView: View {
                     .offset(x: -5, y: -5)
             }
             
-            // Checklist
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Fotoğrafınız doğrulama gereksinimlerini karşılıyor mu?")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white)
-                    .padding(.bottom, 16)
-                    .frame(maxWidth: .infinity)
-                
-                VStack(spacing: 1) {
-                    ChecklistItem(text: "Yüzünüz net ve görünür olmalı", isMet: true)
-                    ChecklistItem(text: "İyi aydınlatılmış bir ortamda çekilmeli", isMet: true)
-                    ChecklistItem(text: "Sadece siz olmalısınız (tek başınıza)", isMet: true)
-                    ChecklistItem(text: "Profesyonel bir görünüm tercih edilmeli", isMet: true)
-                    ChecklistItem(text: "Doğal bir ifade kullanılmalı", isMet: true)
-                    ChecklistItem(text: "Filtre, şapka, güneş gözlüğü kullanılmamalı", isMet: false)
-                }
-            }
-            .padding()
-            .background(Color.white.opacity(0.03))
-            .cornerRadius(16)
-            
-            // Security Info
-            HStack(spacing: 12) {
-                Image(systemName: "lock.shield")
-                    .font(.system(size: 24))
-                    .foregroundColor(.purple)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Fotoğraflarınız gizli ve güvenlidir.")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.white)
-                    Text("Doğrulama işlemi yalnızca güvenlik amacıyla yapılır ve profilinizde izinsiz paylaşılmaz.")
-                        .font(.system(size: 11))
-                        .foregroundColor(AppColors.textSecondary)
-                }
-                Spacer()
-                Image(systemName: "lock.fill")
-                    .foregroundColor(AppColors.textSecondary.opacity(0.5))
-            }
-            .padding()
-            .background(Color.white.opacity(0.03))
-            .cornerRadius(12)
-            
             // Actions
             VStack(spacing: 12) {
                 Button(action: { 
@@ -311,7 +247,7 @@ struct ProfilePhotoFlowView: View {
                 }) {
                     HStack {
                         Image(systemName: "camera")
-                        Text("Yeni Fotoğraf Çek")
+                        Text(NSLocalizedString("photo_take_new", comment: ""))
                     }
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
@@ -327,7 +263,7 @@ struct ProfilePhotoFlowView: View {
                 }) {
                     HStack {
                         Image(systemName: "photo")
-                        Text("Galeriden Seç")
+                        Text(NSLocalizedString("photo_select_gallery", comment: ""))
                     }
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
@@ -336,6 +272,11 @@ struct ProfilePhotoFlowView: View {
                     .background(Color.white.opacity(0.05))
                     .cornerRadius(12)
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                }
+            }
+        }
+    }
+(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
                 }
             }
             
