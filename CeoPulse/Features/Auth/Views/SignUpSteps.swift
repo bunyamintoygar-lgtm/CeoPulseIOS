@@ -308,6 +308,40 @@ struct SignUpStep3View: View {
     }
 }
 
+struct SignUpStepHeader: View {
+    let currentStep: Int
+    let steps = [
+        NSLocalizedString("step_account", comment: ""),
+        NSLocalizedString("step_professional", comment: ""),
+        NSLocalizedString("step_verification", comment: ""),
+        NSLocalizedString("step_complete", comment: "")
+    ]
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            HStack(spacing: 0) {
+                ForEach(0..<steps.count, id: \.self) { index in
+                    StepIndicator(
+                        stepNumber: index + 1,
+                        title: steps[index],
+                        isCurrent: currentStep == index + 1,
+                        isCompleted: currentStep > index + 1
+                    )
+                    
+                    if index < steps.count - 1 {
+                        Rectangle()
+                            .fill(currentStep > index + 1 ? Color.purple : Color.white.opacity(0.1))
+                            .frame(height: 2)
+                            .frame(maxWidth: .infinity)
+                            .offset(y: -10)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
 // MARK: - Step 4: Tamamla
 struct SignUpStep4View: View {
     @State private var showProfileCompletion = false
@@ -328,17 +362,17 @@ struct SignUpStep4View: View {
                         .shadow(color: .purple.opacity(0.5), radius: 20)
                     
                     VStack(spacing: 8) {
-                        Text("Tebrikler!")
+                        Text(NSLocalizedString("signup_congrats", comment: ""))
                             .font(.system(size: 32, weight: .bold))
                             .foregroundColor(.white)
-                        Text("Hesabınız başarıyla oluşturuldu.")
+                        Text(NSLocalizedString("signup_success_msg", comment: ""))
                             .font(.system(size: 14))
                             .foregroundColor(AppColors.textSecondary)
                         HStack(spacing: 4) {
                             Text("CEO Pulse")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.purple)
-                            Text("topluluğuna hoş geldiniz.")
+                            Text(NSLocalizedString("signup_welcome", comment: ""))
                                 .font(.system(size: 14))
                                 .foregroundColor(AppColors.textSecondary)
                         }
@@ -347,17 +381,35 @@ struct SignUpStep4View: View {
             }
             
             VStack(alignment: .leading, spacing: 16) {
-                Text("Hesabınızı kişiselleştirin")
+                Text(NSLocalizedString("personalize_title", comment: ""))
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
-                Text("Daha iyi bir deneyim için aşağıdaki adımları tamamlamanızı öneririz.")
+                Text(NSLocalizedString("personalize_subtitle", comment: ""))
                     .font(.system(size: 13))
                     .foregroundColor(AppColors.textSecondary)
                 
                 VStack(spacing: 12) {
-                    PersonalizationRow(icon: "person.fill", title: "Profilinizi tamamlayın", subtitle: "Profil fotoğrafı, hakkında bilgisi...", actionTitle: "Tamamla", action: { showProfileCompletion = true })
-                    PersonalizationRow(icon: "briefcase.fill", title: "İlgi alanlarınızı seçin", subtitle: "Size özel içerik ve etkinlik önerileri...", actionTitle: "Seç", action: { showInterestsSelection = true })
-                    PersonalizationRow(icon: "bell.fill", title: "Bildirim tercihlerinizi ayarlayın", subtitle: "Önemli gelişmelerden haberdar olmak için...", actionTitle: "Ayarla", action: { showNotificationPreferences = true })
+                    PersonalizationRow(
+                        icon: "person.fill", 
+                        title: NSLocalizedString("row_profile_complete_title", comment: ""), 
+                        subtitle: NSLocalizedString("row_profile_complete_subtitle", comment: ""), 
+                        actionTitle: NSLocalizedString("button_complete", comment: ""), 
+                        action: { showProfileCompletion = true }
+                    )
+                    PersonalizationRow(
+                        icon: "briefcase.fill", 
+                        title: NSLocalizedString("row_interests_title", comment: ""), 
+                        subtitle: NSLocalizedString("row_interests_subtitle", comment: ""), 
+                        actionTitle: NSLocalizedString("button_next", comment: ""), 
+                        action: { showInterestsSelection = true }
+                    )
+                    PersonalizationRow(
+                        icon: "bell.fill", 
+                        title: NSLocalizedString("row_notifications_title", comment: ""), 
+                        subtitle: NSLocalizedString("row_notifications_subtitle", comment: ""), 
+                        actionTitle: NSLocalizedString("button_continue", comment: ""), 
+                        action: { showNotificationPreferences = true }
+                    )
                 }
             }
             .fullScreenCover(isPresented: $showProfileCompletion) {
@@ -374,7 +426,6 @@ struct SignUpStep4View: View {
                 Image(systemName: "crown.fill")
                     .foregroundColor(.yellow)
                 VStack(alignment: .leading) {
-                    Text("Premium'u keşfedin").font(.system(size: 14, weight: .bold))
                     Text("Daha fazla özelliğe erişin, ağınızı büyütün...").font(.system(size: 11)).foregroundColor(AppColors.textSecondary)
                 }
                 Spacer()
