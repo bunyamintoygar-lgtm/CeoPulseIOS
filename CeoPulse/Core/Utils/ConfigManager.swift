@@ -1,5 +1,4 @@
 import Foundation
-import Supabase
 
 class ConfigManager: ObservableObject {
     static let shared = ConfigManager()

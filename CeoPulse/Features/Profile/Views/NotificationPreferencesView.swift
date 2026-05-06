@@ -37,68 +37,13 @@ struct NotificationPreferencesView: View {
                         }
                         .frame(maxWidth: .infinity)
                         
-                        // Channels Section
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text(NSLocalizedString("notifications_channels", comment: ""))
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
-                            
-                            VStack(spacing: 0) {
-                                NotificationToggleRow(title: "Push Bildirimleri", subtitle: "Anlık gelişmelerden haberdar olun", isOn: .constant(true))
-                                Divider().background(Color.white.opacity(0.05))
-                                NotificationToggleRow(title: "E-posta", subtitle: "Önemli özetleri e-posta ile alın", isOn: .constant(false))
-                                Divider().background(Color.white.opacity(0.05))
-                                NotificationToggleRow(title: "SMS", subtitle: "Kritik güvenlik uyarıları için", isOn: .constant(false))
-                            }
-                            .background(Color.white.opacity(0.03))
-                            .cornerRadius(12)
-                        }
-                        
-                        // Categories Section
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text(NSLocalizedString("notifications_categories", comment: ""))
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
-                            
-                            VStack(spacing: 0) {
-                                NotificationToggleRow(title: "Etkinlikler", subtitle: "Yeni etkinlik ve organizasyonlar", isOn: .constant(true))
-                                Divider().background(Color.white.opacity(0.05))
-                                NotificationToggleRow(title: "Haberler & Duyurular", subtitle: "Sektörel haberler ve uygulama duyuruları", isOn: .constant(true))
-                                Divider().background(Color.white.opacity(0.05))
-                                NotificationToggleRow(title: "Ağ Gelişmeleri", subtitle: "Yeni bağlantılar ve etkileşimler", isOn: .constant(true))
-                            }
-                            .background(Color.white.opacity(0.03))
-                            .cornerRadius(12)
-                        }
-                        
-                        // Info Box
-                        HStack(spacing: 16) {
-                            
-                            Spacer()
-                            
-                            ZStack {
-                                Image(systemName: "bell.fill")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(.purple)
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.white)
-                                    .background(Circle().fill(.purple))
-                                    .offset(x: 10, y: 10)
-                            }
-                        }
-                        .padding()
-                        .background(Color.purple.opacity(0.05))
-                        .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.purple.opacity(0.1), lineWidth: 1))
-                        
                         // Notification Channels
                         VStack(alignment: .leading, spacing: 16) {
-                            SectionHeader(title: "Bildirim Kanalları", subtitle: "Hangi kanallardan bildirim almak istediğinizi seçin.")
+                            SectionHeader(title: NSLocalizedString("notifications_channels", comment: ""), subtitle: NSLocalizedString("notifications_channels_subtitle", comment: ""))
                             
                             VStack(spacing: 1) {
-                                NotificationToggleRow(icon: "bell", title: "Uygulama İçi Bildirimler", subtitle: "CEO Pulse uygulaması içindeki bildirimler", isOn: $inAppNotifications)
-                                NotificationToggleRow(icon: "envelope", title: "E-posta Bildirimleri", subtitle: "E-posta adresinize gönderilecek bildirimler", isOn: $emailNotifications)
+                                NotificationToggleRow(icon: "bell", title: NSLocalizedString("notification_push_title", comment: ""), subtitle: NSLocalizedString("notification_push_subtitle", comment: ""), isOn: $inAppNotifications)
+                                NotificationToggleRow(icon: "envelope", title: NSLocalizedString("notification_email_title", comment: ""), subtitle: NSLocalizedString("notification_email_subtitle", comment: ""), isOn: $emailNotifications)
                             }
                             .background(Color.white.opacity(0.03))
                             .cornerRadius(16)
@@ -106,14 +51,14 @@ struct NotificationPreferencesView: View {
                         
                         // Notification Categories
                         VStack(alignment: .leading, spacing: 16) {
-                            SectionHeader(title: "Bildirim Kategorileri", subtitle: "Hangi tür bildirimler almak istediğinizi seçin.")
+                            SectionHeader(title: NSLocalizedString("notifications_categories", comment: ""), subtitle: NSLocalizedString("notifications_categories_subtitle", comment: ""))
                             
                             VStack(spacing: 1) {
-                                NotificationToggleRow(icon: "star", title: "İlişkiler ve Ağ", subtitle: "Yeni bağlantı istekleri, mesajlar ve ağ aktiviteleri", isOn: $networkActivity)
-                                NotificationToggleRow(icon: "briefcase", title: "İş Fırsatları", subtitle: "İş ilanları, ortaklık teklifleri ve fırsat önerileri", isOn: $jobOpportunities)
-                                NotificationToggleRow(icon: "chart.bar", title: "Etkinlikler", subtitle: "Etkinlik davetleri, hatırlatmalar ve güncellemeler", isOn: $events)
-                                NotificationToggleRow(icon: "doc.text", title: "Platform Güncellemeleri", subtitle: "Yeni özellikler, iyileştirmeler ve duyurular", isOn: $platformUpdates)
-                                NotificationToggleRow(icon: "megaphone", title: "Pazarlama ve Kampanyalar", subtitle: "Özel kampanyalar, ipuçları ve içerik önerileri", isOn: $marketing)
+                                NotificationToggleRow(icon: "star", title: NSLocalizedString("notification_network_title", comment: ""), subtitle: NSLocalizedString("notification_network_subtitle", comment: ""), isOn: $networkActivity)
+                                NotificationToggleRow(icon: "briefcase", title: NSLocalizedString("notification_jobs_title", comment: ""), subtitle: NSLocalizedString("notification_jobs_subtitle", comment: ""), isOn: $jobOpportunities)
+                                NotificationToggleRow(icon: "chart.bar", title: NSLocalizedString("notification_events_title", comment: ""), subtitle: NSLocalizedString("notification_events_subtitle", comment: ""), isOn: $events)
+                                NotificationToggleRow(icon: "doc.text", title: NSLocalizedString("notification_updates_title", comment: ""), subtitle: NSLocalizedString("notification_updates_subtitle", comment: ""), isOn: $platformUpdates)
+                                NotificationToggleRow(icon: "megaphone", title: NSLocalizedString("notification_marketing_title", comment: ""), subtitle: NSLocalizedString("notification_marketing_subtitle", comment: ""), isOn: $marketing)
                             }
                             .background(Color.white.opacity(0.03))
                             .cornerRadius(16)
@@ -123,7 +68,7 @@ struct NotificationPreferencesView: View {
                         HStack(spacing: 12) {
                             Image(systemName: "lock.shield")
                                 .foregroundColor(.purple)
-                            Text("Bildirim ayarlarınız gizlidir ve üçüncü kişilerle paylaşılmaz.")
+                            Text(NSLocalizedString("notifications_privacy_note", comment: ""))
                                 .font(.system(size: 12))
                                 .foregroundColor(AppColors.textSecondary)
                         }

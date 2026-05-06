@@ -3,7 +3,9 @@ import SwiftUI
 struct InterestsSelectionView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var configManager = ConfigManager.shared
-    @State private var selectedInterests: Set<String> = []
+    @State private var selectedInterests: Set<LocalizedValue> = []
+    @State private var interests: [LocalizedValue] = []
+    @State private var isLoading = false
     @State private var searchText = ""
     
     // Helper to map icons based on title
@@ -77,7 +79,7 @@ struct InterestsSelectionView: View {
                             FlowLayout(spacing: 10) {
                                 ForEach(interests, id: \.id) { interest in
                                     InterestTag(
-                                        title: configManager.getLocalizedInterest(interest),
+                                        title: configManager.getLocalizedValue(interest),
                                         isSelected: selectedInterests.contains(interest),
                                         onTap: { toggleInterest(interest) }
                                     )
@@ -280,44 +282,35 @@ struct SelectedInterestTag: View {
     }
 }
 
-// Helper for wrapping tags
-struct FlowLayout: View {
-    var spacing: CGFloat
-    var content: [AnyView]
-    
-    init<Data: Collection, Content: View>(spacing: CGFloat = 8, data: Data, @ViewBuilder content: @escaping (Data.Element) -> Content) {
-        self.spacing = spacing
-        self.content = data.map { AnyView(content($0)) }
-    }
+struct InterestTag: View {
+    let title: String
+    let isSelected: Bool
+    let onTap: () -> Void
     
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            var width = CGFloat.zero
-            var height = CGFloat.zero
-            
-            ForEach(0..<content.count, id: \.self) { index in
-                content[index]
-                    .alignmentGuide(.leading) { d in
-                        if (abs(width - d.width) > 300) {
-                            width = 0
-                            height -= d.height + spacing
-                        }
-                        let result = width
-                        if index == content.count - 1 {
-                            width = 0 // last item
-                        } else {
-                            width -= d.width + spacing
-                        }
-                        return result
-                    }
-                    .alignmentGuide(.top) { d in
-                        let result = height
-                        if index == content.count - 1 {
-                            height = 0 // last item
-                        }
-                        return result
-                    }
-            }
+        Button(action: onTap) {
+            Text(title)
+                .font(.system(size: 13))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(isSelected ? Color.purple : Color.white.opacity(0.05))
+                .foregroundColor(.white)
+                .cornerRadius(20)
+                .overlay(RoundedRectangle(cornerRadius: 20).stroke(isSelected ? Color.purple : Color.white.opacity(0.1), lineWidth: 1))
         }
+    }
+}
+
+struct FlowLayout: View {
+    var spacing: CGFloat
+    let content: AnyView
+
+    init<Content: View>(spacing: CGFloat = 8, @ViewBuilder content: () -> Content) {
+        self.spacing = spacing
+        self.content = AnyView(content())
+    }
+
+    var body: some View {
+        content
     }
 }

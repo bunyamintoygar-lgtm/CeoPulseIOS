@@ -133,7 +133,6 @@ struct SignUpStepper: View {
     }
 }
 
-// Placeholder for Step 1
 struct SignUpStep1View: View {
     @Binding var currentStep: Int
     @Binding var firstName: String
@@ -142,6 +141,40 @@ struct SignUpStep1View: View {
     @Binding var password: String
     @Binding var confirmPassword: String
     @Binding var acceptTerms: Bool
+    
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    
+    func handleSignUp() {
+        isLoading = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                let _ = try await SupabaseManager.shared.client.auth.signUp(
+                    email: email,
+                    password: password,
+                    options: AuthSignUpOptions(data: [
+                        "first_name": .string(firstName),
+                        "last_name": .string(lastName)
+                    ])
+                )
+                
+                await MainActor.run {
+                    withAnimation {
+                        currentStep = 2
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                }
+            }
+            await MainActor.run {
+                isLoading = false
+            }
+        }
+    }
     
     var body: some View {
         ScrollView {
@@ -214,35 +247,6 @@ struct SignUpStep1View: View {
                         .foregroundColor(.red)
                         .padding(.top, 8)
                 }
-...
-    @State private var isLoading = false
-    @State private var errorMessage: String?
-    
-    func handleSignUp() {
-        isLoading = true
-        errorMessage = nil
-        
-        Task {
-            do {
-                // SignUp with user metadata
-                let _ = try await SupabaseManager.shared.client.auth.signUp(
-                    email: email,
-                    password: password,
-                    options: AuthSignUpOptions(data: [
-                        "first_name": .string(firstName),
-                        "last_name": .string(lastName)
-                    ])
-                )
-                
-                withAnimation {
-                    currentStep = 2
-                }
-            } catch {
-                errorMessage = error.localizedDescription
-            }
-            isLoading = false
-        }
-    }
                 
                 // Social Section
                 VStack(spacing: 16) {

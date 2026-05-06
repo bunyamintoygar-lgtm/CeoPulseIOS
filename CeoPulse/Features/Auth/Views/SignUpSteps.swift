@@ -13,6 +13,43 @@ struct SignUpStep2View: View {
     @Binding var isPublicProfile: Bool
     
     @StateObject private var configManager = ConfigManager.shared
+    @State private var isLoading = false
+    
+    func handleProfileUpdate() {
+        isLoading = true
+        
+        Task {
+            do {
+                let currentUser = try await SupabaseManager.shared.client.auth.session.user
+                
+                try await SupabaseManager.shared.client
+                    .from("profiles")
+                    .update([
+                        "position": .string(position),
+                        "company": .string(company),
+                        "company_size": .string(companySize),
+                        "duration": .string(duration),
+                        "sector": .string(sector),
+                        "skills": .array(skills.map { .string($0) }),
+                        "bio": .string(bio),
+                        "is_public": .bool(isPublicProfile)
+                    ])
+                    .eq("id", value: currentUser.id)
+                    .execute()
+                
+                await MainActor.run {
+                    withAnimation {
+                        currentStep = 3
+                    }
+                }
+            } catch {
+                print("Profile update error: \(error.localizedDescription)")
+            }
+            await MainActor.run {
+                isLoading = false
+            }
+        }
+    }
     
     var body: some View {
         ScrollView {
@@ -26,15 +63,15 @@ struct SignUpStep2View: View {
                 
                 // Dropdowns
                 VStack(spacing: 12) {
-                    CustomDropdown(label: "Pozisyonunuz", selection: $position, options: configManager.positions)
+                    CustomDropdown(label: "Pozisyonunuz", selection: $position, options: configManager.positions.map { configManager.getLocalizedValue($0) })
                     CustomAuthField(icon: "building", placeholder: "Şirket adı", text: $company)
                     
                     HStack(spacing: 12) {
-                        CustomDropdown(label: "Şirket büyüklüğü", selection: $companySize, options: configManager.companySizes)
-                        CustomDropdown(label: "Çalışma süreniz", selection: $duration, options: configManager.durations)
+                        CustomDropdown(label: "Şirket büyüklüğü", selection: $companySize, options: configManager.companySizes.map { configManager.getLocalizedValue($0) })
+                        CustomDropdown(label: "Çalışma süreniz", selection: $duration, options: configManager.durations.map { configManager.getLocalizedValue($0) })
                     }
                     
-                    CustomDropdown(label: "Sektör", selection: $sector, options: configManager.sectors)
+                    CustomDropdown(label: "Sektör", selection: $sector, options: configManager.sectors.map { configManager.getLocalizedValue($0) })
                 }
                 .onAppear {
                     Task {
@@ -118,40 +155,6 @@ struct SignUpStep2View: View {
                     .background(Color(hex: "6C38FF"))
                     .cornerRadius(12)
                 }
-...
-    @State private var isLoading = false
-    
-    func handleProfileUpdate() {
-        isLoading = true
-        
-        Task {
-            do {
-                let currentUser = try await SupabaseManager.shared.client.auth.session.user
-                
-                try await SupabaseManager.shared.client
-                    .from("profiles")
-                    .update([
-                        "position": .string(position),
-                        "company": .string(company),
-                        "company_size": .string(companySize),
-                        "duration": .string(duration),
-                        "sector": .string(sector),
-                        "skills": .array(skills.map { .string($0) }),
-                        "bio": .string(bio),
-                        "is_public": .bool(isPublicProfile)
-                    ])
-                    .eq("id", value: currentUser.id)
-                    .execute()
-                
-                withAnimation {
-                    currentStep = 3
-                }
-            } catch {
-                print("Profile update error: \(error.localizedDescription)")
-            }
-            isLoading = false
-        }
-    }
                 
                 Button(action: { withAnimation { currentStep = 3 } }) {
                     VStack(spacing: 8) {
@@ -200,14 +203,20 @@ struct SignUpStep3View: View {
                     type: .signup
                 )
                 
-                withAnimation {
-                    currentStep = 4
+                await MainActor.run {
+                    withAnimation {
+                        currentStep = 4
+                    }
                 }
             } catch {
-                errorMessage = "Hatalı veya süresi dolmuş kod. Lütfen tekrar deneyin."
+                await MainActor.run {
+                    errorMessage = "Hatalı veya süresi dolmuş kod. Lütfen tekrar deneyin."
+                }
                 print("OTP Error: \(error.localizedDescription)")
             }
-            isLoading = false
+            await MainActor.run {
+                isLoading = false
+            }
         }
     }
     

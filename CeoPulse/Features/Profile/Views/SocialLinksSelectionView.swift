@@ -21,6 +21,7 @@ struct SocialLinksSelectionView: View {
         ConnectedAccount(platform: "Web Sitesi", handle: "www.kullaniciadi.com", visibility: .public),
         ConnectedAccount(platform: "Instagram", handle: "@kullaniciadi", visibility: .private)
     ]
+    @State private var isPublic = true
     
     var body: some View {
         ZStack {
@@ -34,11 +35,11 @@ struct SocialLinksSelectionView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         // Title Section
                         VStack(spacing: 8) {
-                            Text("Sosyal Bağlantılarınızı Ekleyin")
+                            Text(NSLocalizedString("social_title", comment: ""))
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.white)
                                 .multilineTextAlignment(.center)
-                            Text("Sosyal profilleriniz, profesyonel ağınızı genişletmenize ve fırsatları artırmanıza yardımcı olur.")
+                            Text(NSLocalizedString("social_subtitle", comment: ""))
                                 .font(.system(size: 14))
                                 .foregroundColor(AppColors.textSecondary)
                                 .multilineTextAlignment(.center)
@@ -49,7 +50,7 @@ struct SocialLinksSelectionView: View {
                         HStack(spacing: 12) {
                             Image(systemName: "info.circle")
                                 .foregroundColor(.purple)
-                            Text("Bağladığınız hesaplar profilinizde isteğinize bağlı olarak gösterilir.")
+                            Text(NSLocalizedString("social_info_box", comment: ""))
                                 .font(.system(size: 13))
                                 .foregroundColor(.white.opacity(0.8))
                         }
@@ -58,11 +59,6 @@ struct SocialLinksSelectionView: View {
                         .cornerRadius(12)
                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
                         
-                        // Add Links Section
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Bağlantı Ekle")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
                         // Connected Accounts
                         if !connectedAccounts.isEmpty {
                             VStack(alignment: .leading, spacing: 16) {
@@ -95,34 +91,11 @@ struct SocialLinksSelectionView: View {
                             .cornerRadius(12)
                         }
                         
-                        // Visibility Setting
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack {
-                                Text("Görünürlük Ayarı")
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Text(isPublic ? NSLocalizedString("visibility_public", comment: "") : NSLocalizedString("visibility_private", comment: ""))
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.purple)
-                            }
-                            
-                            Toggle(isOn: $isPublic) {
-                                Text(NSLocalizedString("social_privacy_note", comment: ""))
-                                    .font(.system(size: 14))
-                                    .foregroundColor(AppColors.textSecondary)
-                            }
-                            .tint(.purple)
-                            .padding()
-                            .background(Color.white.opacity(0.03))
-                            .cornerRadius(12)
-                        }
-                        
-                        // Info Box
+                        // Privacy Note
                         HStack(spacing: 16) {
-                            Image(systemName: "info.circle.fill")
+                            Image(systemName: "lock.fill")
                                 .foregroundColor(.purple)
-                            Text(NSLocalizedString("social_info_box", comment: ""))
+                            Text(NSLocalizedString("social_privacy_note", comment: ""))
                                 .font(.system(size: 12))
                                 .foregroundColor(AppColors.textSecondary)
                         }
@@ -137,9 +110,14 @@ struct SocialLinksSelectionView: View {
                 // Footer
                 VStack {
                     Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                            .font(.system(size: 11))
+                        Text(NSLocalizedString("button_save_continue", comment: ""))
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color(hex: "6C38FF"))
+                            .cornerRadius(12)
                     }
-                    .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(24)
                 .background(AppColors.background)
@@ -268,5 +246,42 @@ struct ConnectedAccountRow: View {
         .background(Color.white.opacity(0.03))
         .cornerRadius(12)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
+    }
+}
+
+struct SocialAddRow: View {
+    let platform: String
+    let icon: String
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.05))
+                    .frame(width: 40, height: 40)
+                
+                Image(systemName: "link")
+                    .foregroundColor(.white)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(platform).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                Text(NSLocalizedString("social_add_desc", comment: "")).font(.system(size: 11)).foregroundColor(AppColors.textSecondary)
+            }
+            
+            Spacer()
+            
+            Button(action: {}) {
+                Text(NSLocalizedString("button_add", comment: ""))
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(8)
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.1), lineWidth: 1))
+            }
+        }
+        .padding()
     }
 }

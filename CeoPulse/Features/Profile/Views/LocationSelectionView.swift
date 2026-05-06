@@ -174,3 +174,31 @@ struct LocationRow: View {
         }
     }
 }
+
+struct CityCard: View {
+    let city: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: "building.2.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(isSelected ? .purple : AppColors.textSecondary)
+                
+                Text(city)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(isSelected ? .white : AppColors.textSecondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(isSelected ? Color.purple.opacity(0.1) : Color.white.opacity(0.03))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.purple : Color.white.opacity(0.05), lineWidth: 1)
+            )
+        }
+    }
+}
