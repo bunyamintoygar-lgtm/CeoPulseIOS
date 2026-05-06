@@ -4,6 +4,13 @@ extension View {
     func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
         clipShape(RoundedCorner(radius: radius, corners: corners))
     }
+    func scrollIndicatorsCompat() -> some View {
+        if #available(iOS 16.0, *) {
+            return self.scrollIndicators(.hidden)
+        } else {
+            return self // Earlier versions don't have this modifier, so we just return the view
+        }
+    }
 }
 
 struct RoundedCorner: Shape {

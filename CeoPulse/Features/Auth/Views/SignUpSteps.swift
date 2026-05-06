@@ -271,7 +271,7 @@ struct SignUpStep3View: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 30)
         }
-        .scrollIndicators(.hidden)
+        .scrollIndicatorsCompat()
         .onTapGesture {
             activeField = nil // Dismiss keyboard on background tap
         }
