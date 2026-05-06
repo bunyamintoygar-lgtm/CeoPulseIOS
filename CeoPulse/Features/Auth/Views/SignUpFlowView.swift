@@ -305,12 +305,20 @@ struct CustomAuthField: View {
                 .foregroundColor(AppColors.textSecondary)
                 .frame(width: 20)
             
-            if isSecure {
-                SecureField(placeholder, text: $text)
-                    .foregroundColor(.white)
-            } else {
-                TextField(placeholder, text: $text)
-                    .foregroundColor(.white)
+            ZStack(alignment: .leading) {
+                if text.isEmpty {
+                    Text(placeholder)
+                        .foregroundColor(.white.opacity(0.4))
+                        .font(.system(size: 16))
+                }
+                
+                if isSecure {
+                    SecureField("", text: $text)
+                        .foregroundColor(.white)
+                } else {
+                    TextField("", text: $text)
+                        .foregroundColor(.white)
+                }
             }
             
             if isSecure {
