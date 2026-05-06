@@ -47,7 +47,6 @@ class ConfigManager: ObservableObject {
                 }
             }
             
-            }
         } catch {
             print("Config fetch error: \(error.localizedDescription)")
         }
