@@ -139,7 +139,7 @@ struct InterestsSelectionView: View {
                 VStack {
                     Button(action: { presentationMode.wrappedValue.dismiss() }) {
                         HStack {
-                            Text(NSLocalizedString("button_continue", comment: ""))
+                            Text(NSLocalizedString("continue", comment: ""))
                             Image(systemName: "arrow.right")
                         }
                         .font(.system(size: 16, weight: .bold))

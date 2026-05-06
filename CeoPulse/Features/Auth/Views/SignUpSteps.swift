@@ -407,7 +407,7 @@ struct SignUpStep4View: View {
                         icon: "bell.fill", 
                         title: NSLocalizedString("row_notifications_title", comment: ""), 
                         subtitle: NSLocalizedString("row_notifications_subtitle", comment: ""), 
-                        actionTitle: NSLocalizedString("button_continue", comment: ""), 
+                        actionTitle: NSLocalizedString("button_next", comment: ""), 
                         action: { showNotificationPreferences = true }
                     )
                 }
@@ -426,10 +426,12 @@ struct SignUpStep4View: View {
                 Image(systemName: "crown.fill")
                     .foregroundColor(.yellow)
                 VStack(alignment: .leading) {
-                    Text("Daha fazla özelliğe erişin, ağınızı büyütün...").font(.system(size: 11)).foregroundColor(AppColors.textSecondary)
+                    Text(NSLocalizedString("premium_banner_desc", comment: ""))
+                        .font(.system(size: 11))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 Spacer()
-                Button("Keşfet") {}.font(.system(size: 12, weight: .bold)).padding(.horizontal, 16).padding(.vertical, 8).background(Color.white.opacity(0.1)).cornerRadius(8)
+                Button(NSLocalizedString("button_explore", comment: "")) {}.font(.system(size: 12, weight: .bold)).padding(.horizontal, 16).padding(.vertical, 8).background(Color.white.opacity(0.1)).cornerRadius(8)
             }
             .padding()
             .background(Color.white.opacity(0.03))
@@ -437,7 +439,7 @@ struct SignUpStep4View: View {
             
             Button(action: {}) {
                 HStack {
-                    Text("CEO Pulse'a Başla")
+                    Text(NSLocalizedString("button_start_app", comment: ""))
                     Image(systemName: "arrow.right")
                 }
                 .font(.system(size: 16, weight: .bold))
@@ -470,7 +472,7 @@ struct CustomDropdown: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(label).font(.system(size: 10)).foregroundColor(AppColors.textSecondary)
-                    Text(selection.isEmpty ? "Seçiniz" : selection)
+                    Text(selection.isEmpty ? NSLocalizedString("dropdown_select", comment: "") : selection)
                         .font(.system(size: 14))
                         .foregroundColor(selection.isEmpty ? .white.opacity(0.4) : .white)
                 }

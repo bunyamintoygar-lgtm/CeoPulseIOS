@@ -94,7 +94,7 @@ struct LocationSelectionView: View {
                 // Footer
                 VStack {
                     Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                        Text(NSLocalizedString("button_save", comment: ""))
+                        Text(NSLocalizedString("button_save_continue", comment: ""))
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
