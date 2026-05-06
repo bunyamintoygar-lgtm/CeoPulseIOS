@@ -224,98 +224,116 @@ struct SignUpStep3View: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Doğrulama")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-            Text("Güvenliğiniz bizim için önemli. Lütfen e-posta adresinize gönderilen doğrulama kodunu girin.")
-                .font(.system(size: 13))
-                .foregroundColor(AppColors.textSecondary)
-            
-            VStack(spacing: 24) {
-                // Illustration
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white.opacity(0.05))
-                        .frame(height: 180)
-                    
-                    VStack(spacing: 12) {
-                        ZStack {
-                            Image(systemName: "envelope.fill")
-                                .font(.system(size: 60))
-                                .foregroundColor(.purple.opacity(0.3))
-                            Image(systemName: "shield.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white)
-                                .offset(y: 5)
-                        }
-                        
-                        VStack(spacing: 4) {
-                            Text("E-postanıza kod gönderdik!")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
-                            Text("\(email) adresine gönderilen\n6 haneli kodu aşağıya girin.")
-                                .font(.system(size: 12))
-                                .foregroundColor(AppColors.textSecondary)
-                                .multilineTextAlignment(.center)
-                        }
-                    }
-                }
-                
-                // OTP Input
-                HStack(spacing: 10) {
-                    ForEach(0..<6, id: \.self) { index in
-                        TextField("", text: $otpCode[index])
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.center)
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 42, height: 50)
-                            .background(Color.white.opacity(0.05))
-                            .cornerRadius(10)
-                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(activeField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1))
-                            .focused($activeField, equals: index)
-                            .onChange(of: otpCode[index]) { newValue in
-                                if newValue.count > 1 { otpCode[index] = String(newValue.last!) }
-                                if !newValue.isEmpty && index < 5 { activeField = index + 1 }
-                                if newValue.isEmpty && index > 0 { activeField = index - 1 }
-                            }
-                    }
-                }
-                
-                if let error = errorMessage {
-                    Text(error)
-                        .font(.system(size: 12))
-                        .foregroundColor(.red)
-                        .padding(.top, 4)
-                }
-                
-                HStack {
-                    Image(systemName: "clock")
-                    Text("Kodu yeniden gönderme: 01:45")
-                }
-                .font(.system(size: 13))
-                .foregroundColor(AppColors.textSecondary)
-                
-                Button(action: handleOTPVerification) {
-                    HStack {
-                        if isLoading {
-                            ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else {
-                            Text("Doğrula ve Devam Et")
-                            Image(systemName: "arrow.right")
-                        }
-                    }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Doğrulama")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color(hex: "6C38FF"))
-                    .cornerRadius(12)
+                Text("Güvenliğiniz bizim için önemli. Lütfen e-posta adresinize gönderilen doğrulama kodunu girin.")
+                    .font(.system(size: 13))
+                    .foregroundColor(AppColors.textSecondary)
+                
+                VStack(spacing: 24) {
+                    // Illustration
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.white.opacity(0.05))
+                            .frame(height: 180)
+                        
+                        VStack(spacing: 12) {
+                            ZStack {
+                                Image(systemName: "envelope.fill")
+                                    .font(.system(size: 60))
+                                    .foregroundColor(.purple.opacity(0.3))
+                                Image(systemName: "shield.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.white)
+                                    .offset(y: 5)
+                            }
+                            
+                            VStack(spacing: 4) {
+                                Text("E-postanıza kod gönderdik!")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
+                                Text("\(email) adresine gönderilen\n8 haneli kodu aşağıya girin.")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(AppColors.textSecondary)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                    }
+                    
+                    // OTP Input
+                    HStack(spacing: 8) {
+                        ForEach(0..<8, id: \.self) { index in
+                            TextField("", text: $otpCode[index])
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.center)
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 36, height: 48)
+                                .background(Color.white.opacity(0.05))
+                                .cornerRadius(8)
+                                .overlay(RoundedRectangle(cornerRadius: 8).stroke(activeField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1))
+                                .focused($activeField, equals: index)
+                                .onChange(of: otpCode[index]) { newValue in
+                                    if newValue.count > 1 { otpCode[index] = String(newValue.last!) }
+                                    if !newValue.isEmpty && index < 7 { activeField = index + 1 }
+                                    if newValue.isEmpty && index > 0 { activeField = index - 1 }
+                                }
+                        }
+                    }
+                    
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(.system(size: 12))
+                            .foregroundColor(.red)
+                            .padding(.top, 4)
+                    }
+                    
+                    HStack {
+                        Image(systemName: "clock")
+                        Text("Kodu yeniden gönderme: 01:45")
+                    }
+                    .font(.system(size: 13))
+                    .foregroundColor(AppColors.textSecondary)
+                    
+                    Button(action: handleOTPVerification) {
+                        HStack {
+                            if isLoading {
+                                ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Text("Doğrula ve Devam Et")
+                                Image(systemName: "arrow.right")
+                            }
+                        }
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color(hex: "6C38FF"))
+                        .cornerRadius(12)
+                    }
+                    .disabled(isLoading || otpCode.joined().count < 8)
                 }
-                .disabled(isLoading || otpCode.joined().count < 6)
             }
             .padding(.horizontal, 24)
+            .padding(.bottom, 30)
+        }
+        .scrollIndicators(.hidden)
+        .onTapGesture {
+            activeField = nil // Dismiss keyboard on background tap
+        }
+        .toolbar {
+            ToolbarItem(placement: .keyboard) {
+                HStack {
+                    Spacer()
+                    Button("Bitti") {
+                        activeField = nil
+                    }
+                    .foregroundColor(.purple)
+                }
+            }
         }
     }
 }
