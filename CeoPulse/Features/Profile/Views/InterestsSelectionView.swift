@@ -76,7 +76,7 @@ struct InterestsSelectionView: View {
                             }
                             .padding(.top, 40)
                         } else {
-                            FlowLayout(spacing: 10) {
+                            FlowLayout(spacing: 10, content: {
                                 ForEach(interests, id: \.id) { interest in
                                     InterestTag(
                                         title: configManager.getLocalizedValue(interest),
@@ -84,7 +84,7 @@ struct InterestsSelectionView: View {
                                         onTap: { toggleInterest(interest) }
                                     )
                                 }
-                            }
+                            })
                         }
                         
                         // Other Areas / Search

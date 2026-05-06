@@ -151,10 +151,11 @@ struct SignUpStep1View: View {
         
         Task {
             do {
-                let options = SignUpOptions(data: [
+                let userData: [String: AnyJSON] = [
                     "first_name": .string(firstName),
                     "last_name": .string(lastName)
-                ])
+                ]
+                let options = SignUpOptions(data: userData)
                 
                 try await SupabaseManager.shared.client.auth.signUp(
                     email: email,
