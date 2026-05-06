@@ -4,6 +4,7 @@ import PhotosUI
 struct ProfilePhotoView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var supabaseManager: SupabaseManager
+    @StateObject private var langManager = LanguageManager.shared
     @State private var selectedImage: UIImage? = nil
     @State private var showImagePicker = false
     @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
@@ -17,10 +18,10 @@ struct ProfilePhotoView: View {
                 Spacer().frame(height: 20)
                 
                 VStack(spacing: 12) {
-                    Text("Profil Fotoğrafı")
+                    Text("photo_title".localized())
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.white)
-                    Text("Profesyonel bir profil fotoğrafı, güven oluşturur\nve topluluk içinde fark edilmenizi sağlar.")
+                    Text("photo_subtitle".localized())
                         .font(.system(size: 14))
                         .foregroundColor(AppColors.textSecondary)
                         .multilineTextAlignment(.center)
@@ -90,7 +91,7 @@ struct ProfilePhotoView: View {
                     }) {
                         HStack {
                             Image(systemName: "camera")
-                            Text("Fotoğraf Çek")
+                            Text("photo_take_new".localized())
                         }
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
@@ -106,7 +107,7 @@ struct ProfilePhotoView: View {
                     }) {
                         HStack {
                             Image(systemName: "photo.on.rectangle")
-                            Text("Galeriden Seç")
+                            Text("photo_select_gallery".localized())
                         }
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
@@ -129,7 +130,7 @@ struct ProfilePhotoView: View {
                     }
                 }) {
                     HStack {
-                        Text("Devam Et")
+                        Text("continue".localized())
                         Image(systemName: "arrow.right")
                     }
                     .font(.system(size: 16, weight: .bold))
@@ -146,6 +147,7 @@ struct ProfilePhotoView: View {
         .sheet(isPresented: $showImagePicker) {
             ImagePicker(image: $selectedImage, sourceType: sourceType)
         }
+        .id(langManager.currentLanguage)
     }
 }
 

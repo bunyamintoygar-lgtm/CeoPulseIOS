@@ -221,7 +221,7 @@ struct LoginView: View {
                 loadRememberedInfo()
             }
         }
-        .id(langManager.currentLanguage) // Force view reload on language change
+        .id(langManager.currentLanguage)
     }
     
     private func loadRememberedInfo() {
@@ -251,7 +251,6 @@ struct LoginView: View {
         Task {
             do {
                 try await SupabaseManager.shared.client.auth.signIn(email: email, password: password)
-                // Success - update global state
                 saveRememberedInfo()
                 await MainActor.run {
                     withAnimation {
@@ -269,52 +268,6 @@ struct LoginView: View {
         }
     }
 }
-    
-    private func loadRememberedInfo() {
-        rememberMe = UserDefaults.standard.bool(forKey: rememberMeStatusKey)
-        if rememberMe {
-            if let savedEmail = UserDefaults.standard.string(forKey: rememberMeKey) {
-                email = savedEmail
-            }
-        }
-    }
-    
-    private func saveRememberedInfo() {
-        UserDefaults.standard.set(rememberMe, forKey: rememberMeStatusKey)
-        if rememberMe {
-            UserDefaults.standard.set(email, forKey: rememberMeKey)
-        } else {
-            UserDefaults.standard.removeObject(forKey: rememberMeKey)
-        }
-    }
-    
-    func signIn() {
-        guard !email.isEmpty && !password.isEmpty else { return }
-        
-        isLoading = true
-        errorMessage = nil
-        
-        Task {
-            do {
-                try await SupabaseManager.shared.client.auth.signIn(email: email, password: password)
-                // Success - update global state
-                saveRememberedInfo()
-                await MainActor.run {
-                    withAnimation {
-                        SupabaseManager.shared.isAuthenticated = true
-                    }
-                }
-            } catch {
-                await MainActor.run {
-                    errorMessage = "Giriş başarısız. Lütfen bilgilerinizi kontrol edin."
-                }
-            }
-            await MainActor.run {
-                isLoading = false
-            }
-        }
-    }
-}
 
 struct SocialLoginButton: View {
     let icon: String
@@ -324,7 +277,6 @@ struct SocialLoginButton: View {
     var body: some View {
         Button(action: {}) {
             HStack(spacing: 12) {
-                // Placeholder for social icons
                 Image(systemName: icon == "linkedin_logo" ? "link" : (icon == "google_logo" ? "g.circle.fill" : "applelogo"))
                     .font(.system(size: 20))
                     .foregroundColor(icon == "linkedin_logo" ? .blue : (icon == "google_logo" ? .red : .white))

@@ -212,63 +212,66 @@ struct SignUpStep3View: View {
                                     .multilineTextAlignment(.center)
                             }
                         }
-                    
-                    // OTP Input
-                    HStack(spacing: 8) {
-                        ForEach(0..<8, id: \.self) { index in
-                            TextField("", text: $otpCode[index])
-                                .keyboardType(.numberPad)
-                                .multilineTextAlignment(.center)
-                                .font(.system(size: 18, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 36, height: 48)
-                                .background(Color.white.opacity(0.05))
-                                .cornerRadius(8)
-                                .overlay(RoundedRectangle(cornerRadius: 8).stroke(activeField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1))
-                                .focused($activeField, equals: index)
-                                .onChange(of: otpCode[index]) { newValue in
-                                    if newValue.count > 1 { otpCode[index] = String(newValue.last!) }
-                                    if !newValue.isEmpty && index < 7 { activeField = index + 1 }
-                                    if newValue.isEmpty && index > 0 { activeField = index - 1 }
-                                }
-                        }
                     }
                     
-                    if let error = errorMessage {
-                        Text(error)
-                            .font(.system(size: 12))
-                            .foregroundColor(.red)
-                            .padding(.top, 4)
-                    }
-                    
-                    HStack {
-                        Image(systemName: "clock")
-                        Text("Kodu yeniden gönderme: 01:45")
-                    }
-                    .font(.system(size: 13))
-                    .foregroundColor(AppColors.textSecondary)
-                    
-                    Button(action: handleOTPVerification) {
-                        HStack {
-                            if isLoading {
-                                ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            } else {
-                                Text("Doğrula ve Devam Et")
-                                Image(systemName: "arrow.right")
+                    VStack(spacing: 24) {
+                        // OTP Input
+                        HStack(spacing: 8) {
+                            ForEach(0..<8, id: \.self) { index in
+                                TextField("", text: $otpCode[index])
+                                    .keyboardType(.numberPad)
+                                    .multilineTextAlignment(.center)
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(width: 36, height: 48)
+                                    .background(Color.white.opacity(0.05))
+                                    .cornerRadius(8)
+                                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(activeField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1))
+                                    .focused($activeField, equals: index)
+                                    .onChange(of: otpCode[index]) { newValue in
+                                        if newValue.count > 1 { otpCode[index] = String(newValue.last!) }
+                                        if !newValue.isEmpty && index < 7 { activeField = index + 1 }
+                                        if newValue.isEmpty && index > 0 { activeField = index - 1 }
+                                    }
                             }
                         }
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color(hex: "6C38FF"))
-                        .cornerRadius(12)
+                        
+                        if let error = errorMessage {
+                            Text(error)
+                                .font(.system(size: 12))
+                                .foregroundColor(.red)
+                                .padding(.top, 4)
+                        }
+                        
+                        HStack {
+                            Image(systemName: "clock")
+                            Text("Kodu yeniden gönderme: 01:45")
+                        }
+                        .font(.system(size: 13))
+                        .foregroundColor(AppColors.textSecondary)
+                        
+                        Button(action: handleOTPVerification) {
+                            HStack {
+                                if isLoading {
+                                    ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                } else {
+                                    Text("Doğrula ve Devam Et")
+                                    Image(systemName: "arrow.right")
+                                }
+                            }
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color(hex: "6C38FF"))
+                            .cornerRadius(12)
+                        }
+                        .disabled(isLoading || otpCode.joined().count < 8)
                     }
-                    .disabled(isLoading || otpCode.joined().count < 8)
                 }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 30)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 30)
         }
         .scrollIndicatorsCompat()
         .onTapGesture {
@@ -341,31 +344,21 @@ struct SignUpStep4View: View {
                         .foregroundColor(.purple)
                         .shadow(color: .purple.opacity(0.5), radius: 20)
                     
-                    VStack(spacing: 8) {
+                    VStack(spacing: 12) {
                         Text(NSLocalizedString("signup_congrats", comment: ""))
                             .font(.system(size: 32, weight: .bold))
                             .foregroundColor(.white)
+                        
                         Text(NSLocalizedString("signup_success_msg", comment: ""))
                             .font(.system(size: 14))
                             .foregroundColor(AppColors.textSecondary)
-                        HStack(spacing: 4) {
-                            Text("CEO Pulse")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.purple)
-                            Text("topluluğuna hoş geldiniz. Liderlerle bağlantı kurun, görüşlerinizi paylaşın ve iş dünyasının nabzını tutun.")
-                                .font(.system(size: 14))
-                                .foregroundColor(AppColors.textSecondary)
-                        }
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
                     }
                 }
             }
             
-            // List removed as per user request
             Spacer()
-            
-            .fullScreenCover(isPresented: $showPhotoFlow) {
-                ProfilePhotoView()
-            }
             
             HStack {
                 Image(systemName: "crown.fill")
@@ -399,6 +392,9 @@ struct SignUpStep4View: View {
             .padding(.bottom, 40)
         }
         .padding(.horizontal, 24)
+        .fullScreenCover(isPresented: $showPhotoFlow) {
+            ProfilePhotoView()
+        }
     }
 }
 

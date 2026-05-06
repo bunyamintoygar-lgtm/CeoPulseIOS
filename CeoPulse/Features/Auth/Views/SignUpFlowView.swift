@@ -31,30 +31,8 @@ struct SignUpFlowView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header
-                HStack {
-                    Button(action: {
-                        if currentStep > 1 && currentStep < 4 {
-                            currentStep -= 1
-                        } else {
-                            presentationMode.wrappedValue.dismiss()
-                        }
-                    }) {
-                        Image(systemName: "arrow.left")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(12)
-                            .background(Color.white.opacity(0.05))
-                            .clipShape(Circle())
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
-                
-                // Progress Bar
-                SignUpStepper(currentStep: currentStep)
-                    .padding(.top, 20)
+                // Header and Stepper removed as per user request
+                Spacer().frame(height: 20)
                 
                 // Title Section
                 if currentStep < 4 {
