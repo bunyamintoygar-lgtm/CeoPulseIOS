@@ -274,8 +274,6 @@ struct ProfilePhotoFlowView: View {
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
                 }
             }
-        }
-    }
             
             Button(action: {}) {
                 HStack {
