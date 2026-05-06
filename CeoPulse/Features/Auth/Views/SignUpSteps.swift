@@ -12,6 +12,8 @@ struct SignUpStep2View: View {
     @Binding var bio: String
     @Binding var isPublicProfile: Bool
     
+    @StateObject private var configManager = ConfigManager.shared
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -22,19 +24,22 @@ struct SignUpStep2View: View {
                     .font(.system(size: 13))
                     .foregroundColor(AppColors.textSecondary)
                 
-                // Dropdowns (Simulated with Buttons)
+                // Dropdowns
                 VStack(spacing: 12) {
-                    CustomDropdown(label: "Pozisyonunuz", selection: $position, options: ["CEO", "CTO", "Manager"])
+                    CustomDropdown(label: "Pozisyonunuz", selection: $position, options: configManager.positions)
                     CustomAuthField(icon: "building", placeholder: "Şirket adı", text: $company)
                     
                     HStack(spacing: 12) {
-                        CustomDropdown(label: "Şirket büyüklüğü", selection: $companySize, options: ["1-10", "11-50", "51+"])
-                        CustomDropdown(label: "Çalışma süreniz", selection: $duration, options: ["1-3 yıl", "3-5 yıl", "5+ yıl"])
+                        CustomDropdown(label: "Şirket büyüklüğü", selection: $companySize, options: configManager.companySizes)
+                        CustomDropdown(label: "Çalışma süreniz", selection: $duration, options: configManager.durations)
                     }
                     
-                    CustomDropdown(label: "Sektör", selection: $sector, options: ["Teknoloji", "Finans", "Sağlık"])
-                    
-                    CustomDropdown(label: "Uzmanlık Alanlarınız (En fazla 5 seçim)", selection: .constant(""), options: [])
+                    CustomDropdown(label: "Sektör", selection: $sector, options: configManager.sectors)
+                }
+                .onAppear {
+                    Task {
+                        await configManager.fetchConfigs()
+                    }
                 }
                 
                 // Skills Tags
@@ -360,11 +365,19 @@ struct CustomDropdown: View {
     let options: [String]
     
     var body: some View {
-        Button(action: {}) {
+        Menu {
+            ForEach(options, id: \.self) { option in
+                Button(option) {
+                    selection = option
+                }
+            }
+        } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(label).font(.system(size: 10)).foregroundColor(AppColors.textSecondary)
-                    Text(selection.isEmpty ? "Seçiniz" : selection).font(.system(size: 14)).foregroundColor(selection.isEmpty ? AppColors.textSecondary : .white)
+                    Text(selection.isEmpty ? "Seçiniz" : selection)
+                        .font(.system(size: 14))
+                        .foregroundColor(selection.isEmpty ? .white.opacity(0.4) : .white)
                 }
                 Spacer()
                 Image(systemName: "chevron.down").font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
@@ -372,6 +385,7 @@ struct CustomDropdown: View {
             .padding()
             .background(Color.white.opacity(0.05))
             .cornerRadius(12)
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
         }
     }
 }
