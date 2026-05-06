@@ -6,6 +6,7 @@ struct ProfilePhotoFlowView: View {
     @State private var currentSubStep = 1
     @State private var selectedImage: UIImage? = nil
     @State private var isPickerPresented = false
+    @State private var pickerSource: UIImagePickerController.SourceType = .photoLibrary
     
     var body: some View {
         ZStack {
@@ -38,7 +39,7 @@ struct ProfilePhotoFlowView: View {
         }
         .navigationBarHidden(true)
         .sheet(isPresented: $isPickerPresented) {
-            ImagePicker(image: $selectedImage)
+            ImagePicker(image: $selectedImage, sourceType: pickerSource)
                 .onDisappear {
                     if selectedImage != nil {
                         withAnimation { currentSubStep = 2 }
@@ -46,6 +47,8 @@ struct ProfilePhotoFlowView: View {
                 }
         }
     }
+    
+    // ... rest of the views (I will update the buttons in step2Verification)
     
     // MARK: - Subviews
     
@@ -167,9 +170,15 @@ struct ProfilePhotoFlowView: View {
                 }
                 .frame(width: 180, height: 180)
             }
-            .onTapGesture { isPickerPresented = true }
+            .onTapGesture { 
+                pickerSource = .photoLibrary
+                isPickerPresented = true 
+            }
             
-            Button(action: { isPickerPresented = true }) {
+            Button(action: { 
+                pickerSource = .photoLibrary
+                isPickerPresented = true 
+            }) {
                 HStack {
                     Image(systemName: "arrow.up.circle")
                     Text("Fotoğraf Yükle")
@@ -296,7 +305,10 @@ struct ProfilePhotoFlowView: View {
             
             // Actions
             VStack(spacing: 12) {
-                Button(action: { isPickerPresented = true }) {
+                Button(action: { 
+                    pickerSource = .camera
+                    isPickerPresented = true 
+                }) {
                     HStack {
                         Image(systemName: "camera")
                         Text("Yeni Fotoğraf Çek")
@@ -309,7 +321,10 @@ struct ProfilePhotoFlowView: View {
                     .cornerRadius(12)
                 }
                 
-                Button(action: { isPickerPresented = true }) {
+                Button(action: { 
+                    pickerSource = .photoLibrary
+                    isPickerPresented = true 
+                }) {
                     HStack {
                         Image(systemName: "photo")
                         Text("Galeriden Seç")
@@ -606,40 +621,41 @@ struct SuccessBenefitRow: View {
     }
 }
 
-// Simple ImagePicker for demonstration
+// Custom ImagePicker supporting both camera and gallery
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
+    var sourceType: UIImagePickerController.SourceType = .photoLibrary
     @Environment(\.presentationMode) var presentationMode
 
-    func makeUIViewController(context: Context) -> PHPickerViewController {
-        var config = PHPickerConfiguration()
-        config.filter = .images
-        let picker = PHPickerViewController(configuration: config)
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = sourceType
         picker.delegate = context.coordinator
         return picker
     }
 
-    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
 
-    class Coordinator: NSObject, PHPickerViewControllerDelegate {
+    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         let parent: ImagePicker
 
         init(_ parent: ImagePicker) {
             self.parent = parent
         }
 
-        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            parent.presentationMode.wrappedValue.dismiss()
-            guard let provider = results.first?.itemProvider, provider.canLoadObject(ofClass: UIImage.self) else { return }
-            provider.loadObject(ofClass: UIImage.self) { image, _ in
-                DispatchQueue.main.async {
-                    self.parent.image = image as? UIImage
-                }
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let uiImage = info[.originalImage] as? UIImage {
+                parent.image = uiImage
             }
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.presentationMode.wrappedValue.dismiss()
         }
     }
 }
