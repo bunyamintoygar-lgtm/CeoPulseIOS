@@ -57,18 +57,22 @@ struct SignUpFlowView: View {
                     .padding(.top, 20)
                 
                 // Title Section
-                VStack(spacing: 8) {
-                    Text(currentStep == 2 ? "Doğrulama" : "Hesap Oluşturun")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.white)
-                    
-                    Text(currentStep == 2 ? "\(email) adresine gönderilen\n8 haneli kodu aşağıya girin." : "Liderlerle bağlantı kurun, görüşlerinizi paylaşın\nve iş dünyasının nabzını tutun.")
-                        .font(.system(size: 13))
-                        .foregroundColor(AppColors.textSecondary)
-                        .multilineTextAlignment(.center)
+                if currentStep < 4 {
+                    VStack(spacing: 8) {
+                        Text(currentStep == 2 ? "Doğrulama" : "Hesap Oluşturun")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Text(currentStep == 2 ? "\(email) adresine gönderilen\n8 haneli kodu aşağıya girin." : "Liderlerle bağlantı kurun, görüşlerinizi paylaşın\nve iş dünyasının nabzını tutun.")
+                            .font(.system(size: 13))
+                            .foregroundColor(AppColors.textSecondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.top, 24)
+                    .padding(.bottom, 32)
+                } else {
+                    Spacer().frame(height: 20)
                 }
-                .padding(.top, 24)
-                .padding(.bottom, 32)
                 
                 // Step Content
                 ZStack {

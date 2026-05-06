@@ -212,7 +212,6 @@ struct SignUpStep3View: View {
                                     .multilineTextAlignment(.center)
                             }
                         }
-                    }
                     
                     // OTP Input
                     HStack(spacing: 8) {
@@ -353,7 +352,7 @@ struct SignUpStep4View: View {
                             Text("CEO Pulse")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.purple)
-                            Text(NSLocalizedString("signup_welcome", comment: ""))
+                            Text("topluluğuna hoş geldiniz. Liderlerle bağlantı kurun, görüşlerinizi paylaşın ve iş dünyasının nabzını tutun.")
                                 .font(.system(size: 14))
                                 .foregroundColor(AppColors.textSecondary)
                         }
