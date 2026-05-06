@@ -9,6 +9,7 @@ struct AppColors {
     static let textSecondary = Color(hex: "8A8E9B")
     
     static let primaryAccent = Color(hex: "6C38FF")
+    static let primary = primaryAccent
     static let premiumGold = Color(hex: "FFB800")
     static let successGreen = Color(hex: "4CAF50")
     static let successGreenDark = Color(hex: "1B3320")
