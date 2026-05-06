@@ -121,9 +121,11 @@ struct InterestsSelectionView: View {
                                         .foregroundColor(AppColors.textSecondary)
                                 }
                                 
-                                FlowLayout(spacing: 8, data: Array(selectedInterests)) { interest in
-                                    SelectedInterestTag(title: configManager.getLocalizedInterest(interest)) {
-                                        selectedInterests.remove(interest)
+                                CeoPulseFlowLayout(itemSpacing: 8) {
+                                    ForEach(Array(selectedInterests), id: \.id) { interest in
+                                        SelectedInterestTag(title: configManager.getLocalizedValue(interest)) {
+                                            selectedInterests.remove(interest)
+                                        }
                                     }
                                 }
                             }
