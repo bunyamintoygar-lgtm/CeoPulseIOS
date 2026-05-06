@@ -40,45 +40,47 @@ struct InterestsSelectionView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         // Title Section
                         VStack(spacing: 8) {
-                            Text("İlgi Alanlarınızı Seçin")
+                            Text(NSLocalizedString("interests_title", comment: ""))
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.white)
-                            Text("Size özel içerik ve etkinlik önerileri almak için ilgi alanlarınızı belirleyin.")
+                            Text(NSLocalizedString("interests_subtitle", comment: ""))
                                 .font(.system(size: 14))
                                 .foregroundColor(AppColors.textSecondary)
                                 .multilineTextAlignment(.center)
                         }
                         .frame(maxWidth: .infinity)
                         
-                        // Info Box
-                        HStack(spacing: 12) {
-                            Image(systemName: "info.circle")
-                                .foregroundColor(.purple)
-                            Text("En az 3, en fazla 10 ilgi alanı seçebilirsiniz.")
-                                .font(.system(size: 13))
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.purple.opacity(0.05))
-                        .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.purple.opacity(0.1), lineWidth: 1))
-                        
-                        // Popular Areas Grid
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text(NSLocalizedString("interests_title", comment: ""))
+                        // Counter & Selection Info
+                        HStack {
+                            Text("\(selectedInterests.count)/10")
                                 .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(selectedInterests.count >= 3 ? .green : .orange)
                             
-                            let displayInterests = configManager.interestsList.map { 
-                                Interest(title: $0, icon: iconForInterest($0)) 
+                            Spacer()
+                            
+                            Text(NSLocalizedString("interests_min_max_info", comment: ""))
+                                .font(.system(size: 12))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        .padding(.horizontal, 4)
+                        
+                        // Flow Layout for Interests
+                        if isLoading {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                    .tint(.purple)
+                                Spacer()
                             }
-                            
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                                ForEach(displayInterests) { interest in
-                                    InterestCard(interest: interest, isSelected: selectedInterests.contains(interest.title)) {
-                                        toggleInterest(interest.title)
-                                    }
+                            .padding(.top, 40)
+                        } else {
+                            FlowLayout(spacing: 10) {
+                                ForEach(interests, id: \.id) { interest in
+                                    InterestTag(
+                                        title: configManager.getLocalizedInterest(interest),
+                                        isSelected: selectedInterests.contains(interest),
+                                        onTap: { toggleInterest(interest) }
+                                    )
                                 }
                             }
                         }
@@ -118,7 +120,7 @@ struct InterestsSelectionView: View {
                                 }
                                 
                                 FlowLayout(spacing: 8, data: Array(selectedInterests)) { interest in
-                                    SelectedInterestTag(title: interest) {
+                                    SelectedInterestTag(title: configManager.getLocalizedInterest(interest)) {
                                         selectedInterests.remove(interest)
                                     }
                                 }
@@ -190,11 +192,13 @@ struct InterestsSelectionView: View {
         }
     }
     
-    private func toggleInterest(_ title: String) {
-        if selectedInterests.contains(title) {
-            selectedInterests.remove(title)
-        } else if selectedInterests.count < 10 {
-            selectedInterests.insert(title)
+    private func toggleInterest(_ interest: LocalizedValue) {
+        if selectedInterests.contains(interest) {
+            selectedInterests.remove(interest)
+        } else {
+            if selectedInterests.count < 10 {
+                selectedInterests.insert(interest)
+            }
         }
     }
 }
