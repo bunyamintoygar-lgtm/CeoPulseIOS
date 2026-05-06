@@ -312,6 +312,7 @@ struct SignUpStep3View: View {
 struct SignUpStep4View: View {
     @State private var showProfileCompletion = false
     @State private var showInterestsSelection = false
+    @State private var showNotificationPreferences = false
     
     var body: some View {
         VStack(spacing: 32) {
@@ -356,7 +357,7 @@ struct SignUpStep4View: View {
                 VStack(spacing: 12) {
                     PersonalizationRow(icon: "person.fill", title: "Profilinizi tamamlayın", subtitle: "Profil fotoğrafı, hakkında bilgisi...", actionTitle: "Tamamla", action: { showProfileCompletion = true })
                     PersonalizationRow(icon: "briefcase.fill", title: "İlgi alanlarınızı seçin", subtitle: "Size özel içerik ve etkinlik önerileri...", actionTitle: "Seç", action: { showInterestsSelection = true })
-                    PersonalizationRow(icon: "bell.fill", title: "Bildirim tercihlerinizi ayarlayın", subtitle: "Önemli gelişmelerden haberdar olmak için...", actionTitle: "Ayarla")
+                    PersonalizationRow(icon: "bell.fill", title: "Bildirim tercihlerinizi ayarlayın", subtitle: "Önemli gelişmelerden haberdar olmak için...", actionTitle: "Ayarla", action: { showNotificationPreferences = true })
                 }
             }
             .fullScreenCover(isPresented: $showProfileCompletion) {
@@ -364,6 +365,9 @@ struct SignUpStep4View: View {
             }
             .fullScreenCover(isPresented: $showInterestsSelection) {
                 InterestsSelectionView()
+            }
+            .fullScreenCover(isPresented: $showNotificationPreferences) {
+                NotificationPreferencesView()
             }
             
             HStack {
