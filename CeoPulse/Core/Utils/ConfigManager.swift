@@ -7,7 +7,7 @@ class ConfigManager: ObservableObject {
     @Published var positions: [LocalizedValue] = []
     @Published var companySizes: [String] = []
     @Published var durations: [String] = []
-    @Published var sectors: [String] = []
+    @Published var sectors: [LocalizedValue] = []
     @Published var skillsList: [LocalizedValue] = []
     @Published var interestsList: [LocalizedValue] = []
     @Published var isLoading = false
@@ -27,7 +27,7 @@ class ConfigManager: ObservableObject {
             for item in response {
                 guard let key = item["key"] as? String else { continue }
                 
-                let localizedKeys = ["interests_list", "positions", "skills_list"]
+                let localizedKeys = ["interests_list", "positions", "skills_list", "sectors"]
                 
                 if localizedKeys.contains(key), let data = item["value"] as? [[String: String]] {
                     let decoder = JSONDecoder()
@@ -37,6 +37,7 @@ class ConfigManager: ObservableObject {
                         case "interests_list": self.interestsList = decodedValues
                         case "positions": self.positions = decodedValues
                         case "skills_list": self.skillsList = decodedValues
+                        case "sectors": self.sectors = decodedValues
                         default: break
                         }
                     }
@@ -44,7 +45,6 @@ class ConfigManager: ObservableObject {
                     switch key {
                     case "company_sizes": self.companySizes = value
                     case "durations": self.durations = value
-                    case "sectors": self.sectors = value
                     default: break
                     }
                 }
