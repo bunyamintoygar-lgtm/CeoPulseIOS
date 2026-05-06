@@ -76,7 +76,7 @@ struct InterestsSelectionView: View {
                             }
                             .padding(.top, 40)
                         } else {
-                            FlowLayout(spacing: 10, content: {
+                            FlowLayout(itemSpacing: 10, content: {
                                 ForEach(interests, id: \.id) { interest in
                                     InterestTag(
                                         title: configManager.getLocalizedValue(interest),
@@ -302,17 +302,15 @@ struct InterestTag: View {
 }
 
 struct FlowLayout<Content: View>: View {
-    var spacing: CGFloat
+    var itemSpacing: CGFloat
     let content: Content
 
-    init(spacing: CGFloat = 8, @ViewBuilder content: () -> Content) {
-        self.spacing = spacing
+    init(itemSpacing: CGFloat = 8, @ViewBuilder content: () -> Content) {
+        self.itemSpacing = itemSpacing
         self.content = content()
     }
 
     var body: some View {
-        // For now, keeping it simple as the original was just a wrapper
-        // but this fix solves the compiler error
         content
     }
 }
