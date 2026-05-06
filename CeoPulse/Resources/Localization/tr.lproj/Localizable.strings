@@ -3,6 +3,27 @@
 "button_save" = "Kaydet ve Devam Et";
 "button_back" = "Geri";
 "button_complete" = "Tamamla";
+"button_skip" = "Atla";
+"button_next" = "Sonraki";
+
+/* Kayıt Adımları */
+"step_account" = "Hesap Bilgileri";
+"step_professional" = "Profesyonel Bilgiler";
+"step_verification" = "Doğrulama";
+"step_complete" = "Tamamla";
+"signup_congrats" = "Tebrikler!";
+"signup_success_msg" = "Hesabınız başarıyla oluşturuldu.";
+"signup_welcome" = "CEO Pulse topluluğuna hoş geldiniz.";
+"personalize_title" = "Hesabınızı kişiselleştirin";
+"personalize_subtitle" = "Daha iyi bir deneyim için aşağıdaki adımları tamamlamanızı öneririz.";
+
+/* Profil Tamamlama Satırları */
+"row_profile_complete_title" = "Profilinizi tamamlayın";
+"row_profile_complete_subtitle" = "Profil fotoğrafı, hakkında bilgisi...";
+"row_interests_title" = "İlgi alanlarınızı seçin";
+"row_interests_subtitle" = "Size özel içerik ve etkinlik önerileri...";
+"row_notifications_title" = "Bildirim tercihlerinizi ayarlayın";
+"row_notifications_subtitle" = "Önemli gelişmelerden haberdar olmak için...";
 
 /* Profil Fotoğrafı */
 "photo_title" = "Profil Fotoğrafı";
@@ -13,19 +34,37 @@
 "photo_success_title" = "Başarıyla Tamamlandı!";
 "photo_take_new" = "Yeni Fotoğraf Çek";
 "photo_select_gallery" = "Galeriden Seç";
+"photo_confirm_title" = "Harika Görünüyor!";
+"photo_confirm_subtitle" = "Fotoğrafınız başarıyla doğrulandı.";
 
 /* İlgi Alanları */
 "interests_title" = "İlgi Alanlarınızı Seçin";
 "interests_subtitle" = "Size özel içerik ve etkinlik önerileri almak için ilgi alanlarınızı belirleyin.";
 "interests_min_max_info" = "En az 3, en fazla 10 ilgi alanı seçebilirsiniz.";
+"other_areas" = "Diğer Alanlar";
+"search_area_placeholder" = "Başka bir ilgi alanı ekleyin";
 
 /* Bildirimler */
 "notifications_title" = "Bildirim Tercihlerinizi Ayarlayın";
 "notifications_subtitle" = "Sizin için önemli gelişmeleri kaçırmamak için bildirim tercihlerinizi özelleştirin.";
 "notifications_channels" = "Bildirim Kanalları";
 "notifications_categories" = "Bildirim Kategorileri";
+"notifications_info_box" = "Tercihlerinizi dilediğiniz zaman ayarlar bölümünden değiştirebilirsiniz.";
+"notifications_privacy_note" = "Bildirim ayarlarınız gizlidir ve üçüncü kişilerle paylaşılmaz.";
 
 /* Lokasyon */
 "location_title" = "Lokasyonunuzu Ekleyin";
 "location_subtitle" = "Bulunduğunuz konum, size en uygun fırsatları görmenize yardımcı olur.";
 "location_search_placeholder" = "Şehir, ülke veya bölge ara";
+"location_current_title" = "Mevcut Konumunuz";
+"location_suggested_title" = "Önerilen Konumlar";
+
+/* Sosyal Bağlantılar */
+"social_title" = "Sosyal Bağlantılarınızı Ekleyin";
+"social_subtitle" = "Sosyal profilleriniz, profesyonel ağınızı genişletmenize yardımcı olur.";
+"social_info_box" = "Bağladığınız hesaplar profilinizde isteğinize bağlı olarak gösterilir.";
+"social_add_section" = "Bağlantı Ekle";
+"social_connected_section" = "Bağlanan Hesaplar";
+"social_privacy_note" = "Bağlantılarınızı dilediğiniz zaman düzenleyebilirsiniz.";
+"visibility_public" = "Görünüyor";
+"visibility_private" = "Sadece ben";

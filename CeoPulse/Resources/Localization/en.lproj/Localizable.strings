@@ -3,6 +3,27 @@
 "button_save" = "Save & Continue";
 "button_back" = "Back";
 "button_complete" = "Complete";
+"button_skip" = "Skip";
+"button_next" = "Next";
+
+/* SignUp Steps */
+"step_account" = "Account Info";
+"step_professional" = "Professional Info";
+"step_verification" = "Verification";
+"step_complete" = "Complete";
+"signup_congrats" = "Congratulations!";
+"signup_success_msg" = "Your account has been successfully created.";
+"signup_welcome" = "Welcome to the CEO Pulse community.";
+"personalize_title" = "Personalize your account";
+"personalize_subtitle" = "We recommend completing the steps below for a better experience.";
+
+/* Profile Completion Rows */
+"row_profile_complete_title" = "Complete your profile";
+"row_profile_complete_subtitle" = "Profile photo, about info...";
+"row_interests_title" = "Select your interests";
+"row_interests_subtitle" = "Personalized content and event suggestions...";
+"row_notifications_title" = "Set notification preferences";
+"row_notifications_subtitle" = "Stay updated on important developments...";
 
 /* Profile Photo */
 "photo_title" = "Profile Photo";
@@ -13,19 +34,37 @@
 "photo_success_title" = "Success!";
 "photo_take_new" = "Take New Photo";
 "photo_select_gallery" = "Select from Gallery";
+"photo_confirm_title" = "Looks Great!";
+"photo_confirm_subtitle" = "Your photo has been successfully verified.";
 
 /* Interests */
 "interests_title" = "Select Your Interests";
 "interests_subtitle" = "Define your interests to receive personalized content and event suggestions.";
 "interests_min_max_info" = "You can select at least 3 and at most 10 interests.";
+"other_areas" = "Other Areas";
+"search_area_placeholder" = "Add another interest area";
 
 /* Notifications */
 "notifications_title" = "Set Notification Preferences";
 "notifications_subtitle" = "Customize your notification preferences to never miss important updates.";
 "notifications_channels" = "Notification Channels";
 "notifications_categories" = "Notification Categories";
+"notifications_info_box" = "You can change your preferences anytime in the settings section.";
+"notifications_privacy_note" = "Your notification settings are private and not shared with third parties.";
 
 /* Location */
 "location_title" = "Add Your Location";
 "location_subtitle" = "Your location helps you see the most relevant opportunities.";
 "location_search_placeholder" = "Search city, country or region";
+"location_current_title" = "Current Location";
+"location_suggested_title" = "Suggested Locations";
+
+/* Social Links */
+"social_title" = "Add Your Social Links";
+"social_subtitle" = "Your social profiles help expand your professional network.";
+"social_info_box" = "Connected accounts are displayed on your profile optionally.";
+"social_add_section" = "Add Connection";
+"social_connected_section" = "Connected Accounts";
+"social_privacy_note" = "You can edit your connections anytime.";
+"visibility_public" = "Visible";
+"visibility_private" = "Only me";

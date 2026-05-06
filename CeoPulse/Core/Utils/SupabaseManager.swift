@@ -1,5 +1,7 @@
 import Foundation
 import Supabase
+import SwiftUI
+import Combine
 
 class SupabaseManager: ObservableObject {
     static let shared = SupabaseManager()
