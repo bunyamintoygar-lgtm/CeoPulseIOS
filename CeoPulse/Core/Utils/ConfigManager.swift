@@ -5,7 +5,7 @@ class ConfigManager: ObservableObject {
     static let shared = ConfigManager()
     
     @Published var positions: [LocalizedValue] = []
-    @Published var companySizes: [String] = []
+    @Published var companySizes: [LocalizedValue] = []
     @Published var durations: [LocalizedValue] = []
     @Published var sectors: [LocalizedValue] = []
     @Published var skillsList: [LocalizedValue] = []
@@ -25,26 +25,19 @@ class ConfigManager: ObservableObject {
                 .value
             
             for item in response {
-                guard let key = item["key"] as? String else { continue }
+                guard let key = item["key"] as? String,
+                      let data = item["value"] as? [[String: String]] else { continue }
                 
-                let localizedKeys = ["interests_list", "positions", "skills_list", "sectors", "durations"]
-                
-                if localizedKeys.contains(key), let data = item["value"] as? [[String: String]] {
-                    let decoder = JSONDecoder()
-                    if let jsonData = try? JSONSerialization.data(withJSONObject: data),
-                       let decodedValues = try? decoder.decode([LocalizedValue].self, from: jsonData) {
-                        switch key {
-                        case "interests_list": self.interestsList = decodedValues
-                        case "positions": self.positions = decodedValues
-                        case "skills_list": self.skillsList = decodedValues
-                        case "sectors": self.sectors = decodedValues
-                        case "durations": self.durations = decodedValues
-                        default: break
-                        }
-                    }
-                } else if let value = item["value"] as? [String] {
+                let decoder = JSONDecoder()
+                if let jsonData = try? JSONSerialization.data(withJSONObject: data),
+                   let decodedValues = try? decoder.decode([LocalizedValue].self, from: jsonData) {
                     switch key {
-                    case "company_sizes": self.companySizes = value
+                    case "interests_list": self.interestsList = decodedValues
+                    case "positions": self.positions = decodedValues
+                    case "skills_list": self.skillsList = decodedValues
+                    case "sectors": self.sectors = decodedValues
+                    case "durations": self.durations = decodedValues
+                    case "company_sizes": self.companySizes = decodedValues
                     default: break
                     }
                 }
