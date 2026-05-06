@@ -8,7 +8,7 @@ class ConfigManager: ObservableObject {
     @Published var companySizes: [String] = []
     @Published var durations: [String] = []
     @Published var sectors: [String] = []
-    @Published var skillsList: [String] = []
+    @Published var skillsList: [LocalizedValue] = []
     @Published var interestsList: [LocalizedValue] = []
     @Published var isLoading = false
     
@@ -27,14 +27,17 @@ class ConfigManager: ObservableObject {
             for item in response {
                 guard let key = item["key"] as? String else { continue }
                 
-                if (key == "interests_list" || key == "positions"), let data = item["value"] as? [[String: String]] {
+                let localizedKeys = ["interests_list", "positions", "skills_list"]
+                
+                if localizedKeys.contains(key), let data = item["value"] as? [[String: String]] {
                     let decoder = JSONDecoder()
                     if let jsonData = try? JSONSerialization.data(withJSONObject: data),
                        let decodedValues = try? decoder.decode([LocalizedValue].self, from: jsonData) {
-                        if key == "interests_list" {
-                            self.interestsList = decodedValues
-                        } else {
-                            self.positions = decodedValues
+                        switch key {
+                        case "interests_list": self.interestsList = decodedValues
+                        case "positions": self.positions = decodedValues
+                        case "skills_list": self.skillsList = decodedValues
+                        default: break
                         }
                     }
                 } else if let value = item["value"] as? [String] {
@@ -42,7 +45,6 @@ class ConfigManager: ObservableObject {
                     case "company_sizes": self.companySizes = value
                     case "durations": self.durations = value
                     case "sectors": self.sectors = value
-                    case "skills_list": self.skillsList = value
                     default: break
                     }
                 }
