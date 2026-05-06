@@ -1,6 +1,5 @@
 import SwiftUI
 import Supabase
-import Auth
 
 struct SignUpFlowView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -156,7 +155,7 @@ struct SignUpStep1View: View {
                     "first_name": .string(firstName),
                     "last_name": .string(lastName)
                 ]
-                let options = Auth.SignUpOptions(data: userData)
+                let options = SignUpOptions(data: userData)
                 
                 try await SupabaseManager.shared.client.auth.signUp(
                     email: email,
