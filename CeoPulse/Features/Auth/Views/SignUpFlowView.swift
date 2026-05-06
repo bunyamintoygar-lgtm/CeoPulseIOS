@@ -175,7 +175,6 @@ struct SignUpStep1View: View {
                         RequirementRow(text: "Büyük harf (A-Z)", isMet: password.contains(where: { $0.isUppercase }))
                         RequirementRow(text: "Küçük harf (a-z)", isMet: password.contains(where: { $0.isLowercase }))
                         RequirementRow(text: "Rakam (0-9)", isMet: password.contains(where: { $0.isNumber }))
-                        RequirementRow(text: "Özel karakter (!@#$%^&*)", isMet: password.rangeOfCharacter(from: CharacterSet(charactersIn: "!@#$%^&*")) != nil)
                     }
                 }
                 .padding(16)
@@ -298,6 +297,7 @@ struct CustomAuthField: View {
     let placeholder: String
     @Binding var text: String
     var isSecure: Bool = false
+    @State private var isVisible: Bool = false
     
     var body: some View {
         HStack {
@@ -312,7 +312,7 @@ struct CustomAuthField: View {
                         .font(.system(size: 16))
                 }
                 
-                if isSecure {
+                if isSecure && !isVisible {
                     SecureField("", text: $text)
                         .foregroundColor(.white)
                 } else {
@@ -322,8 +322,10 @@ struct CustomAuthField: View {
             }
             
             if isSecure {
-                Image(systemName: "eye.slash")
-                    .foregroundColor(AppColors.textSecondary)
+                Button(action: { isVisible.toggle() }) {
+                    Image(systemName: isVisible ? "eye" : "eye.slash")
+                        .foregroundColor(AppColors.textSecondary)
+                }
             }
         }
         .padding()
