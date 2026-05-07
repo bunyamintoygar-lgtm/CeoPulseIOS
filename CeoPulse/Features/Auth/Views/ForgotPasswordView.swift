@@ -279,7 +279,8 @@ struct ForgotPasswordView: View {
         Task {
             do {
                 try await SupabaseManager.shared.client.auth.verifyOTP(
-                    params: .init(email: email, token: token, type: .recovery)
+                    tokenHash: token,
+                    type: .recovery
                 )
                 await MainActor.run {
                     withAnimation { currentStep = 3 }
