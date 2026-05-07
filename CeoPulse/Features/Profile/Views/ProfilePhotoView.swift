@@ -308,10 +308,11 @@ struct ImagePicker: UIViewControllerRepresentable {
                 finalImage = uiImage
             }
             
-            // Eğer ön kamerayla çekildiyse ve aynalanmış gibi duruyorsa düzelt (opsiyonel ama kullanıcı istedi)
+            // Selfie aynalamasını düzelt (90 derece döndürmeden sadece yatay çevir)
             if picker.sourceType == .camera && picker.cameraDevice == .front, let image = finalImage {
                 if let cgImage = image.cgImage {
-                    finalImage = UIImage(cgImage: cgImage, scale: image.scale, orientation: .leftMirrored)
+                    // .upMirrored sadece yatayda (sağ-sol) çevirir, döndürme yapmaz
+                    finalImage = UIImage(cgImage: cgImage, scale: image.scale, orientation: .upMirrored)
                 }
             }
             
