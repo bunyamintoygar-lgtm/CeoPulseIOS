@@ -1,12 +1,11 @@
 import SwiftUI
 import Supabase
-import Auth
 
 struct ForgotPasswordView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var email = ""
     @State private var currentStep = 1 // 1: Email, 2: OTP, 3: New Password
-    @State private var otpCode = Array(repeating: "", count: 8)
+    @State private var otpCode = Array(repeating: "", count: 6)
     @FocusState private var activeOTPField: Int?
     @State private var newPassword = ""
     @State private var confirmPassword = ""
@@ -134,7 +133,7 @@ struct ForgotPasswordView: View {
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
             }
             
-            Button(action: sendRecoveryOTP) {
+            Button(action: sendRecoveryEmail) {
                 HStack {
                     if isLoading {
                         ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
@@ -158,27 +157,28 @@ struct ForgotPasswordView: View {
     private var otpStepView: some View {
         VStack(spacing: 32) {
             VStack(spacing: 16) {
-                HStack(spacing: 8) {
-                    ForEach(0..<8, id: \.self) { index in
+                // 6 haneli OTP - Supabase varsayılanı
+                HStack(spacing: 10) {
+                    ForEach(0..<6, id: \.self) { index in
                         TextField("", text: $otpCode[index])
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.center)
-                            .font(.system(size: 18, weight: .bold))
+                            .font(.system(size: 22, weight: .bold))
                             .foregroundColor(.white)
-                            .frame(width: 36, height: 48)
+                            .frame(width: 44, height: 56)
                             .background(Color.white.opacity(0.05))
-                            .cornerRadius(8)
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(activeOTPField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1))
+                            .cornerRadius(10)
+                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(activeOTPField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1.5))
                             .focused($activeOTPField, equals: index)
                             .onChange(of: otpCode[index]) { newValue in
                                 if newValue.count > 1 { otpCode[index] = String(newValue.last!) }
-                                if !newValue.isEmpty && index < 7 { activeOTPField = index + 1 }
+                                if !newValue.isEmpty && index < 5 { activeOTPField = index + 1 }
                                 if newValue.isEmpty && index > 0 { activeOTPField = index - 1 }
                             }
                     }
                 }
                 
-                Button(action: sendRecoveryOTP) {
+                Button(action: sendRecoveryEmail) {
                     Text("Kodu Yeniden Gönder")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.purple)
@@ -198,10 +198,10 @@ struct ForgotPasswordView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(otpCode.joined().count == 8 ? Color(hex: "6C38FF") : Color.white.opacity(0.1))
+                .background(otpCode.joined().count == 6 ? Color(hex: "6C38FF") : Color.white.opacity(0.1))
                 .cornerRadius(12)
             }
-            .disabled(isLoading || otpCode.joined().count < 8)
+            .disabled(isLoading || otpCode.joined().count < 6)
         }
         .padding(.horizontal, 24)
     }
@@ -234,7 +234,7 @@ struct ForgotPasswordView: View {
         .padding(.horizontal, 24)
     }
     
-    // MARK: - Logic
+    // MARK: - Computed Properties
     
     private var titleForStep: String {
         switch currentStep {
@@ -247,28 +247,31 @@ struct ForgotPasswordView: View {
     
     private var descriptionForStep: String {
         switch currentStep {
-        case 1: return "Endişelenmeyin! E-posta adresinizi girin, size bir kurtarma kodu gönderelim."
-        case 2: return "\(email) adresine gönderilen 8 haneli kodu aşağıya girin."
-        case 3: return "Lütfen hesabınız için yeni ve güvenli bir şifre belirleyin."
+        case 1: return "E-posta adresinizi girin, size 6 haneli bir kurtarma kodu gönderelim."
+        case 2: return "\(email) adresine gönderilen 6 haneli kodu aşağıya girin."
+        case 3: return "Hesabınız için yeni ve güvenli bir şifre belirleyin."
         default: return ""
         }
     }
     
-    func sendRecoveryOTP() {
+    // MARK: - Logic
+    
+    func sendRecoveryEmail() {
         isLoading = true
         errorMessage = nil
+        successMessage = nil
         
         Task {
             do {
                 try await SupabaseManager.shared.client.auth.resetPasswordForEmail(email)
                 await MainActor.run {
                     withAnimation { currentStep = 2 }
-                    successMessage = "Doğrulama kodu gönderildi."
+                    successMessage = "Doğrulama kodu e-posta adresinize gönderildi."
                 }
             } catch {
                 await MainActor.run { errorMessage = error.localizedDescription }
             }
-            isLoading = false
+            await MainActor.run { isLoading = false }
         }
     }
     
@@ -288,9 +291,9 @@ struct ForgotPasswordView: View {
                     withAnimation { currentStep = 3 }
                 }
             } catch {
-                await MainActor.run { errorMessage = "Hatalı kod. Lütfen tekrar deneyin." }
+                await MainActor.run { errorMessage = "Hatalı veya süresi dolmuş kod. Lütfen tekrar deneyin." }
             }
-            isLoading = false
+            await MainActor.run { isLoading = false }
         }
     }
     
@@ -303,7 +306,7 @@ struct ForgotPasswordView: View {
                 let attributes = UserAttributes(password: newPassword)
                 try await SupabaseManager.shared.client.auth.updateUser(attributes)
                 await MainActor.run {
-                    successMessage = "Şifreniz başarıyla güncellendi. Giriş yapabilirsiniz."
+                    successMessage = "Şifreniz başarıyla güncellendi!"
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                         presentationMode.wrappedValue.dismiss()
                     }
@@ -311,7 +314,7 @@ struct ForgotPasswordView: View {
             } catch {
                 await MainActor.run { errorMessage = error.localizedDescription }
             }
-            isLoading = false
+            await MainActor.run { isLoading = false }
         }
     }
 }
