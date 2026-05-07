@@ -26,6 +26,24 @@ struct Survey: Identifiable, Codable {
     }
 }
 
+struct SurveyCategory: Identifiable, Codable {
+    let id: UUID
+    let nameTr: String
+    let nameEn: String
+    let icon: String?
+    
+    var name: String {
+        let lang = Locale.current.language.languageCode?.identifier ?? "tr"
+        return lang == "en" ? nameEn : nameTr
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id, icon
+        case nameTr = "name_tr"
+        case nameEn = "name_en"
+    }
+}
+
 struct SurveyQuestion: Identifiable, Codable {
     let id: UUID
     let surveyId: UUID
