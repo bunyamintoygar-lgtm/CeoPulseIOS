@@ -305,7 +305,7 @@ struct CustomAuthField: View {
             ZStack(alignment: .leading) {
                 if text.isEmpty {
                     Text(placeholder)
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(.white.opacity(0.7))
                         .font(.system(size: 16))
                 }
                 

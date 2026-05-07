@@ -99,7 +99,7 @@ struct LoginView: View {
                                 HStack {
                                     Image(systemName: "envelope")
                                         .foregroundColor(AppColors.textSecondary)
-                                    TextField("", text: $email, prompt: Text("login_email_placeholder".localized()).foregroundColor(Color.white.opacity(0.4)))
+                                    TextField("", text: $email, prompt: Text("login_email_placeholder".localized()).foregroundColor(Color.white.opacity(0.7)))
                                         .foregroundColor(.white)
                                         .keyboardType(.emailAddress)
                                         .autocapitalization(.none)
@@ -120,10 +120,10 @@ struct LoginView: View {
                                     Image(systemName: "lock")
                                         .foregroundColor(AppColors.textSecondary)
                                     if isPasswordVisible {
-                                        TextField("", text: $password, prompt: Text("login_password_placeholder".localized()).foregroundColor(Color.white.opacity(0.4)))
+                                        TextField("", text: $password, prompt: Text("login_password_placeholder".localized()).foregroundColor(Color.white.opacity(0.7)))
                                             .foregroundColor(.white)
                                     } else {
-                                        SecureField("", text: $password, prompt: Text("login_password_placeholder".localized()).foregroundColor(Color.white.opacity(0.4)))
+                                        SecureField("", text: $password, prompt: Text("login_password_placeholder".localized()).foregroundColor(Color.white.opacity(0.7)))
                                             .foregroundColor(.white)
                                     }
                                     Button(action: { isPasswordVisible.toggle() }) {
