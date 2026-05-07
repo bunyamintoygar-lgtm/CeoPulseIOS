@@ -304,7 +304,7 @@ struct ForgotPasswordView: View {
         Task {
             do {
                 let attributes = UserAttributes(password: newPassword)
-                try await SupabaseManager.shared.client.auth.updateUser(attributes)
+                try await SupabaseManager.shared.client.auth.update(user: attributes)
                 await MainActor.run {
                     successMessage = "Şifreniz başarıyla güncellendi!"
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
