@@ -416,19 +416,61 @@ struct SignUpStep4View: View {
             .background(Color.white.opacity(0.03))
             .cornerRadius(12)
             
-            Button(action: {
-                showPhotoFlow = true
-            }) {
-                HStack {
-                    Text(NSLocalizedString("button_start_app", comment: ""))
-                    Image(systemName: "arrow.right")
+            VStack(spacing: 16) {
+                // Profil Fotoğrafı Ekleme Seçeneği (Opsiyonel)
+                Button(action: {
+                    showPhotoFlow = true
+                }) {
+                    HStack(spacing: 16) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.purple.opacity(0.1))
+                                .frame(width: 48, height: 48)
+                            Image(systemName: "person.crop.circle.badge.plus")
+                                .font(.system(size: 20))
+                                .foregroundColor(.purple)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Profil Fotoğrafınızı Ekleyin")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(.white)
+                            Text("Profilinizi %100 tamamlayın")
+                                .font(.system(size: 12))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white.opacity(0.3))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(16)
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
                 }
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color(hex: "6C38FF"))
-                .cornerRadius(12)
+                
+                // Ana Buton (Dashboard'a Git)
+                Button(action: {
+                    withAnimation {
+                        supabaseManager.isAuthenticated = true
+                    }
+                }) {
+                    HStack {
+                        Text(NSLocalizedString("button_start_app", comment: ""))
+                        Image(systemName: "arrow.right")
+                    }
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color(hex: "6C38FF"))
+                    .cornerRadius(12)
+                    .shadow(color: Color(hex: "6C38FF").opacity(0.3), radius: 10, y: 5)
+                }
             }
             .padding(.bottom, 40)
         }
