@@ -7,10 +7,15 @@ struct ProfilePhotoView: View {
     @EnvironmentObject var supabaseManager: SupabaseManager
     @StateObject private var langManager = LanguageManager.shared
     @State private var selectedImage: UIImage? = nil
-    @State private var showImagePicker = false
-    @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
     @State private var showAlert = false
     @State private var alertMessage = ""
+    
+    // Identifiable struct for reliable sheet presentation
+    struct PhotoSource: Identifiable {
+        let id = UUID()
+        let type: UIImagePickerController.SourceType
+    }
+    @State private var photoSource: PhotoSource?
     
     var body: some View {
         ZStack {
@@ -61,7 +66,6 @@ struct ProfilePhotoView: View {
                             HStack {
                                 Spacer()
                                 Button(action: { 
-                                    sourceType = .camera
                                     checkCameraPermissionAndOpen() 
                                 }) {
                                     Circle()
@@ -81,7 +85,6 @@ struct ProfilePhotoView: View {
                     
                     VStack(spacing: 12) {
                         Button(action: { 
-                            sourceType = .camera
                             checkCameraPermissionAndOpen() 
                         }) {
                             HStack {
@@ -97,8 +100,7 @@ struct ProfilePhotoView: View {
                         }
                         
                         Button(action: {
-                            sourceType = .photoLibrary
-                            showImagePicker = true
+                            photoSource = PhotoSource(type: .photoLibrary)
                         }) {
                             Text("photo_select_gallery".localized())
                                 .font(.system(size: 13))
@@ -179,8 +181,8 @@ struct ProfilePhotoView: View {
                 }
             }
         }
-        .sheet(isPresented: $showImagePicker) {
-            ImagePicker(image: $selectedImage, sourceType: sourceType)
+        .sheet(item: $photoSource) { source in
+            ImagePicker(image: $selectedImage, sourceType: source.type)
         }
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Uyarı"), message: Text(alertMessage), dismissButton: .default(Text("Tamam")))
@@ -188,7 +190,6 @@ struct ProfilePhotoView: View {
         .id(langManager.currentLanguage)
     }
     private func checkCameraPermissionAndOpen() {
-        // Check if camera is available (Simulators don't have cameras)
         if !UIImagePickerController.isSourceTypeAvailable(.camera) {
             alertMessage = "Bu cihazda kamera kullanılamıyor."
             showAlert = true
@@ -200,15 +201,13 @@ struct ProfilePhotoView: View {
         switch status {
         case .authorized:
             DispatchQueue.main.async {
-                self.sourceType = .camera
-                self.showImagePicker = true
+                self.photoSource = PhotoSource(type: .camera)
             }
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 if granted {
                     DispatchQueue.main.async {
-                        self.sourceType = .camera
-                        self.showImagePicker = true
+                        self.photoSource = PhotoSource(type: .camera)
                     }
                 }
             }
