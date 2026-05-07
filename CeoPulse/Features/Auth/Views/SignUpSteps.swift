@@ -164,7 +164,7 @@ struct SignUpStep3View: View {
                 }
             } catch {
                 await MainActor.run {
-                    errorMessage = "Hatalı veya süresi dolmuş kod. Lütfen tekrar deneyin."
+                    errorMessage = "forgot_pw_error_invalid_code".localized()
                 }
                 print("OTP Error: \(error.localizedDescription)")
             }
@@ -177,10 +177,10 @@ struct SignUpStep3View: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Text("Doğrulama")
+                Text("signup_verify_title".localized())
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
-                Text("Güvenliğiniz bizim için önemli. Lütfen e-posta adresinize gönderilen doğrulama kodunu girin.")
+                Text("signup_verify_desc".localized())
                     .font(.system(size: 13))
                     .foregroundColor(AppColors.textSecondary)
                 
@@ -203,10 +203,10 @@ struct SignUpStep3View: View {
                             }
                             
                             VStack(spacing: 4) {
-                                Text("E-postanıza kod gönderdik!")
+                                Text("signup_verify_illustration_title".localized())
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(.white)
-                                Text("\(email) adresine gönderilen\n8 haneli kodu aşağıya girin.")
+                                Text("signup_verify_illustration_desc".localized(with: [email]))
                                     .font(.system(size: 12))
                                     .foregroundColor(AppColors.textSecondary)
                                     .multilineTextAlignment(.center)
@@ -216,14 +216,14 @@ struct SignUpStep3View: View {
                     
                     VStack(spacing: 24) {
                         // OTP Input
-                        HStack(spacing: 8) {
+                        HStack(spacing: 6) {
                             ForEach(0..<8, id: \.self) { index in
                                 TextField("", text: $otpCode[index])
-                                    .keyboardType(.numberPad)
+                                    .keyboardType(.number_pad)
                                     .multilineTextAlignment(.center)
                                     .font(.system(size: 18, weight: .bold))
                                     .foregroundColor(.white)
-                                    .frame(width: 36, height: 48)
+                                    .frame(width: 38, height: 52)
                                     .background(Color.white.opacity(0.05))
                                     .cornerRadius(8)
                                     .overlay(RoundedRectangle(cornerRadius: 8).stroke(activeField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1))
@@ -245,7 +245,7 @@ struct SignUpStep3View: View {
                         
                         HStack {
                             Image(systemName: "clock")
-                            Text("Kodu yeniden gönderme: 01:45")
+                            Text("signup_verify_resend_timer".localized(with: ["01:45"]))
                         }
                         .font(.system(size: 13))
                         .foregroundColor(AppColors.textSecondary)
@@ -255,7 +255,7 @@ struct SignUpStep3View: View {
                                 if isLoading {
                                     ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
                                 } else {
-                                    Text("Doğrula ve Devam Et")
+                                    Text("signup_verify_button".localized())
                                     Image(systemName: "arrow.right")
                                 }
                             }
@@ -269,9 +269,9 @@ struct SignUpStep3View: View {
                         .disabled(isLoading || otpCode.joined().count < 8)
                     }
                 }
-                .padding(.horizontal, 24)
                 .padding(.bottom, 30)
             }
+            .padding(.horizontal, 24) // Apply padding to the main VStack containing both titles and content
         }
         .scrollIndicatorsCompat()
         .onTapGesture {

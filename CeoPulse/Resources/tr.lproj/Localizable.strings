@@ -357,3 +357,12 @@
 "forgot_pw_new_pw_placeholder" = "Yeni Şifre";
 "forgot_pw_confirm_pw_placeholder" = "Şifreyi Onayla";
 
+/* SignUp Verification */
+"signup_verify_title" = "Doğrulama";
+"signup_verify_desc" = "Güvenliğiniz bizim için önemli. Lütfen e-posta adresinize gönderilen doğrulama kodunu girin.";
+"signup_verify_illustration_title" = "E-postanıza kod gönderdik!";
+"signup_verify_illustration_desc" = "%@ adresine gönderilen 8 haneli kodu aşağıya girin.";
+"signup_verify_resend_timer" = "Kodu yeniden gönderme: %@";
+"signup_verify_button" = "Doğrula ve Devam Et";
+
+

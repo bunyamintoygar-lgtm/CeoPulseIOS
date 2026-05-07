@@ -357,3 +357,12 @@
 "forgot_pw_new_pw_placeholder" = "New Password";
 "forgot_pw_confirm_pw_placeholder" = "Confirm Password";
 
+/* SignUp Verification */
+"signup_verify_title" = "Verification";
+"signup_verify_desc" = "Your security is important to us. Please enter the verification code sent to your email address.";
+"signup_verify_illustration_title" = "We sent a code to your email!";
+"signup_verify_illustration_desc" = "Enter the 8-digit code sent to %@ below.";
+"signup_verify_resend_timer" = "Resend code in: %@";
+"signup_verify_button" = "Verify and Continue";
+
+
