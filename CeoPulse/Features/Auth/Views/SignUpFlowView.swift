@@ -35,13 +35,13 @@ struct SignUpFlowView: View {
                 Spacer().frame(height: 20)
                 
                 // Title Section
-                if currentStep < 4 {
+                if currentStep == 1 {
                     VStack(spacing: 8) {
-                        Text(currentStep == 2 ? "Doğrulama" : "Hesap Oluşturun")
+                        Text("Hesap Oluşturun")
                             .font(.system(size: 24, weight: .bold))
                             .foregroundColor(.white)
                         
-                        Text(currentStep == 2 ? "\(email) adresine gönderilen\n8 haneli kodu aşağıya girin." : "Liderlerle bağlantı kurun, görüşlerinizi paylaşın\nve iş dünyasının nabzını tutun.")
+                        Text("Liderlerle bağlantı kurun, görüşlerinizi paylaşın\nve iş dünyasının nabzını tutun.")
                             .font(.system(size: 13))
                             .foregroundColor(AppColors.textSecondary)
                             .multilineTextAlignment(.center)
