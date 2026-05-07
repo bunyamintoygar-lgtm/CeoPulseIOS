@@ -136,17 +136,30 @@ struct SignUpStep1View: View {
         
         Task {
             do {
-                print("DEBUG: Signup başlatılıyor (SADE)... Email: \(email)")
+                let userData: [String: AnyJSON] = [
+                    "first_name": .string(firstName),
+                    "last_name": .string(lastName),
+                    "lang": .string(LanguageManager.shared.currentLanguage)
+                ]
+                
+                print("--- SIGNUP DEBUG BAŞLADI ---")
+                print("E-posta: [\(email)]")
+                print("Şifre Uzunluğu: \(password.count)")
+                print("Meta Veri: \(userData)")
+                
                 let response = try await SupabaseManager.shared.client.auth.signUp(
                     email: email,
-                    password: password
+                    password: password,
+                    data: userData
                 )
-                print("DEBUG: Signup başarılı! User ID: \(response.user?.id?.uuidString ?? "nil")")
-                print("DEBUG: Session var mı?: \(response.session != nil)")
+                
+                print("Signup Yanıtı Alındı!")
+                print("User ID: \(response.user?.id?.uuidString ?? "nil")")
+                print("Oturum (Session) Durumu: \(response.session != nil ? "AKTİF (Onay gerekmiyor)" : "BEKLİYOR (Onay gerekiyor)")")
+                print("--- SIGNUP DEBUG BİTTİ ---")
                 
                 await MainActor.run {
                     withAnimation {
-                        // Eğer zaten session geldiyse (onay gerekmiyorsa) doğrudan 3. adıma git
                         if response.session != nil {
                             currentStep = 3
                         } else {
@@ -155,7 +168,7 @@ struct SignUpStep1View: View {
                     }
                 }
             } catch {
-                print("DEBUG: Signup HATASI: \(error)")
+                print("!!! SIGNUP HATASI: \(error)")
                 await MainActor.run {
                     let description = error.localizedDescription
                     if description.contains("invalid format") && description.contains("email") {
