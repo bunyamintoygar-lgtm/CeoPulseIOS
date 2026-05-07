@@ -158,6 +158,7 @@ struct SignUpStep3View: View {
                 )
                 
                 await MainActor.run {
+                    errorMessage = nil
                     withAnimation {
                         currentStep = 3
                     }
@@ -177,6 +178,20 @@ struct SignUpStep3View: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                Button(action: {
+                    withAnimation {
+                        currentStep = 1
+                    }
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                        Text("Geri")
+                    }
+                    .font(.system(size: 14))
+                    .foregroundColor(.purple)
+                }
+                .padding(.bottom, 8)
+
                 Text("signup_verify_title".localized())
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
@@ -253,6 +268,17 @@ struct SignUpStep3View: View {
                             .cornerRadius(12)
                         }
                         .disabled(isLoading || otpCode.joined().count < 8)
+                        
+                        Button(action: {
+                            withAnimation {
+                                currentStep = 1
+                            }
+                        }) {
+                            Text("Geri Dön")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        .padding(.top, 8)
                     }
                 }
                 .padding(.bottom, 30)
