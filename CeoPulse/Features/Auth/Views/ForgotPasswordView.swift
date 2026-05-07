@@ -363,17 +363,3 @@ struct ForgotPasswordView: View {
     }
 }
 
-struct RequirementRow: View {
-    let text: String
-    let isMet: Bool
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "checkmark")
-                .font(.system(size: 8, weight: .bold))
-                .foregroundColor(isMet ? .green : Color.white.opacity(0.2))
-            Text(text)
-                .font(.system(size: 10))
-                .foregroundColor(isMet ? .white : Color.white.opacity(0.5))
-        }
-    }
-}
