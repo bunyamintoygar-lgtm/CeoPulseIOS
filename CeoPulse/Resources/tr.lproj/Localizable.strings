@@ -342,8 +342,8 @@
 "forgot_pw_title_step1" = "Şifremi Unuttum";
 "forgot_pw_title_step2" = "Kodu Doğrula";
 "forgot_pw_title_step3" = "Yeni Şifre";
-"forgot_pw_desc_step1" = "E-posta adresinizi girin, size 6 haneli bir kurtarma kodu gönderelim.";
-"forgot_pw_desc_step2" = "%@ adresine gönderilen 6 haneli kodu aşağıya girin.";
+"forgot_pw_desc_step1" = "E-posta adresinizi girin, size 8 haneli bir kurtarma kodu gönderelim.";
+"forgot_pw_desc_step2" = "%@ adresine gönderilen 8 haneli kodu aşağıya girin.";
 "forgot_pw_desc_step3" = "Hesabınız için yeni ve güvenli bir şifre belirleyin.";
 "forgot_pw_button_send" = "Kod Gönder";
 "forgot_pw_button_resend" = "Kodu Yeniden Gönder";

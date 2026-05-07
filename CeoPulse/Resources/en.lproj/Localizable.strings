@@ -342,8 +342,8 @@
 "forgot_pw_title_step1" = "Forgot Password";
 "forgot_pw_title_step2" = "Verify Code";
 "forgot_pw_title_step3" = "New Password";
-"forgot_pw_desc_step1" = "Enter your email address and we'll send you a 6-digit recovery code.";
-"forgot_pw_desc_step2" = "Enter the 6-digit code sent to %@ below.";
+"forgot_pw_desc_step1" = "Enter your email address and we'll send you an 8-digit recovery code.";
+"forgot_pw_desc_step2" = "Enter the 8-digit code sent to %@ below.";
 "forgot_pw_desc_step3" = "Set a new and secure password for your account.";
 "forgot_pw_button_send" = "Send Code";
 "forgot_pw_button_resend" = "Resend Code";
