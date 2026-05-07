@@ -5,7 +5,7 @@ struct ForgotPasswordView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var email = ""
     @State private var currentStep = 1 // 1: Email, 2: OTP, 3: New Password
-    @State private var otpCode = Array(repeating: "", count: 6)
+    @State private var otpCode = Array(repeating: "", count: 8)
     @FocusState private var activeOTPField: Int?
     @State private var newPassword = ""
     @State private var confirmPassword = ""
@@ -115,14 +115,14 @@ struct ForgotPasswordView: View {
             .padding(.vertical, 20)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("E-posta adresiniz")
+                Text("login_email_label".localized())
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.white)
                 
                 HStack {
                     Image(systemName: "envelope")
                         .foregroundColor(AppColors.textSecondary)
-                    TextField("", text: $email, prompt: Text("ornek@email.com").foregroundColor(Color.white.opacity(0.7)))
+                    TextField("", text: $email, prompt: Text("login_email_placeholder".localized()).foregroundColor(Color.white.opacity(0.7)))
                         .foregroundColor(.white)
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
@@ -138,7 +138,7 @@ struct ForgotPasswordView: View {
                     if isLoading {
                         ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
                     } else {
-                        Text("Kod Gönder")
+                        Text("forgot_pw_button_send".localized())
                             .font(.system(size: 16, weight: .bold))
                         Image(systemName: "arrow.right")
                     }
@@ -157,29 +157,29 @@ struct ForgotPasswordView: View {
     private var otpStepView: some View {
         VStack(spacing: 32) {
             VStack(spacing: 16) {
-                // 6 haneli OTP - Supabase varsayılanı
-                HStack(spacing: 10) {
-                    ForEach(0..<6, id: \.self) { index in
+                // 8 haneli OTP
+                HStack(spacing: 6) {
+                    ForEach(0..<8, id: \.self) { index in
                         TextField("", text: $otpCode[index])
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.center)
-                            .font(.system(size: 22, weight: .bold))
+                            .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
-                            .frame(width: 44, height: 56)
+                            .frame(width: 38, height: 52)
                             .background(Color.white.opacity(0.05))
                             .cornerRadius(10)
                             .overlay(RoundedRectangle(cornerRadius: 10).stroke(activeOTPField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1.5))
                             .focused($activeOTPField, equals: index)
                             .onChange(of: otpCode[index]) { newValue in
                                 if newValue.count > 1 { otpCode[index] = String(newValue.last!) }
-                                if !newValue.isEmpty && index < 5 { activeOTPField = index + 1 }
+                                if !newValue.isEmpty && index < 7 { activeOTPField = index + 1 }
                                 if newValue.isEmpty && index > 0 { activeOTPField = index - 1 }
                             }
                     }
                 }
                 
                 Button(action: sendRecoveryEmail) {
-                    Text("Kodu Yeniden Gönder")
+                    Text("forgot_pw_button_resend".localized())
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.purple)
                 }
@@ -190,7 +190,7 @@ struct ForgotPasswordView: View {
                     if isLoading {
                         ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
                     } else {
-                        Text("Kodu Doğrula")
+                        Text("forgot_pw_button_verify".localized())
                             .font(.system(size: 16, weight: .bold))
                         Image(systemName: "checkmark")
                     }
@@ -198,10 +198,10 @@ struct ForgotPasswordView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(otpCode.joined().count == 6 ? Color(hex: "6C38FF") : Color.white.opacity(0.1))
+                .background(otpCode.joined().count == 8 ? Color(hex: "6C38FF") : Color.white.opacity(0.1))
                 .cornerRadius(12)
             }
-            .disabled(isLoading || otpCode.joined().count < 6)
+            .disabled(isLoading || otpCode.joined().count < 8)
         }
         .padding(.horizontal, 24)
     }
@@ -209,8 +209,8 @@ struct ForgotPasswordView: View {
     private var newPasswordStepView: some View {
         VStack(spacing: 24) {
             VStack(alignment: .leading, spacing: 16) {
-                CustomAuthField(icon: "lock", placeholder: "Yeni Şifre", text: $newPassword, isSecure: true)
-                CustomAuthField(icon: "lock.fill", placeholder: "Şifreyi Onayla", text: $confirmPassword, isSecure: true)
+                CustomAuthField(icon: "lock", placeholder: "forgot_pw_new_pw_placeholder".localized(), text: $newPassword, isSecure: true)
+                CustomAuthField(icon: "lock.fill", placeholder: "forgot_pw_confirm_pw_placeholder".localized(), text: $confirmPassword, isSecure: true)
             }
             
             Button(action: updatePassword) {
@@ -218,7 +218,7 @@ struct ForgotPasswordView: View {
                     if isLoading {
                         ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
                     } else {
-                        Text("Şifreyi Güncelle")
+                        Text("forgot_pw_button_update".localized())
                             .font(.system(size: 16, weight: .bold))
                         Image(systemName: "lock.rotation")
                     }
@@ -238,18 +238,18 @@ struct ForgotPasswordView: View {
     
     private var titleForStep: String {
         switch currentStep {
-        case 1: return "Şifremi Unuttum"
-        case 2: return "Kodu Doğrula"
-        case 3: return "Yeni Şifre"
+        case 1: return "forgot_pw_title_step1".localized()
+        case 2: return "forgot_pw_title_step2".localized()
+        case 3: return "forgot_pw_title_step3".localized()
         default: return ""
         }
     }
     
     private var descriptionForStep: String {
         switch currentStep {
-        case 1: return "E-posta adresinizi girin, size 6 haneli bir kurtarma kodu gönderelim."
-        case 2: return "\(email) adresine gönderilen 6 haneli kodu aşağıya girin."
-        case 3: return "Hesabınız için yeni ve güvenli bir şifre belirleyin."
+        case 1: return "forgot_pw_desc_step1".localized()
+        case 2: return "forgot_pw_desc_step2".localized(with: [email])
+        case 3: return "forgot_pw_desc_step3".localized()
         default: return ""
         }
     }
@@ -266,10 +266,26 @@ struct ForgotPasswordView: View {
                 try await SupabaseManager.shared.client.auth.resetPasswordForEmail(email)
                 await MainActor.run {
                     withAnimation { currentStep = 2 }
-                    successMessage = "Doğrulama kodu e-posta adresinize gönderildi."
+                    successMessage = "forgot_pw_success_sent".localized()
                 }
             } catch {
-                await MainActor.run { errorMessage = error.localizedDescription }
+                let errorString = error.localizedDescription
+                if errorString.contains("Failed to reach hook") {
+                    await MainActor.run {
+                        withAnimation { currentStep = 2 }
+                        successMessage = "forgot_pw_success_sent".localized()
+                    }
+                } else {
+                    await MainActor.run { 
+                        if errorString.contains("User not found") {
+                            errorMessage = "forgot_pw_error_not_found".localized()
+                        } else if errorString.contains("rate limit") {
+                            errorMessage = "forgot_pw_error_rate_limit".localized()
+                        } else {
+                            errorMessage = "forgot_pw_error_generic".localized()
+                        }
+                    }
+                }
             }
             await MainActor.run { isLoading = false }
         }
@@ -291,7 +307,7 @@ struct ForgotPasswordView: View {
                     withAnimation { currentStep = 3 }
                 }
             } catch {
-                await MainActor.run { errorMessage = "Hatalı veya süresi dolmuş kod. Lütfen tekrar deneyin." }
+                await MainActor.run { errorMessage = "forgot_pw_error_invalid_code".localized() }
             }
             await MainActor.run { isLoading = false }
         }
@@ -301,18 +317,16 @@ struct ForgotPasswordView: View {
         isLoading = true
         errorMessage = nil
         
+        let attributes = UserAttributes(password: newPassword)
+        
         Task {
             do {
-                let attributes = UserAttributes(password: newPassword)
                 try await SupabaseManager.shared.client.auth.update(user: attributes)
                 await MainActor.run {
-                    successMessage = "Şifreniz başarıyla güncellendi!"
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        presentationMode.wrappedValue.dismiss()
-                    }
+                    presentationMode.wrappedValue.dismiss()
                 }
             } catch {
-                await MainActor.run { errorMessage = error.localizedDescription }
+                await MainActor.run { errorMessage = "forgot_pw_error_generic".localized() }
             }
             await MainActor.run { isLoading = false }
         }

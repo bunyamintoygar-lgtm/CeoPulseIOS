@@ -337,3 +337,23 @@
 "login_failed" = "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.";
 "login_email_placeholder" = "ornek@email.com";
 "login_password_placeholder" = "Şifrenizi giriniz";
+
+/* Forgot Password */
+"forgot_pw_title_step1" = "Şifremi Unuttum";
+"forgot_pw_title_step2" = "Kodu Doğrula";
+"forgot_pw_title_step3" = "Yeni Şifre";
+"forgot_pw_desc_step1" = "E-posta adresinizi girin, size 6 haneli bir kurtarma kodu gönderelim.";
+"forgot_pw_desc_step2" = "%@ adresine gönderilen 6 haneli kodu aşağıya girin.";
+"forgot_pw_desc_step3" = "Hesabınız için yeni ve güvenli bir şifre belirleyin.";
+"forgot_pw_button_send" = "Kod Gönder";
+"forgot_pw_button_resend" = "Kodu Yeniden Gönder";
+"forgot_pw_button_verify" = "Kodu Doğrula";
+"forgot_pw_button_update" = "Şifreyi Güncelle";
+"forgot_pw_success_sent" = "Doğrulama kodu e-posta adresinize gönderildi.";
+"forgot_pw_error_not_found" = "Bu e-posta adresiyle kayıtlı bir kullanıcı bulunamadı.";
+"forgot_pw_error_generic" = "Bir hata oluştu. Lütfen tekrar deneyin.";
+"forgot_pw_error_rate_limit" = "Lütfen yeni bir kod istemeden önce 1 dakika bekleyin.";
+"forgot_pw_error_invalid_code" = "Hatalı veya süresi dolmuş kod. Lütfen tekrar deneyin.";
+"forgot_pw_new_pw_placeholder" = "Yeni Şifre";
+"forgot_pw_confirm_pw_placeholder" = "Şifreyi Onayla";
+

@@ -337,3 +337,23 @@
 "login_failed" = "Login failed. Please check your information.";
 "login_email_placeholder" = "example@email.com";
 "login_password_placeholder" = "Enter your password";
+
+/* Forgot Password */
+"forgot_pw_title_step1" = "Forgot Password";
+"forgot_pw_title_step2" = "Verify Code";
+"forgot_pw_title_step3" = "New Password";
+"forgot_pw_desc_step1" = "Enter your email address and we'll send you a 6-digit recovery code.";
+"forgot_pw_desc_step2" = "Enter the 6-digit code sent to %@ below.";
+"forgot_pw_desc_step3" = "Set a new and secure password for your account.";
+"forgot_pw_button_send" = "Send Code";
+"forgot_pw_button_resend" = "Resend Code";
+"forgot_pw_button_verify" = "Verify Code";
+"forgot_pw_button_update" = "Update Password";
+"forgot_pw_success_sent" = "Verification code has been sent to your email address.";
+"forgot_pw_error_not_found" = "No user found with this email address.";
+"forgot_pw_error_generic" = "An error occurred. Please try again.";
+"forgot_pw_error_rate_limit" = "Please wait 1 minute before requesting a new code.";
+"forgot_pw_error_invalid_code" = "Invalid or expired code. Please try again.";
+"forgot_pw_new_pw_placeholder" = "New Password";
+"forgot_pw_confirm_pw_placeholder" = "Confirm Password";
+
