@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @State private var selectedTab = 0
+    @State private var showCreateSurvey = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -35,7 +36,7 @@ struct MainTabView: View {
                     TabItem(icon: "person.2.fill", label: "nav_network".localized(), isSelected: selectedTab == 1) { selectedTab = 1 }
                     
                     // Center Floating Action Button
-                    Button(action: {}) {
+                    Button(action: { showCreateSurvey = true }) {
                         ZStack {
                             Circle()
                                 .fill(AppColors.primaryAccent)
@@ -58,6 +59,9 @@ struct MainTabView: View {
             }
         }
         .ignoresSafeArea(.all, edges: .bottom)
+        .sheet(isPresented: $showCreateSurvey) {
+            CreateSurveyView()
+        }
     }
 }
 

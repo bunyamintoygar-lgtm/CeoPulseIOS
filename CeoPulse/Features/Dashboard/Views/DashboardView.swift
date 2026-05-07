@@ -71,7 +71,7 @@ struct DashboardView: View {
                             .frame(width: 150)
                         }
                         
-                        NavigationLink(destination: SurveysView()) {
+                        NavigationLink(destination: SurveysHomeView()) {
                             MetricCard(
                                 title: "surveys".localized(),
                                 value: "2",
