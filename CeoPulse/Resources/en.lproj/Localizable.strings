@@ -376,6 +376,17 @@
 "signup_already_have_account" = "Already have an account?";
 "signup_login_link" = "Log In";
 
+/* Profile Photo Screen */
+"photo_tips_title" = "Tips for a great profile photo";
+"photo_tip_1" = "Face clear and in focus";
+"photo_tip_2" = "Choose a well-lit environment";
+"photo_tip_3" = "Prefer professional attire";
+"photo_tip_4" = "Use a natural expression";
+"photo_examples_title" = "Example profile photos";
+"photo_format_info" = "JPG, PNG formats supported. Max 5MB size.";
+"photo_take_new" = "Take Photo";
+"photo_select_gallery" = "Upload from Gallery";
+
 
 
 

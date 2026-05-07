@@ -376,6 +376,17 @@
 "signup_already_have_account" = "Zaten bir hesabınız var mı?";
 "signup_login_link" = "Giriş Yapın";
 
+/* Profile Photo Screen */
+"photo_tips_title" = "İyi bir profil fotoğrafı için ipuçları";
+"photo_tip_1" = "Yüzünüz net ve odakta olsun";
+"photo_tip_2" = "İyi aydınlatılmış bir ortam seçin";
+"photo_tip_3" = "Profesyonel kıyafet tercih edin";
+"photo_tip_4" = "Doğal bir ifade kullanın";
+"photo_examples_title" = "Örnek profil fotoğrafları";
+"photo_format_info" = "JPG, PNG formatları desteklenir. Maks. 5MB boyut.";
+"photo_take_new" = "Fotoğraf Çek";
+"photo_select_gallery" = "Galerimden Yükle";
+
 
 
 
