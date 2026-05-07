@@ -60,7 +60,10 @@ struct ProfilePhotoView: View {
                             Spacer()
                             HStack {
                                 Spacer()
-                                Button(action: { checkCameraPermissionAndOpen() }) {
+                                Button(action: { 
+                                    sourceType = .camera
+                                    checkCameraPermissionAndOpen() 
+                                }) {
                                     Circle()
                                         .fill(Color(hex: "6C38FF"))
                                         .frame(width: 44, height: 44)
@@ -76,9 +79,11 @@ struct ProfilePhotoView: View {
                         .frame(width: 190, height: 190)
                     }
                     
-                    // Action Buttons
                     VStack(spacing: 12) {
-                        Button(action: { checkCameraPermissionAndOpen() }) {
+                        Button(action: { 
+                            sourceType = .camera
+                            checkCameraPermissionAndOpen() 
+                        }) {
                             HStack {
                                 Image(systemName: "camera.fill")
                                 Text("photo_take_new".localized())
@@ -194,14 +199,16 @@ struct ProfilePhotoView: View {
         
         switch status {
         case .authorized:
-            sourceType = .camera
-            showImagePicker = true
+            DispatchQueue.main.async {
+                self.sourceType = .camera
+                self.showImagePicker = true
+            }
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 if granted {
                     DispatchQueue.main.async {
-                        sourceType = .camera
-                        showImagePicker = true
+                        self.sourceType = .camera
+                        self.showImagePicker = true
                     }
                 }
             }
