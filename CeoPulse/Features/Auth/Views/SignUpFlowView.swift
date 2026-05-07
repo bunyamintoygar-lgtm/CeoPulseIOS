@@ -136,17 +136,10 @@ struct SignUpStep1View: View {
         
         Task {
             do {
-                let userData: [String: AnyJSON] = [
-                    "first_name": .string(firstName),
-                    "last_name": .string(lastName),
-                    "lang": .string(LanguageManager.shared.currentLanguage)
-                ]
-                
-                print("DEBUG: Signup başlatılıyor... Email: \(email)")
+                print("DEBUG: Signup başlatılıyor (SADE)... Email: \(email)")
                 let response = try await SupabaseManager.shared.client.auth.signUp(
                     email: email,
-                    password: password,
-                    data: userData
+                    password: password
                 )
                 print("DEBUG: Signup başarılı! User ID: \(response.user?.id?.uuidString ?? "nil")")
                 print("DEBUG: Session var mı?: \(response.session != nil)")
