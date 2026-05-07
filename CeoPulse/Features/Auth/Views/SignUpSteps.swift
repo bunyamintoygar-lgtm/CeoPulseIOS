@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import Supabase
 
 // MARK: - Step 2: Profesyonel Bilgiler
