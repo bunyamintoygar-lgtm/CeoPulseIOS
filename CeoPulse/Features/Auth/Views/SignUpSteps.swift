@@ -143,6 +143,16 @@ struct SignUpStep3View: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     
+    // Timer States
+    @State private var timeRemaining = 105 // 1:45
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
+    func timeString(from seconds: Int) -> String {
+        let minutes = seconds / 60
+        let remainingSeconds = seconds % 60
+        return String(format: "%02d:%02d", minutes, remainingSeconds)
+    }
+    
     func handleOTPVerification() {
         isLoading = true
         errorMessage = nil
@@ -194,7 +204,6 @@ struct SignUpStep3View: View {
                 
                 VStack(spacing: 24) {
                     // Illustration
-                    // Illustration
                     ZStack {
                         RoundedRectangle(cornerRadius: 20)
                             .fill(Color.white.opacity(0.05))
@@ -239,26 +248,34 @@ struct SignUpStep3View: View {
                         }
                         
                         VStack(spacing: 8) {
-                            HStack {
-                                Image(systemName: "clock")
-                                Text("signup_verify_resend_timer".localized(with: ["01:45"]))
-                            }
-                            .font(.system(size: 13))
-                            .foregroundColor(AppColors.textSecondary)
-                            
-                            Button(action: {
-                                Task {
-                                    do {
-                                        try await SupabaseManager.shared.client.auth.resend(email: email, type: .signup)
-                                        print("DEBUG: Doğrulama kodu tekrar gönderildi.")
-                                    } catch {
-                                        print("DEBUG: Yeniden gönderim hatası: \(error)")
+                            if timeRemaining > 0 {
+                                HStack {
+                                    Image(systemName: "clock")
+                                    Text("signup_verify_resend_timer".localized(with: [timeString(from: timeRemaining)]))
+                                }
+                                .font(.system(size: 13))
+                                .foregroundColor(AppColors.textSecondary)
+                                .onReceive(timer) { _ in
+                                    if timeRemaining > 0 {
+                                        timeRemaining -= 1
                                     }
                                 }
-                            }) {
-                                Text("Kodu Yeniden Gönder")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(.purple)
+                            } else {
+                                Button(action: {
+                                    Task {
+                                        do {
+                                            try await SupabaseManager.shared.client.auth.resend(email: email, type: .signup)
+                                            print("DEBUG: Doğrulama kodu tekrar gönderildi.")
+                                            timeRemaining = 105 // Sayacı sıfırla
+                                        } catch {
+                                            print("DEBUG: Yeniden gönderim hatası: \(error)")
+                                        }
+                                    }
+                                }) {
+                                    Text("Kodu Yeniden Gönder")
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundColor(.purple)
+                                }
                             }
                         }
                         
