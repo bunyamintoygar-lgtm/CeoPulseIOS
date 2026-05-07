@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import AVFoundation
 
 struct ProfilePhotoView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -8,6 +9,8 @@ struct ProfilePhotoView: View {
     @State private var selectedImage: UIImage? = nil
     @State private var showImagePicker = false
     @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
+    @State private var showAlert = false
+    @State private var alertMessage = ""
     
     var body: some View {
         ZStack {
@@ -86,8 +89,7 @@ struct ProfilePhotoView: View {
                 // Action Buttons
                 VStack(spacing: 16) {
                     Button(action: {
-                        sourceType = .camera
-                        showImagePicker = true
+                        checkCameraPermissionAndOpen()
                     }) {
                         HStack {
                             Image(systemName: "camera")
@@ -147,7 +149,41 @@ struct ProfilePhotoView: View {
         .sheet(isPresented: $showImagePicker) {
             ImagePicker(image: $selectedImage, sourceType: sourceType)
         }
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text("Uyarı"), message: Text(alertMessage), dismissButton: .default(Text("Tamam")))
+        }
         .id(langManager.currentLanguage)
+    }
+    
+    private func checkCameraPermissionAndOpen() {
+        // Check if camera is available (Simulators don't have cameras)
+        if !UIImagePickerController.isSourceTypeAvailable(.camera) {
+            alertMessage = "Bu cihazda kamera kullanılamıyor."
+            showAlert = true
+            return
+        }
+        
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        
+        switch status {
+        case .authorized:
+            sourceType = .camera
+            showImagePicker = true
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                if granted {
+                    DispatchQueue.main.async {
+                        sourceType = .camera
+                        showImagePicker = true
+                    }
+                }
+            }
+        case .denied, .restricted:
+            alertMessage = "Kamera erişimi reddedildi. Lütfen ayarlardan izin verin."
+            showAlert = true
+        @unknown default:
+            break
+        }
     }
 }
 
@@ -160,6 +196,7 @@ struct ImagePicker: UIViewControllerRepresentable {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
         picker.sourceType = sourceType
+        picker.allowsEditing = true // Added editing support for profile photos
         return picker
     }
     
@@ -177,7 +214,9 @@ struct ImagePicker: UIViewControllerRepresentable {
         }
         
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let uiImage = info[.originalImage] as? UIImage {
+            if let editedImage = info[.editedImage] as? UIImage {
+                parent.image = editedImage
+            } else if let uiImage = info[.originalImage] as? UIImage {
                 parent.image = uiImage
             }
             picker.dismiss(animated: true)
