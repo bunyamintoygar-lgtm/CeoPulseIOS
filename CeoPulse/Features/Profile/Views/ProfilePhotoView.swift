@@ -276,7 +276,13 @@ struct ImagePicker: UIViewControllerRepresentable {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
         picker.sourceType = sourceType
-        picker.allowsEditing = true // Added editing support for profile photos
+        picker.allowsEditing = true
+        
+        // Ön kamerayı varsayılan yap
+        if sourceType == .camera && UIImagePickerController.isCameraDeviceAvailable(.front) {
+            picker.cameraDevice = .front
+        }
+        
         return picker
     }
     
@@ -294,11 +300,22 @@ struct ImagePicker: UIViewControllerRepresentable {
         }
         
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            var finalImage: UIImage?
+            
             if let editedImage = info[.editedImage] as? UIImage {
-                parent.image = editedImage
+                finalImage = editedImage
             } else if let uiImage = info[.originalImage] as? UIImage {
-                parent.image = uiImage
+                finalImage = uiImage
             }
+            
+            // Eğer ön kamerayla çekildiyse ve aynalanmış gibi duruyorsa düzelt (opsiyonel ama kullanıcı istedi)
+            if picker.sourceType == .camera && picker.cameraDevice == .front, let image = finalImage {
+                if let cgImage = image.cgImage {
+                    finalImage = UIImage(cgImage: cgImage, scale: image.scale, orientation: .leftMirrored)
+                }
+            }
+            
+            parent.image = finalImage
             picker.dismiss(animated: true)
         }
         
