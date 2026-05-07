@@ -154,7 +154,7 @@ struct SignUpStep1View: View {
                 )
                 
                 print("Signup Yanıtı Alındı!")
-                print("User ID: \(response.user?.id?.uuidString ?? "nil")")
+                print("User ID: \(response.user.id.uuidString)")
                 print("Oturum (Session) Durumu: \(response.session != nil ? "AKTİF (Onay gerekmiyor)" : "BEKLİYOR (Onay gerekiyor)")")
                 print("--- SIGNUP DEBUG BİTTİ ---")
                 
