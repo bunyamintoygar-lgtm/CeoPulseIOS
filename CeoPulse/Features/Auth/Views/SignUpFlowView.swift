@@ -135,7 +135,8 @@ struct SignUpStep1View: View {
             do {
                 let userData: [String: AnyJSON] = [
                     "first_name": .string(firstName),
-                    "last_name": .string(lastName)
+                    "last_name": .string(lastName),
+                    "lang": .string(LanguageManager.shared.currentLanguage)
                 ]
                 
                 try await SupabaseManager.shared.client.auth.signUp(
