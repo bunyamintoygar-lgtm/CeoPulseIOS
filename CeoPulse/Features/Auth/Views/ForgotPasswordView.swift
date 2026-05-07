@@ -178,10 +178,15 @@ struct ForgotPasswordView: View {
                             .cornerRadius(10)
                             .overlay(RoundedRectangle(cornerRadius: 10).stroke(activeOTPField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1.5))
                             .focused($activeOTPField, equals: index)
-                            .onChange(of: otpCode[index]) { newValue in
-                                if newValue.count > 1 { otpCode[index] = String(newValue.last!) }
-                                if !newValue.isEmpty && index < 7 { activeOTPField = index + 1 }
-                                if newValue.isEmpty && index > 0 { activeOTPField = index - 1 }
+                            .onChange(of: otpCode[index]) { (newValue: String) in
+                                if newValue.count > 1 {
+                                    otpCode[index] = String(newValue.suffix(1))
+                                }
+                                if !newValue.isEmpty && index < 7 {
+                                    activeOTPField = index + 1
+                                } else if newValue.isEmpty && index > 0 {
+                                    activeOTPField = index - 1
+                                }
                             }
                     }
                 }

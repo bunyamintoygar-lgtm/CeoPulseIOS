@@ -228,10 +228,15 @@ struct SignUpStep3View: View {
                                     .cornerRadius(8)
                                     .overlay(RoundedRectangle(cornerRadius: 8).stroke(activeField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1))
                                     .focused($activeField, equals: index)
-                                    .onChange(of: otpCode[index]) { newValue in
-                                        if newValue.count > 1 { otpCode[index] = String(newValue.last!) }
-                                        if !newValue.isEmpty && index < 7 { activeField = index + 1 }
-                                        if newValue.isEmpty && index > 0 { activeField = index - 1 }
+                                    .onChange(of: otpCode[index]) { (newValue: String) in
+                                        if newValue.count > 1 {
+                                            otpCode[index] = String(newValue.suffix(1))
+                                        }
+                                        if !newValue.isEmpty && index < 7 {
+                                            activeField = index + 1
+                                        } else if newValue.isEmpty && index > 0 {
+                                            activeField = index - 1
+                                        }
                                     }
                             }
                         }
