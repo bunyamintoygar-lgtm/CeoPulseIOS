@@ -1,5 +1,6 @@
 import SwiftUI
 import Supabase
+import Auth
 
 struct ForgotPasswordView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -279,9 +280,9 @@ struct ForgotPasswordView: View {
         Task {
             do {
                 try await SupabaseManager.shared.client.auth.verifyOTP(
-                    type: .recovery,
                     email: email,
-                    token: token
+                    token: token,
+                    type: .recovery
                 )
                 await MainActor.run {
                     withAnimation { currentStep = 3 }
