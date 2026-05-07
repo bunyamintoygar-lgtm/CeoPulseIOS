@@ -182,6 +182,36 @@ struct ProfilePhotoView: View {
         }
         .id(langManager.currentLanguage)
     }
+    private func checkCameraPermissionAndOpen() {
+        // Check if camera is available (Simulators don't have cameras)
+        if !UIImagePickerController.isSourceTypeAvailable(.camera) {
+            alertMessage = "Bu cihazda kamera kullanılamıyor."
+            showAlert = true
+            return
+        }
+        
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        
+        switch status {
+        case .authorized:
+            sourceType = .camera
+            showImagePicker = true
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                if granted {
+                    DispatchQueue.main.async {
+                        sourceType = .camera
+                        showImagePicker = true
+                    }
+                }
+            }
+        case .denied, .restricted:
+            alertMessage = "Kamera erişimi reddedildi. Lütfen ayarlardan izin verin."
+            showAlert = true
+        @unknown default:
+            break
+        }
+    }
 }
 
 // MARK: - Subviews
@@ -227,38 +257,6 @@ struct ExampleItem: View {
                 .background(Circle().fill(.white).padding(2))
                 .font(.system(size: 16))
                 .offset(x: 4, y: 4)
-        }
-    }
-}
-    
-    private func checkCameraPermissionAndOpen() {
-        // Check if camera is available (Simulators don't have cameras)
-        if !UIImagePickerController.isSourceTypeAvailable(.camera) {
-            alertMessage = "Bu cihazda kamera kullanılamıyor."
-            showAlert = true
-            return
-        }
-        
-        let status = AVCaptureDevice.authorizationStatus(for: .video)
-        
-        switch status {
-        case .authorized:
-            sourceType = .camera
-            showImagePicker = true
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                if granted {
-                    DispatchQueue.main.async {
-                        sourceType = .camera
-                        showImagePicker = true
-                    }
-                }
-            }
-        case .denied, .restricted:
-            alertMessage = "Kamera erişimi reddedildi. Lütfen ayarlardan izin verin."
-            showAlert = true
-        @unknown default:
-            break
         }
     }
 }
