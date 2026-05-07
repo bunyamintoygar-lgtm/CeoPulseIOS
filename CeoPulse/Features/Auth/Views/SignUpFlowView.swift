@@ -142,18 +142,27 @@ struct SignUpStep1View: View {
                     "lang": .string(LanguageManager.shared.currentLanguage)
                 ]
                 
-                try await SupabaseManager.shared.client.auth.signUp(
+                print("DEBUG: Signup başlatılıyor... Email: \(email)")
+                let response = try await SupabaseManager.shared.client.auth.signUp(
                     email: email,
                     password: password,
                     data: userData
                 )
+                print("DEBUG: Signup başarılı! User ID: \(response.user?.id?.uuidString ?? "nil")")
+                print("DEBUG: Session var mı?: \(response.session != nil)")
                 
                 await MainActor.run {
                     withAnimation {
-                        currentStep = 2
+                        // Eğer zaten session geldiyse (onay gerekmiyorsa) doğrudan 3. adıma git
+                        if response.session != nil {
+                            currentStep = 3
+                        } else {
+                            currentStep = 2
+                        }
                     }
                 }
             } catch {
+                print("DEBUG: Signup HATASI: \(error)")
                 await MainActor.run {
                     let description = error.localizedDescription
                     if description.contains("invalid format") && description.contains("email") {
