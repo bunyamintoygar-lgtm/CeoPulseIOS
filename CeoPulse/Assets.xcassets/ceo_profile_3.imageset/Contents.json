@@ -1,15 +1,17 @@
-﻿{
+{
   "images" : [
     {
-      "filename" : "ceo_profile_3.png",
+      "filename" : "ceo_profile_3.webp",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "ceo_profile_3.webp",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "ceo_profile_3.webp",
       "idiom" : "universal",
       "scale" : "3x"
     }
