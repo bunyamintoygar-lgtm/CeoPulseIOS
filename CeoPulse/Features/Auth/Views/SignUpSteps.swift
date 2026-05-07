@@ -190,16 +190,10 @@ struct SignUpStep3View: View {
                     .font(.system(size: 14))
                     .foregroundColor(.purple)
                 }
-                .padding(.bottom, 8)
-
-                Text("signup_verify_title".localized())
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
-                Text("signup_verify_desc".localized())
-                    .font(.system(size: 13))
-                    .foregroundColor(AppColors.textSecondary)
+                .padding(.top, 10)
                 
                 VStack(spacing: 24) {
+                    // Illustration
                     // Illustration
                     ZStack {
                         RoundedRectangle(cornerRadius: 20)
