@@ -45,7 +45,7 @@ struct SurveysHomeView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach(tabs, id: \.self) { tab in
-                                TabButton(title: tab, isSelected: selectedTab == tab) {
+                                SurveyTabButton(title: tab, isSelected: selectedTab == tab) {
                                     withAnimation {
                                         selectedTab = tab
                                     }
@@ -163,14 +163,14 @@ struct SurveysHomeView: View {
                 .foregroundColor(.purple)
             }
             
-            CompletedSurveyRow(title: "Hibrit çalışma modellerinin verimliliğe etkisi nedir?", date: "Nisan 2025", rate: 92, icon: "chart.line.uptrend.xyaxis", color: .purple)
-            CompletedSurveyRow(title: "2025'te en büyük iş önceliğiniz hangisi?", date: "Mart 2025", rate: 89, icon: "person.2.fill", color: .blue)
-            CompletedSurveyRow(title: "Sürdürülebilirlik yatırımlarınızın öncelik alanı nedir?", date: "Şubat 2025", rate: 91, icon: "leaf.fill", color: .green)
+            SurveyCompletedRow(title: "Hibrit çalışma modellerinin verimliliğe etkisi nedir?", date: "Nisan 2025", rate: 92, icon: "chart.line.uptrend.xyaxis", color: .purple)
+            SurveyCompletedRow(title: "2025'te en büyük iş önceliğiniz hangisi?", date: "Mart 2025", rate: 89, icon: "person.2.fill", color: .blue)
+            SurveyCompletedRow(title: "Sürdürülebilirlik yatırımlarınızın öncelik alanı nedir?", date: "Şubat 2025", rate: 91, icon: "leaf.fill", color: .green)
         }
     }
 }
 
-struct TabButton: View {
+struct SurveyTabButton: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void

@@ -49,6 +49,7 @@ struct SurveyOption: Identifiable, Codable {
 }
 
 struct SurveyWithDetails: Identifiable {
+    var id: UUID { survey.id }
     let survey: Survey
     let questions: [QuestionWithSharedOptions]
     var participationRate: Double = 0.0

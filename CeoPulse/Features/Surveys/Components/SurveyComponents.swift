@@ -137,7 +137,7 @@ struct SurveyCard: View {
     }
 }
 
-struct CompletedSurveyRow: View {
+struct SurveyCompletedRow: View {
     let title: String
     let date: String
     let rate: Int
