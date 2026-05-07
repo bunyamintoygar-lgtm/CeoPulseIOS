@@ -244,12 +244,29 @@ struct SignUpStep3View: View {
                                 .padding(.top, 4)
                         }
                         
-                        HStack {
-                            Image(systemName: "clock")
-                            Text("signup_verify_resend_timer".localized(with: ["01:45"]))
+                        VStack(spacing: 8) {
+                            HStack {
+                                Image(systemName: "clock")
+                                Text("signup_verify_resend_timer".localized(with: ["01:45"]))
+                            }
+                            .font(.system(size: 13))
+                            .foregroundColor(AppColors.textSecondary)
+                            
+                            Button(action: {
+                                Task {
+                                    do {
+                                        try await SupabaseManager.shared.client.auth.resend(email: email, type: .signup)
+                                        print("DEBUG: Doğrulama kodu tekrar gönderildi.")
+                                    } catch {
+                                        print("DEBUG: Yeniden gönderim hatası: \(error)")
+                                    }
+                                }
+                            }) {
+                                Text("Kodu Yeniden Gönder")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(.purple)
+                            }
                         }
-                        .font(.system(size: 13))
-                        .foregroundColor(AppColors.textSecondary)
                         
                         Button(action: handleOTPVerification) {
                             HStack {

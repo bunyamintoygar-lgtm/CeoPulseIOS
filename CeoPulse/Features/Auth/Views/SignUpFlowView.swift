@@ -209,7 +209,7 @@ struct SignUpStep1View: View {
                 // Password Requirements
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Image(systemName: "shield.checkered")
+                        Image(systemName: "shield.fill")
                             .foregroundColor(.purple)
                         Text("pw_req_title".localized())
                             .font(.system(size: 11))
