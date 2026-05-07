@@ -168,26 +168,7 @@ struct ForgotPasswordView: View {
                 // 8 haneli OTP
                 HStack(spacing: 6) {
                     ForEach(0..<8, id: \.self) { index in
-                        TextField("", text: $otpCode[index])
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.center)
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 38, height: 52)
-                            .background(Color.white.opacity(0.05))
-                            .cornerRadius(10)
-                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(activeOTPField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1.5))
-                            .focused($activeOTPField, equals: index)
-                            .onChange(of: otpCode[index]) { (newValue: String) in
-                                if newValue.count > 1 {
-                                    otpCode[index] = String(newValue.suffix(1))
-                                }
-                                if !newValue.isEmpty && index < 7 {
-                                    activeOTPField = index + 1
-                                } else if newValue.isEmpty && index > 0 {
-                                    activeOTPField = index - 1
-                                }
-                            }
+                        SingleOTPInput(index: index, otpCode: $otpCode, activeField: $activeOTPField)
                     }
                 }
                 
