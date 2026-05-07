@@ -365,4 +365,12 @@
 "signup_verify_resend_timer" = "Resend code in: %@";
 "signup_verify_button" = "Verify and Continue";
 
+/* Password Requirements */
+"pw_req_title" = "Your password must be at least 8 characters and include:";
+"pw_req_upper" = "Uppercase (A-Z)";
+"pw_req_lower" = "Lowercase (a-z)";
+"pw_req_digit" = "Number (0-9)";
+"pw_req_length" = "At least 8 characters";
+
+
 

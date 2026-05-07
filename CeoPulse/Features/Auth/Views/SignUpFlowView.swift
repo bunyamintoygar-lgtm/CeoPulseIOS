@@ -193,15 +193,16 @@ struct SignUpStep1View: View {
                     HStack {
                         Image(systemName: "shield.checkered")
                             .foregroundColor(.purple)
-                        Text("Şifreniz en az 8 karakter olmalı ve aşağıdakileri içermelidir:")
+                        Text("pw_req_title".localized())
                             .font(.system(size: 11))
                             .foregroundColor(.white.opacity(0.8))
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        RequirementRow(text: "Büyük harf (A-Z)", isMet: password.contains(where: { $0.isUppercase }))
-                        RequirementRow(text: "Küçük harf (a-z)", isMet: password.contains(where: { $0.isLowercase }))
-                        RequirementRow(text: "Rakam (0-9)", isMet: password.contains(where: { $0.isNumber }))
+                        RequirementRow(text: "pw_req_upper".localized(), isMet: password.contains(where: { $0.isUppercase }))
+                        RequirementRow(text: "pw_req_lower".localized(), isMet: password.contains(where: { $0.isLowercase }))
+                        RequirementRow(text: "pw_req_digit".localized(), isMet: password.contains(where: { $0.isNumber }))
+                        RequirementRow(text: "pw_req_length".localized(), isMet: password.count >= 8)
                     }
                 }
                 .padding(16)

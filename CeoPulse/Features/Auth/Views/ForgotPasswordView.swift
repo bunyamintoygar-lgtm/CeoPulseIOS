@@ -14,6 +14,14 @@ struct ForgotPasswordView: View {
     @State private var errorMessage: String?
     @State private var successMessage: String?
     
+    // Password validation computed properties
+    private var isPasswordLongEnough: Bool { newPassword.count >= 8 }
+    private var hasUppercase: Bool { newPassword.contains(where: { $0.isUppercase }) }
+    private var hasLowercase: Bool { newPassword.contains(where: { $0.isLowercase }) }
+    private var hasDigit: Bool { newPassword.contains(where: { $0.isNumber }) }
+    private var passwordsMatch: Bool { !newPassword.isEmpty && newPassword == confirmPassword }
+    private var isPasswordValid: Bool { isPasswordLongEnough && hasUppercase && hasLowercase && hasDigit && passwordsMatch }
+    
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
@@ -213,6 +221,28 @@ struct ForgotPasswordView: View {
                 CustomAuthField(icon: "lock.fill", placeholder: "forgot_pw_confirm_pw_placeholder".localized(), text: $confirmPassword, isSecure: true)
             }
             
+            // Password Requirements
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Image(systemName: "shield.checkered")
+                        .foregroundColor(.purple)
+                    Text("pw_req_title".localized())
+                        .font(.system(size: 11))
+                        .foregroundColor(.white.opacity(0.8))
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    RequirementRow(text: "pw_req_upper".localized(), isMet: hasUppercase)
+                    RequirementRow(text: "pw_req_lower".localized(), isMet: hasLowercase)
+                    RequirementRow(text: "pw_req_digit".localized(), isMet: hasDigit)
+                    RequirementRow(text: "pw_req_length".localized(), isMet: isPasswordLongEnough) 
+                    // Note: Simplified length text, or we could add a dedicated key "Min 8 chars"
+                }
+            }
+            .padding(16)
+            .background(Color.white.opacity(0.03))
+            .cornerRadius(12)
+            
             Button(action: updatePassword) {
                 HStack {
                     if isLoading {
@@ -226,10 +256,10 @@ struct ForgotPasswordView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(newPassword.count >= 6 && newPassword == confirmPassword ? Color(hex: "6C38FF") : Color.white.opacity(0.1))
+                .background(isPasswordValid ? Color(hex: "6C38FF") : Color.white.opacity(0.1))
                 .cornerRadius(12)
             }
-            .disabled(isLoading || newPassword.count < 6 || newPassword != confirmPassword)
+            .disabled(isLoading || !isPasswordValid)
         }
         .padding(.horizontal, 24)
     }
@@ -329,6 +359,21 @@ struct ForgotPasswordView: View {
                 await MainActor.run { errorMessage = "forgot_pw_error_generic".localized() }
             }
             await MainActor.run { isLoading = false }
+        }
+    }
+}
+
+struct RequirementRow: View {
+    let text: String
+    let isMet: Bool
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "checkmark")
+                .font(.system(size: 8, weight: .bold))
+                .foregroundColor(isMet ? .green : Color.white.opacity(0.2))
+            Text(text)
+                .font(.system(size: 10))
+                .foregroundColor(isMet ? .white : Color.white.opacity(0.5))
         }
     }
 }

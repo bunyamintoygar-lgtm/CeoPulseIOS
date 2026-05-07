@@ -365,4 +365,12 @@
 "signup_verify_resend_timer" = "Kodu yeniden gönderme: %@";
 "signup_verify_button" = "Doğrula ve Devam Et";
 
+/* Password Requirements */
+"pw_req_title" = "Şifreniz en az 8 karakter olmalı ve aşağıdakileri içermelidir:";
+"pw_req_upper" = "Büyük harf (A-Z)";
+"pw_req_lower" = "Küçük harf (a-z)";
+"pw_req_digit" = "Rakam (0-9)";
+"pw_req_length" = "En az 8 karakter";
+
+
 
