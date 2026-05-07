@@ -372,5 +372,10 @@
 "pw_req_digit" = "Number (0-9)";
 "pw_req_length" = "At least 8 characters";
 
+/* Signup Bottom Link */
+"signup_already_have_account" = "Already have an account?";
+"signup_login_link" = "Log In";
+
+
 
 

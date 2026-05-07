@@ -372,5 +372,10 @@
 "pw_req_digit" = "Rakam (0-9)";
 "pw_req_length" = "En az 8 karakter";
 
+/* Signup Bottom Link */
+"signup_already_have_account" = "Zaten bir hesabınız var mı?";
+"signup_login_link" = "Giriş Yapın";
+
+
 
 

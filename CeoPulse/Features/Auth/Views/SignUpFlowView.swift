@@ -124,6 +124,9 @@ struct SignUpStep1View: View {
     @Binding var confirmPassword: String
     @Binding var acceptTerms: Bool
     
+    @Environment(\.presentationMode) var presentationMode
+
+    
     @State private var isLoading = false
     @State private var errorMessage: String?
     
@@ -258,11 +261,13 @@ struct SignUpStep1View: View {
                 
                 HStack {
                     Spacer()
-                    Text("Zaten bir hesabınız var mı?")
+                    Text("signup_already_have_account".localized())
                         .font(.system(size: 13))
                         .foregroundColor(AppColors.textSecondary)
-                    Button(action: {}) {
-                        Text("Giriş Yapın")
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Text("signup_login_link".localized())
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(.purple)
                     }
