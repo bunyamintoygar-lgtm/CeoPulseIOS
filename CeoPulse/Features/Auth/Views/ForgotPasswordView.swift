@@ -115,9 +115,11 @@ struct ForgotPasswordView: View {
                     .frame(width: 180, height: 180)
                     .foregroundColor(Color.purple.opacity(0.3))
                 
-                Image(systemName: "lock.fill")
+                Image(systemName: "lock.shield.fill")
                     .font(.system(size: 60))
+                    .symbolRenderingMode(.hierarchical)
                     .foregroundColor(Color(hex: "8A56FF"))
+                    .symbolEffect(.pulse, options: .repeating)
                     .shadow(color: Color(hex: "8A56FF").opacity(0.5), radius: 20)
             }
             .padding(.vertical, 20)
@@ -164,6 +166,34 @@ struct ForgotPasswordView: View {
     
     private var otpStepView: some View {
         VStack(spacing: 32) {
+            // Illustration (Consistency with SignUp)
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.white.opacity(0.05))
+                    .frame(height: 140)
+                
+                VStack(spacing: 12) {
+                    ZStack {
+                        Image(systemName: "key.fill")
+                            .font(.system(size: 40))
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundColor(.purple.opacity(0.3))
+                            .symbolEffect(.pulse, options: .repeating)
+                        
+                        Image(systemName: "shield.checkered")
+                            .font(.system(size: 18))
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, .purple)
+                            .offset(x: 15, y: 15)
+                    }
+                    
+                    Text("signup_verify_illustration_title".localized())
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+            .padding(.bottom, 8)
+
             VStack(spacing: 16) {
                 // 8 haneli OTP
                 HStack(spacing: 6) {
@@ -172,10 +202,18 @@ struct ForgotPasswordView: View {
                     }
                 }
                 
-                Button(action: sendRecoveryEmail) {
-                    Text("forgot_pw_button_resend".localized())
-                        .font(.system(size: 14, weight: .medium))
+                HStack {
+                    Image(systemName: "clock.badge.exclamationmark")
+                        .font(.system(size: 12))
+                        .symbolRenderingMode(.hierarchical)
+                        .symbolEffect(.pulse, options: .repeating)
                         .foregroundColor(.purple)
+                    
+                    Button(action: sendRecoveryEmail) {
+                        Text("forgot_pw_button_resend".localized())
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.purple)
+                    }
                 }
             }
             
@@ -186,7 +224,10 @@ struct ForgotPasswordView: View {
                     } else {
                         Text("forgot_pw_button_verify".localized())
                             .font(.system(size: 16, weight: .bold))
-                        Image(systemName: "checkmark")
+                        Image(systemName: "checkmark.circle.fill")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, .green)
+                            .symbolEffect(.bounce, value: otpCode.joined().count == 8)
                     }
                 }
                 .foregroundColor(.white)
@@ -237,6 +278,7 @@ struct ForgotPasswordView: View {
                         Text("forgot_pw_button_update".localized())
                             .font(.system(size: 16, weight: .bold))
                         Image(systemName: "lock.rotation")
+                            .symbolEffect(.pulse, options: .repeating, value: isPasswordValid)
                     }
                 }
                 .foregroundColor(.white)
