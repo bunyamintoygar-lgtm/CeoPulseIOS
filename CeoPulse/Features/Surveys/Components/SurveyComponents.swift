@@ -35,6 +35,23 @@ struct SurveyCard: View {
                         .foregroundColor(AppColors.textSecondary)
                         .cornerRadius(4)
                     }
+                    
+                    if let category = ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId }) {
+                        HStack(spacing: 4) {
+                            if let icon = category.icon {
+                                Image(systemName: icon)
+                                    .font(.system(size: 10))
+                                    .symbolRenderingMode(.hierarchical)
+                            }
+                            Text(category.name)
+                                .font(.system(size: 10, weight: .medium))
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.purple.opacity(0.1))
+                        .foregroundColor(.purple)
+                        .cornerRadius(4)
+                    }
                 }
                 
                 Spacer()

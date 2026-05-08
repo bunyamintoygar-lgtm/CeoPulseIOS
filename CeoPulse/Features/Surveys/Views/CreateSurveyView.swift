@@ -7,11 +7,13 @@ struct CreateSurveyView: View {
     // Step 1: Details
     @State private var title = ""
     @State private var description = ""
-    @State private var selectedCategory = ""
+    @State private var selectedCategory: SurveyCategory?
     @State private var targetAudience = "Herkese Açık"
     @State private var hasEndDate = false
     @State private var startDate = Date()
     @State private var endDate = Date()
+    
+    @StateObject private var configManager = ConfigManager.shared
     
     // Step 2: Questions
     @State private var questions: [DraftQuestion] = [
@@ -161,16 +163,35 @@ struct CreateSurveyView: View {
             // Category
             VStack(alignment: .leading, spacing: 8) {
                 Text("Kategori").font(.system(size: 13, weight: .medium)).foregroundColor(.white)
-                HStack {
-                    Image(systemName: "square.grid.2x2")
-                    Text(selectedCategory.isEmpty ? "Kategori seçin" : selectedCategory)
-                    Spacer()
-                    Image(systemName: "chevron.down")
+                
+                Menu {
+                    ForEach(configManager.surveyCategories) { category in
+                        Button(action: { selectedCategory = category }) {
+                            HStack {
+                                Text(category.name)
+                                if let icon = category.icon {
+                                    Image(systemName: icon)
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: selectedCategory?.icon ?? "square.grid.2x2")
+                        Text(selectedCategory?.name ?? "Kategori seçin")
+                        Spacer()
+                        Image(systemName: "chevron.down")
+                    }
+                    .padding()
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(12)
+                    .foregroundColor(selectedCategory == nil ? AppColors.textSecondary : .white)
                 }
-                .padding()
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(12)
-                .foregroundColor(selectedCategory.isEmpty ? AppColors.textSecondary : .white)
+                .onAppear {
+                    if configManager.surveyCategories.isEmpty {
+                        Task { await configManager.fetchConfigs() }
+                    }
+                }
             }
             
             // Target Audience

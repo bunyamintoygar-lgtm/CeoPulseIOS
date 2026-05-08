@@ -11,6 +11,7 @@ class ConfigManager: ObservableObject {
     @Published var sectors: [LocalizedValue] = []
     @Published var skillsList: [LocalizedValue] = []
     @Published var interestsList: [LocalizedValue] = []
+    @Published var surveyCategories: [SurveyCategory] = []
     @Published var isLoading = false
     
     private init() {}
@@ -19,30 +20,38 @@ class ConfigManager: ObservableObject {
     func fetchConfigs() async {
         isLoading = true
         do {
-            // Using PostgrestResponse to get data
             let response = try await SupabaseManager.shared.client
                 .from("app_config")
                 .select()
                 .execute()
             
             let responseData = response.data
-            // Since data is Data, we should decode it properly
             let decoder = JSONDecoder()
-            struct ConfigItem: Decodable {
+            
+            // Raw representation to get the keys and raw values
+            struct RawConfigItem: Decodable {
                 let key: String
-                let value: [LocalizedValue]
+                let value: AnyDecodable // Custom helper or use generic decoding
             }
             
-            let configs = try decoder.decode([ConfigItem].self, from: responseData)
+            // Instead of a complex generic, let's decode to a dictionary first
+            // Supabase returns an array of objects: [{key: "...", value: ...}, ...]
+            let rawArray = try JSONSerialization.jsonObject(with: responseData) as? [[String: Any]] ?? []
             
-            for item in configs {
-                switch item.key {
-                case "interests_list": self.interestsList = item.value
-                case "positions": self.positions = item.value
-                case "skills_list": self.skillsList = item.value
-                case "sectors": self.sectors = item.value
-                case "durations": self.durations = item.value
-                case "company_sizes": self.companySizes = item.value
+            for item in rawArray {
+                guard let key = item["key"] as? String,
+                      let value = item["value"] else { continue }
+                
+                let valueData = try JSONSerialization.data(withJSONObject: value)
+                
+                switch key {
+                case "interests_list": self.interestsList = (try? decoder.decode([LocalizedValue].self, from: valueData)) ?? []
+                case "positions": self.positions = (try? decoder.decode([LocalizedValue].self, from: valueData)) ?? []
+                case "skills_list": self.skillsList = (try? decoder.decode([LocalizedValue].self, from: valueData)) ?? []
+                case "sectors": self.sectors = (try? decoder.decode([LocalizedValue].self, from: valueData)) ?? []
+                case "durations": self.durations = (try? decoder.decode([LocalizedValue].self, from: valueData)) ?? []
+                case "company_sizes": self.companySizes = (try? decoder.decode([LocalizedValue].self, from: valueData)) ?? []
+                case "survey_categories": self.surveyCategories = (try? decoder.decode([SurveyCategory].self, from: valueData)) ?? []
                 default: break
                 }
             }
