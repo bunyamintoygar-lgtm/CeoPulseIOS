@@ -214,11 +214,15 @@ struct SignUpStep3View: View {
                             ZStack {
                                 Image(systemName: "envelope.fill")
                                     .font(.system(size: 60))
+                                    .symbolRenderingMode(.hierarchical)
                                     .foregroundColor(.purple.opacity(0.3))
-                                Image(systemName: "shield.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(.white)
-                                    .offset(y: 5)
+                                    .symbolEffect(.pulse, options: .repeating)
+                                
+                                Image(systemName: "shield.checkered")
+                                    .font(.system(size: 24))
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .purple)
+                                    .offset(x: 20, y: 20)
                             }
                             
                             VStack(spacing: 4) {
@@ -251,7 +255,9 @@ struct SignUpStep3View: View {
                         VStack(spacing: 8) {
                             if timeRemaining > 0 {
                                 HStack {
-                                    Image(systemName: "clock")
+                                    Image(systemName: "clock.badge.exclamationmark")
+                                        .symbolRenderingMode(.hierarchical)
+                                        .symbolEffect(.pulse, options: .repeating)
                                     Text("signup_verify_resend_timer".localized(with: [timeString(from: timeRemaining)]))
                                 }
                                 .font(.system(size: 13))
@@ -382,7 +388,9 @@ struct SignUpStep4View: View {
                 VStack(spacing: 20) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 80))
-                        .foregroundColor(.purple)
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.white, .purple)
+                        .symbolEffect(.bounce, options: .repeating)
                         .shadow(color: .purple.opacity(0.5), radius: 20)
                     
                     VStack(spacing: 12) {
@@ -428,6 +436,7 @@ struct SignUpStep4View: View {
                                 .frame(width: 48, height: 48)
                             Image(systemName: "person.crop.circle.badge.plus")
                                 .font(.system(size: 20))
+                                .symbolRenderingMode(.hierarchical)
                                 .foregroundColor(.purple)
                         }
                         
@@ -568,6 +577,7 @@ struct StepIndicator: View {
                     Image(systemName: "checkmark")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.white)
+                        .symbolEffect(.bounce, value: isCompleted)
                 } else {
                     Text("\(stepNumber)")
                         .font(.system(size: 12, weight: .bold))
