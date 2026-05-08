@@ -16,6 +16,7 @@ struct Survey: Identifiable, Codable {
     let allowEditResponses: Bool
     let participationLimit: Int?
     let createdAt: Date
+    let language: String?
     
     enum SurveyStatus: String, Codable {
         case active, completed, draft, archived
@@ -23,6 +24,25 @@ struct Survey: Identifiable, Codable {
     
     enum ResultVisibility: String, Codable {
         case immediate, after_closed, never
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case creatorId = "creator_id"
+        case title
+        case description
+        case categoryId = "category_id"
+        case coverImageUrl = "cover_image_url"
+        case targetAudience = "target_audience"
+        case status
+        case startDate = "start_date"
+        case endDate = "end_date"
+        case isAnonymous = "is_anonymous"
+        case resultVisibility = "result_visibility"
+        case allowEditResponses = "allow_edit_responses"
+        case participationLimit = "participation_limit"
+        case createdAt = "created_at"
+        case language
     }
 }
 
@@ -35,6 +55,13 @@ struct SurveyCategory: Identifiable, Codable {
     var name: String {
         let lang = Locale.current.language.languageCode?.identifier ?? "tr"
         return lang == "en" ? en : tr
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case tr = "name_tr"
+        case en = "name_en"
+        case icon
     }
 }
 
@@ -51,6 +78,16 @@ struct SurveyQuestion: Identifiable, Codable {
         case singleChoice = "single_choice"
         case multipleChoice = "multiple_choice"
     }
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case surveyId = "survey_id"
+        case questionText = "question_text"
+        case questionType = "question_type"
+        case isRequired = "is_required"
+        case maxSelections = "max_selections"
+        case order
+    }
 }
 
 struct SurveyOption: Identifiable, Codable {
@@ -58,6 +95,13 @@ struct SurveyOption: Identifiable, Codable {
     let questionId: UUID
     let optionText: String
     let order: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case questionId = "question_id"
+        case optionText = "option_text"
+        case order
+    }
 }
 
 struct SurveyWithDetails: Identifiable {

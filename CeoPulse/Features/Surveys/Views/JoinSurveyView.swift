@@ -2,10 +2,11 @@ import SwiftUI
 
 struct JoinSurveyView: View {
     @Environment(\.presentationMode) var presentationMode
-    let survey: Survey
+    @StateObject private var viewModel: JoinSurveyViewModel
     
-    @State private var currentQuestionIndex = 0
-    @State private var answers: [UUID: Set<UUID>] = [:]
+    init(survey: Survey) {
+        _viewModel = StateObject(wrappedValue: JoinSurveyViewModel(survey: survey))
+    }
     
     var body: some View {
         ZStack {
@@ -15,237 +16,290 @@ struct JoinSurveyView: View {
                 // Header
                 headerView
                 
-                ScrollView {
-                    VStack(spacing: 24) {
-                        // Survey Info Card
-                        surveyInfoCard
+                // Top Progress Bar
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Rectangle()
+                            .fill(Color.white.opacity(0.05))
+                            .frame(height: 4)
                         
-                        // Anonymous Warning
-                        anonymousWarning
-                        
-                        // Questions
-                        VStack(spacing: 20) {
-                            ForEach(0..<dummyQuestions.count, id: \.self) { index in
-                                QuestionActionCard(
-                                    question: dummyQuestions[index],
-                                    options: dummyOptions[dummyQuestions[index].id] ?? [],
-                                    selectedOptions: binding(for: dummyQuestions[index].id),
-                                    number: index + 1
-                                )
-                            }
+                        if !viewModel.questions.isEmpty {
+                            Rectangle()
+                                .fill(LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing))
+                                .frame(width: geo.size.width * CGFloat(Double(viewModel.currentQuestionIndex + 1) / Double(viewModel.questions.count)), height: 4)
+                                .animation(.spring(), value: viewModel.currentQuestionIndex)
                         }
                     }
-                    .padding(20)
-                    .padding(.bottom, 100)
+                }
+                .frame(height: 4)
+                
+                if viewModel.isLoading {
+                    Spacer()
+                    ProgressView()
+                        .tint(.purple)
+                    Spacer()
+                } else if let error = viewModel.errorMessage {
+                    Spacer()
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(.amber)
+                        Text(error)
+                            .font(.system(size: 14))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                        Button("Tekrar Dene") {
+                            viewModel.fetchQuestions()
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.purple)
+                        .cornerRadius(12)
+                    }
+                    .padding(40)
+                    Spacer()
+                } else {
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            // Survey Info Card
+                            surveyInfoCard
+                            
+                            // Anonymous Warning
+                            anonymousWarning
+                            
+                            // Questions
+                            VStack(spacing: 20) {
+                                ForEach(0..<viewModel.questions.count, id: \.self) { index in
+                                    QuestionActionCard(
+                                        question: viewModel.questions[index],
+                                        options: viewModel.options[viewModel.questions[index].id] ?? [],
+                                        selectedOptions: binding(for: viewModel.questions[index].id),
+                                        number: index + 1
+                                    )
+                                }
+                            }
+                        }
+                        .padding(20)
+                        .padding(.bottom, 100)
+                    }
                 }
                 
                 // Bottom Actions
                 bottomActions
             }
         }
+        .onAppear {
+            viewModel.fetchQuestions()
+        }
+        .alert("Yarım Kalan Cevaplar", isPresented: $viewModel.showingResumeAlert) {
+            Button("Devam Et") {
+                viewModel.loadDraft()
+            }
+            Button("Yeni Başla", role: .destructive) {
+                viewModel.clearDraft()
+            }
+        } message: {
+            Text("Bu anket için daha önceden kaydettiğiniz cevaplarınız mevcut. Kaldığınız yerden devam etmek ister misiniz?")
+        }
     }
     
     private var headerView: some View {
         HStack {
             Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                Image(systemName: "arrow.left")
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
                     .frame(width: 40, height: 40)
-                    .background(Color.white.opacity(0.05))
-                    .clipShape(Circle())
+                    .background(Circle().fill(Color.white.opacity(0.1)))
             }
             
             Spacer()
             
             VStack(spacing: 4) {
-                HStack {
-                    Image(systemName: "pencil.and.outline")
-                        .foregroundColor(.purple)
-                    Text("Ankete Katıl")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
+                Text("Ankete Katıl")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+                
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color.green)
+                        .frame(width: 6, height: 6)
+                        .symbolEffect(.pulse, options: .repeating)
+                    Text("Canlı Oturum")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.green)
                 }
-                Text("Görüşünüz bizim için çok değerli.")
-                    .font(.system(size: 12))
-                    .foregroundColor(AppColors.textSecondary)
             }
             
             Spacer()
             
-            Color.clear.frame(width: 40, height: 40)
+            Button(action: {}) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .frame(width: 40, height: 40)
+                    .background(Circle().fill(Color.white.opacity(0.1)))
+            }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
     }
     
     private var surveyInfoCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 20) {
             HStack {
-                HStack(spacing: 4) {
-                    Text("AKTİF")
-                        .font(.system(size: 10, weight: .bold))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.purple.opacity(0.2))
-                        .foregroundColor(.purple)
-                        .cornerRadius(4)
-                    
-                    Image(systemName: "eye.slash.fill")
-                        .font(.system(size: 10))
-                        .foregroundColor(AppColors.textSecondary)
-                    Text("Anonim")
-                        .font(.system(size: 10))
-                        .foregroundColor(AppColors.textSecondary)
+                if let categoryId = viewModel.survey.categoryId,
+                   let category = ConfigManager.shared.surveyCategories.first(where: { $0.id == categoryId }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: category.icon ?? "tag")
+                        Text(category.name)
+                    }
+                    .font(.system(size: 10, weight: .bold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(Color.purple.opacity(0.15)))
+                    .foregroundColor(.purple)
                 }
+                
                 Spacer()
+                
                 HStack(spacing: 4) {
-                    Image(systemName: "clock")
-                    Text("5 gün kaldı")
+                    Image(systemName: "person.2.fill")
+                        .symbolRenderingMode(.hierarchical)
+                    Text("Canlı")
                 }
-                .font(.system(size: 11))
+                .font(.system(size: 11, weight: .medium))
                 .foregroundColor(AppColors.textSecondary)
             }
             
-            HStack(alignment: .center, spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(survey.title)
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
-                    
-                    Text(survey.description ?? "Küresel CEO Pulse Anketi")
+            VStack(alignment: .leading, spacing: 8) {
+                Text(viewModel.survey.title)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.white)
+                    .lineLimit(3)
+                
+                Text(viewModel.survey.description ?? "Küresel CEO Pulse Anketi")
+                    .font(.system(size: 14))
+                    .foregroundColor(AppColors.textSecondary)
+            }
+            
+            Divider().background(Color.white.opacity(0.1))
+            
+            HStack {
+                Label(viewModel.survey.isAnonymous ? "Anonim Katılım" : "İsimli Katılım", systemImage: viewModel.survey.isAnonymous ? "eye.slash.fill" : "eye.fill")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(viewModel.survey.isAnonymous ? .green : .blue)
+                Spacer()
+                if let endDate = viewModel.survey.endDate {
+                    Text("\(endDate.daysFromNow()) gün kaldı")
                         .font(.system(size: 12))
                         .foregroundColor(AppColors.textSecondary)
                 }
-                
-                Spacer()
-                
-                // Participation Circle
-                ZStack {
-                    Circle()
-                        .stroke(Color.white.opacity(0.05), lineWidth: 4)
-                        .frame(width: 70, height: 70)
-                    
-                    Circle()
-                        .trim(from: 0, to: 0.62)
-                        .stroke(LinearGradient(colors: [.purple, Color(hex: "6C38FF")], startPoint: .top, endPoint: .bottom), style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                        .frame(width: 70, height: 70)
-                        .rotationEffect(.degrees(-90))
-                    
-                    VStack(spacing: 0) {
-                        Text("%62")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
-                        Text("Katılım")
-                            .font(.system(size: 8))
-                            .foregroundColor(AppColors.textSecondary)
-                    }
-                }
-            }
-            
-            HStack(spacing: -8) {
-                ForEach(1...4, id: \.self) { i in
-                    Image("ceo_profile_\(i)")
-                        .resizable()
-                        .frame(width: 28, height: 28)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(AppColors.background, lineWidth: 2))
-                }
-                Text("+248")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 28, height: 28)
-                    .background(Color.purple.opacity(0.3))
-                    .clipShape(Circle())
-                    .padding(.leading, 4)
-                
-                Text("Toplam 248 CEO oy verdi")
-                    .font(.system(size: 11))
-                    .foregroundColor(AppColors.textSecondary)
-                    .padding(.leading, 8)
             }
         }
-        .padding(20)
-        .background(Color.white.opacity(0.03))
-        .cornerRadius(20)
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color.white.opacity(0.03))
+                .overlay(RoundedRectangle(cornerRadius: 24).stroke(Color.white.opacity(0.05), lineWidth: 1))
+        )
     }
     
     private var anonymousWarning: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle().fill(Color.purple.opacity(0.1)).frame(width: 32, height: 32)
-                Image(systemName: "info.circle.fill").foregroundColor(.purple)
+        HStack(spacing: 16) {
+            Image(systemName: "hand.raised.fill")
+                .font(.system(size: 20))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundColor(.green)
+                .symbolEffect(.pulse, options: .repeating)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Gizlilik Koruması")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.white)
+                Text("Yanıtlarınız şifrelenir ve güvenle saklanır.")
+                    .font(.system(size: 12))
+                    .foregroundColor(AppColors.textSecondary)
             }
-            Text("Anket anonimdir. Yanıtlarınız sadece toplu istatistiklerde değerlendirilir.")
-                .font(.system(size: 12))
-                .foregroundColor(AppColors.textSecondary)
             Spacer()
         }
-        .padding()
-        .background(Color.purple.opacity(0.05))
-        .cornerRadius(12)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.purple.opacity(0.1), lineWidth: 1))
+        .padding(16)
+        .background(RoundedRectangle(cornerRadius: 16).fill(Color.green.opacity(0.05)))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.green.opacity(0.1), lineWidth: 1))
     }
     
     private var bottomActions: some View {
-        VStack(spacing: 12) {
-            Rectangle().fill(Color.white.opacity(0.05)).frame(height: 1)
+        VStack(spacing: 16) {
+            Rectangle()
+                .fill(LinearGradient(colors: [.clear, .white.opacity(0.05), .clear], startPoint: .leading, endPoint: .trailing))
+                .frame(height: 1)
             
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                    HStack {
-                        Image(systemName: "bookmark")
-                        Text("Kaydet ve Çık")
-                    }
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(12)
+                    Text("Daha Sonra")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.05)))
                 }
                 
-                Button(action: {}) {
-                    HStack {
-                        Text("Devam Et")
-                        Image(systemName: "arrow.right")
+                Button(action: {
+                    if viewModel.currentQuestionIndex < viewModel.questions.count - 1 {
+                        withAnimation { viewModel.currentQuestionIndex += 1 }
+                    } else {
+                        Task {
+                            let success = await viewModel.submitAnswers()
+                            if success {
+                                presentationMode.wrappedValue.dismiss()
+                            }
+                        }
                     }
-                    .font(.system(size: 16, weight: .bold))
+                }) {
+                    HStack(spacing: 8) {
+                        if viewModel.isLoading {
+                            ProgressView().tint(.white)
+                        } else {
+                            Text(viewModel.currentQuestionIndex == viewModel.questions.count - 1 ? "Anketi Bitir" : "Sıradaki Soru")
+                            Image(systemName: viewModel.currentQuestionIndex == viewModel.questions.count - 1 ? "checkmark.circle.fill" : "arrow.right")
+                        }
+                    }
+                    .font(.system(size: 15, weight: .bold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color(hex: "6C38FF"))
-                    .cornerRadius(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(LinearGradient(colors: [Color(hex: "6C38FF"), .purple], startPoint: .leading, endPoint: .trailing))
+                            .shadow(color: .purple.opacity(0.3), radius: 8, y: 4)
+                    )
                 }
+                .disabled(viewModel.isLoading)
             }
             .padding(.horizontal, 20)
             
-            HStack {
-                Text("1 / 4").font(.system(size: 12, weight: .bold))
-                HStack(spacing: 6) {
-                    Circle().fill(Color.purple).frame(width: 6, height: 6)
-                    Circle().fill(Color.white.opacity(0.2)).frame(width: 6, height: 6)
-                    Circle().fill(Color.white.opacity(0.2)).frame(width: 6, height: 6)
-                    Circle().fill(Color.white.opacity(0.2)).frame(width: 6, height: 6)
-                }
-                .padding(.leading, 10)
-            }
-            .foregroundColor(.white)
-            .padding(.vertical, 10)
-            
-            HStack(spacing: 8) {
-                Image(systemName: "lock.fill").font(.system(size: 10))
-                Text("Yanıtlarınız güvenle korunur ve anonim olarak işlenir.").font(.system(size: 10))
+            HStack(spacing: 4) {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 10))
+                Text("Yanıtlarınız güvenli protokoller ile korunmaktadır.")
+                    .font(.system(size: 10, weight: .medium))
             }
             .foregroundColor(AppColors.textSecondary)
-            .padding(.bottom, 20)
+            .padding(.bottom, 10)
         }
-        .background(AppColors.background)
+        .padding(.top, 8)
+        .background(
+            AppColors.background
+                .overlay(
+                    LinearGradient(colors: [Color.black.opacity(0.2), .clear], startPoint: .bottom, endPoint: .top)
+                )
+        )
     }
     
     private func binding(for questionId: UUID) -> Binding<Set<UUID>> {
         Binding(
-            get: { self.answers[questionId] ?? [] },
-            set: { self.answers[questionId] = $0 }
+            get: { viewModel.answers[questionId] ?? [] },
+            set: { viewModel.answers[questionId] = $0 }
         )
     }
 }
@@ -257,58 +311,104 @@ struct QuestionActionCard: View {
     let number: Int
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("\(number). Soru").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
-                Text("(Zorunlu)").font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("SORU \(number)")
+                        .font(.system(size: 12, weight: .black))
+                        .foregroundColor(.purple)
+                    
+                    Text(question.questionText)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer()
+                if question.isRequired {
+                    Image(systemName: "asterisk")
+                        .font(.system(size: 10))
+                        .foregroundColor(.red.opacity(0.8))
+                }
             }
-            
-            Text(question.questionText)
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(.white)
             
             if question.questionType == .multipleChoice {
-                Text("En fazla \(question.maxSelections) seçenek işaretleyebilirsiniz.")
-                    .font(.system(size: 11))
-                    .foregroundColor(AppColors.textSecondary)
+                HStack(spacing: 4) {
+                    Image(systemName: "checklist")
+                    Text("Birden fazla seçim yapabilirsiniz (Maks: \(question.maxSelections))")
+                }
+                .font(.system(size: 11))
+                .foregroundColor(AppColors.textSecondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Capsule().fill(Color.white.opacity(0.05)))
             }
             
-            VStack(spacing: 10) {
+            VStack(spacing: 12) {
                 ForEach(options) { option in
+                    let isSelected = selectedOptions.contains(option.id)
                     Button(action: {
-                        if question.questionType == .singleChoice {
-                            selectedOptions = [option.id]
-                        } else {
-                            if selectedOptions.contains(option.id) {
-                                selectedOptions.remove(option.id)
-                            } else if selectedOptions.count < question.maxSelections {
-                                selectedOptions.insert(option.id)
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            if question.questionType == .singleChoice {
+                                selectedOptions = [option.id]
+                            } else {
+                                if isSelected {
+                                    selectedOptions.remove(option.id)
+                                } else if selectedOptions.count < question.maxSelections {
+                                    selectedOptions.insert(option.id)
+                                }
                             }
                         }
                     }) {
-                        HStack {
-                            Image(systemName: selectedOptions.contains(option.id) ? 
-                                  (question.questionType == .singleChoice ? "largecircle.fill.circle" : "checkmark.square.fill") :
-                                  (question.questionType == .singleChoice ? "circle" : "square"))
-                                .foregroundColor(selectedOptions.contains(option.id) ? .purple : AppColors.textSecondary)
+                        HStack(spacing: 16) {
+                            ZStack {
+                                if question.questionType == .singleChoice {
+                                    Circle()
+                                        .stroke(isSelected ? Color.purple : Color.white.opacity(0.2), lineWidth: 2)
+                                        .frame(width: 22, height: 22)
+                                    if isSelected {
+                                        Circle()
+                                            .fill(Color.purple)
+                                            .frame(width: 12, height: 12)
+                                    }
+                                } else {
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(isSelected ? Color.purple : Color.white.opacity(0.2), lineWidth: 2)
+                                        .frame(width: 22, height: 22)
+                                    if isSelected {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(.purple)
+                                    }
+                                }
+                            }
                             
                             Text(option.text)
-                                .font(.system(size: 14))
-                                .foregroundColor(.white)
+                                .font(.system(size: 15, weight: isSelected ? .bold : .medium))
+                                .foregroundColor(isSelected ? .white : .white.opacity(0.8))
                             
                             Spacer()
                         }
-                        .padding()
-                        .background(selectedOptions.contains(option.id) ? Color.purple.opacity(0.1) : Color.white.opacity(0.03))
-                        .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(selectedOptions.contains(option.id) ? Color.purple : Color.clear, lineWidth: 1))
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(isSelected ? Color.purple.opacity(0.1) : Color.white.opacity(0.05))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(isSelected ? Color.purple.opacity(0.5) : Color.clear, lineWidth: 1)
+                        )
+                        .scaleEffect(isSelected ? 1.02 : 1.0)
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
         }
-        .padding(20)
-        .background(Color.white.opacity(0.03))
-        .cornerRadius(20)
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(Color.white.opacity(0.03))
+                .overlay(RoundedRectangle(cornerRadius: 28).stroke(Color.white.opacity(0.05), lineWidth: 1))
+        )
     }
 }
 

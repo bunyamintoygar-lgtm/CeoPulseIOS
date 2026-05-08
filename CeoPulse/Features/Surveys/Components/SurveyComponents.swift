@@ -6,20 +6,20 @@ struct SurveyCard: View {
     let participationRate: Double // 0.0 to 1.0
     let timeRemaining: String
     let isAnonymous: Bool
+    let buttonTitle: String
     let onJoin: () -> Void
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 20) {
             // Top Row: Badges and Timer
             HStack {
-                HStack(spacing: 4) {
+                HStack(spacing: 6) {
                     Text(survey.status.rawValue.uppercased())
                         .font(.system(size: 10, weight: .bold))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.purple.opacity(0.2))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Capsule().fill(Color.purple.opacity(0.15)))
                         .foregroundColor(.purple)
-                        .cornerRadius(4)
                     
                     if isAnonymous {
                         HStack(spacing: 4) {
@@ -27,13 +27,12 @@ struct SurveyCard: View {
                                 .font(.system(size: 10))
                                 .symbolRenderingMode(.hierarchical)
                             Text("Anonim")
-                                .font(.system(size: 10, weight: .medium))
+                                .font(.system(size: 10, weight: .bold))
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.white.opacity(0.05))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Capsule().fill(Color.white.opacity(0.08)))
                         .foregroundColor(AppColors.textSecondary)
-                        .cornerRadius(4)
                     }
                     
                     if let category = ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId }) {
@@ -44,38 +43,40 @@ struct SurveyCard: View {
                                     .symbolRenderingMode(.hierarchical)
                             }
                             Text(category.name)
-                                .font(.system(size: 10, weight: .medium))
+                                .font(.system(size: 10, weight: .bold))
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.purple.opacity(0.1))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Capsule().fill(LinearGradient(colors: [.purple.opacity(0.1), .blue.opacity(0.1)], startPoint: .leading, endPoint: .trailing)))
                         .foregroundColor(.purple)
-                        .cornerRadius(4)
                     }
                 }
                 
                 Spacer()
                 
                 HStack(spacing: 4) {
-                    Image(systemName: "clock")
+                    Image(systemName: "clock.badge.exclamationmark")
+                        .symbolRenderingMode(.hierarchical)
                         .symbolEffect(.pulse, options: .repeating)
                     Text(timeRemaining)
                 }
-                .font(.system(size: 11))
+                .font(.system(size: 11, weight: .medium))
                 .foregroundColor(AppColors.textSecondary)
             }
             
-            // Middle Content: Title, Description and Progress
-            HStack(alignment: .top, spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
+            // Middle Content: Title and Progress
+            HStack(alignment: .top, spacing: 20) {
+                VStack(alignment: .leading, spacing: 10) {
                     Text(survey.title)
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
                         .lineLimit(3)
+                        .multilineTextAlignment(.leading)
                     
                     Text(survey.description ?? "Küresel CEO Pulse Anketi")
-                        .font(.system(size: 12))
+                        .font(.system(size: 13))
                         .foregroundColor(AppColors.textSecondary)
+                        .lineLimit(2)
                 }
                 
                 Spacer()
@@ -83,78 +84,87 @@ struct SurveyCard: View {
                 // Participation Rate Circle
                 ZStack {
                     Circle()
-                        .stroke(Color.white.opacity(0.05), lineWidth: 4)
-                        .frame(width: 70, height: 70)
+                        .stroke(Color.white.opacity(0.05), lineWidth: 5)
+                        .frame(width: 75, height: 75)
                     
                     Circle()
                         .trim(from: 0, to: participationRate)
                         .stroke(
                             LinearGradient(
-                                colors: [.purple, Color(hex: "6C38FF")],
+                                colors: [.purple, Color(hex: "6C38FF"), .blue],
                                 startPoint: .top,
                                 endPoint: .bottom
                             ),
-                            style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                            style: StrokeStyle(lineWidth: 5, lineCap: .round)
                         )
-                        .frame(width: 70, height: 70)
+                        .frame(width: 75, height: 75)
                         .rotationEffect(.degrees(-90))
+                        .shadow(color: .purple.opacity(0.3), radius: 4)
                     
                     VStack(spacing: 0) {
                         Text("%\(Int(participationRate * 100))")
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: 18, weight: .black))
                             .foregroundColor(.white)
                         Text("Katılım")
-                            .font(.system(size: 8))
+                            .font(.system(size: 9, weight: .bold))
                             .foregroundColor(AppColors.textSecondary)
                     }
                 }
             }
             
-            // Avatars and Total Votes
-            HStack(spacing: -8) {
-                ForEach(0..<4) { i in
-                    Image("ceo_profile_\(i + 1)")
-                        .resizable()
-                        .frame(width: 28, height: 28)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(AppColors.background, lineWidth: 2))
+            // Bottom Row: Avatars and Button
+            HStack {
+                HStack(spacing: -10) {
+                    ForEach(0..<min(totalVotes, 4), id: \.self) { i in
+                        Image("ceo_profile_\(i + 1)")
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 32, height: 32)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(AppColors.background, lineWidth: 2))
+                    }
+                    
+                    if totalVotes > 4 {
+                        Text("+\(totalVotes - 4)")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 32, height: 32)
+                            .background(Circle().fill(Color.purple.opacity(0.4)))
+                            .overlay(Circle().stroke(AppColors.background, lineWidth: 2))
+                    }
                 }
                 
-                Text("+\(totalVotes)")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 28, height: 28)
-                    .background(Color.purple.opacity(0.3))
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(AppColors.background, lineWidth: 2))
-                    .padding(.leading, 4)
+                Spacer(minLength: 12)
                 
-                Text("Toplam \(totalVotes) CEO oy verdi")
-                    .font(.system(size: 11))
-                    .foregroundColor(AppColors.textSecondary)
-                    .padding(.leading, 8)
-            }
-            
-            // Join Button
-            Button(action: onJoin) {
-                HStack {
-                    Text("Ankete Katıl")
-                    Image(systemName: "chevron.right")
+                Button(action: onJoin) {
+                    Text(buttonTitle)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule()
+                                .fill(LinearGradient(colors: [Color(hex: "6C38FF"), .purple], startPoint: .leading, endPoint: .trailing))
+                                .shadow(color: .purple.opacity(0.3), radius: 8, y: 4)
+                        )
                 }
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color(hex: "6C38FF"))
-                .cornerRadius(12)
             }
         }
-        .padding(20)
-        .background(Color.white.opacity(0.03))
-        .cornerRadius(20)
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.05), lineWidth: 1))
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(Color.white.opacity(0.03))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28)
+                        .stroke(
+                            LinearGradient(colors: [.white.opacity(0.1), .clear, .white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                            lineWidth: 1
+                        )
+                )
+        )
     }
 }
+
 
 struct SurveyCompletedRow: View {
     let title: String

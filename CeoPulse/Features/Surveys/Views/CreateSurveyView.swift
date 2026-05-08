@@ -9,9 +9,52 @@ struct CreateSurveyView: View {
     @State private var description = ""
     @State private var selectedCategory: SurveyCategory?
     @State private var targetAudience = "Herkese Açık"
-    @State private var hasEndDate = false
+    @State private var hasEndDate = true // Default to true as per new 3-month rule
     @State private var startDate = Date()
-    @State private var endDate = Date()
+    @State private var endDate = Calendar.current.date(byAdding: .month, value: 3, to: Date()) ?? Date()
+    
+    private var maxEndDate: Date {
+        Calendar.current.date(byAdding: .month, value: 3, to: startDate) ?? startDate
+    }
+    @State private var isGeneratingAI = false
+    
+    private func generateAIQuestions() {
+        guard !title.isEmpty else { return }
+        isGeneratingAI = true
+        
+        Task {
+            do {
+                let languageCode = Locale.current.language.languageCode?.identifier ?? "tr"
+                
+                let response: [DraftQuestion] = try await SupabaseManager.shared.client.functions
+                    .invoke("generate-survey-questions", 
+                            options: .init(body: [
+                                "title": title, 
+                                "description": description,
+                                "language": languageCode
+                            ]))
+                
+                await MainActor.run {
+                    withAnimation {
+                        self.questions = response
+                        self.isGeneratingAI = false
+                    }
+                }
+            } catch {
+                print("AI generation error: \(error)")
+                await MainActor.run { self.isGeneratingAI = false }
+            }
+        }
+    }
+    @State private var showingResumeAlert = false
+    @State private var showingExitConfirmation = false
+    
+    @StateObject private var draftManager = SurveyDraftManager.shared
+    
+    private var hasChanges: Bool {
+        // Only count as changes if title/desc is not empty OR questions are different from the single default question
+        !title.isEmpty || !description.isEmpty || questions.count > 1 || (questions.count == 1 && !questions[0].text.isEmpty && questions[0].text != "2026 yılında yapay zeka yatırımlarınızın toplam bütçenizdeki payı ne olacak?")
+    }
     
     @StateObject private var configManager = ConfigManager.shared
     
@@ -39,6 +82,8 @@ struct CreateSurveyView: View {
                             step2Questions
                         } else if currentStep == 3 {
                             step3Settings
+                        } else if currentStep == 4 {
+                            step4Preview
                         }
                     }
                     .padding(20)
@@ -53,46 +98,87 @@ struct CreateSurveyView: View {
     
     private var headerView: some View {
         HStack {
-            Button(action: { presentationMode.wrappedValue.dismiss() }) {
+            Button(action: { 
+                if hasChanges {
+                    showingExitConfirmation = true
+                } else {
+                    presentationMode.wrappedValue.dismiss()
+                }
+            }) {
                 Image(systemName: "arrow.left")
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
                     .frame(width: 40, height: 40)
-                    .background(Color.white.opacity(0.05))
-                    .clipShape(Circle())
+                    .background(Circle().fill(Color.white.opacity(0.05)))
             }
             
             Spacer()
             
             VStack(spacing: 4) {
-                HStack {
+                HStack(spacing: 8) {
                     Image(systemName: "plus.square.fill.on.square.fill")
+                        .symbolRenderingMode(.hierarchical)
                         .foregroundColor(.purple)
+                        .symbolEffect(.bounce, value: currentStep)
                     Text("Yeni Anket Ekle")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
                 }
-                Text("Anketinizi oluşturun ve topluluğunuzla paylaşın.")
+                Text("Anketinizi oluşturun ve paylaşın.")
                     .font(.system(size: 12))
                     .foregroundColor(AppColors.textSecondary)
             }
             
             Spacer()
             
-            Button(action: {}) {
-                HStack(spacing: 6) {
-                    Image(systemName: "archivebox")
-                    Text("Taslaklar")
-                }
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.purple)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Color.purple.opacity(0.1))
-                .cornerRadius(8)
-            }
+            // Empty space for balance
+            Color.clear.frame(width: 40, height: 40)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
+        .confirmationDialog("Anketi Taslak Olarak Kaydet?", isPresented: $showingExitConfirmation, titleVisibility: .visible) {
+            Button("Taslağı Kaydet") {
+                draftManager.saveDraft(title: title, description: description, category: selectedCategory, audience: targetAudience, questions: questions, step: currentStep)
+                presentationMode.wrappedValue.dismiss()
+            }
+            Button("Değişiklikleri Sil", role: .destructive) {
+                draftManager.clearDraft()
+                presentationMode.wrappedValue.dismiss()
+            }
+            Button("Düzenlemeye Devam Et", role: .cancel) {}
+        } message: {
+            Text("Çıkmak üzeresiniz. Yaptığınız değişiklikleri taslak olarak kaydetmek ister misiniz?")
+        }
+        .alert("Yarım Kalan Anket", isPresented: $showingResumeAlert) {
+            Button("Devam Et") {
+                loadDraft()
+            }
+            Button("Yeni Başla", role: .destructive) {
+                draftManager.clearDraft()
+            }
+        } message: {
+            Text("Daha önceden yarım bıraktığınız bir taslağınız mevcut. Kaldığınız yerden devam etmek ister misiniz?")
+        }
+        .onAppear {
+            if draftManager.hasDraft() && !hasChanges {
+                showingResumeAlert = true
+            }
+        }
+    }
+    
+    private func loadDraft() {
+        if let draft = draftManager.loadDraft() {
+            title = draft.title
+            description = draft.description
+            targetAudience = draft.targetAudience
+            questions = draft.questions
+            currentStep = draft.currentStep
+            
+            // Re-map category
+            if let catId = draft.categoryId {
+                selectedCategory = configManager.surveyCategories.first(where: { $0.id == catId })
+            }
+        }
     }
     
     private var surveyStepper: some View {
@@ -224,21 +310,59 @@ struct CreateSurveyView: View {
                 Text("Soru: \(questions.count)").font(.system(size: 11)).padding(.horizontal, 10).padding(.vertical, 5).background(Color.white.opacity(0.05)).cornerRadius(8)
             }
             
+            // AI Wizard Button
+            Button(action: generateAIQuestions) {
+                HStack(spacing: 12) {
+                    if isGeneratingAI {
+                        ProgressView().tint(.white)
+                    } else {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 18))
+                            .symbolEffect(.bounce, options: .repeating)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(isGeneratingAI ? "Sorular Hazırlanıyor..." : "AI Soru Sihirbazı")
+                            .font(.system(size: 14, weight: .bold))
+                        Text("Anket adına göre soruları otomatik oluştur")
+                            .font(.system(size: 10))
+                            .opacity(0.8)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12))
+                }
+                .padding()
+                .foregroundColor(.white)
+                .background(
+                    LinearGradient(colors: [Color(hex: "6C38FF"), .purple], startPoint: .leading, endPoint: .trailing)
+                        .opacity(isGeneratingAI ? 0.6 : 1.0)
+                )
+                .cornerRadius(16)
+                .shadow(color: .purple.opacity(0.3), radius: 8, y: 4)
+            }
+            .disabled(isGeneratingAI || title.isEmpty)
+            .opacity(title.isEmpty ? 0.5 : 1.0)
+            
             ForEach(0..<questions.count, id: \.self) { index in
                 QuestionEditCard(question: $questions[index], number: index + 1)
             }
             
-            Button(action: { questions.append(DraftQuestion(text: "", options: ["", ""], type: .singleChoice)) }) {
+            Button(action: { 
+                withAnimation(.spring()) {
+                    questions.append(DraftQuestion(text: "", options: ["", ""], type: .singleChoice)) 
+                }
+            }) {
                 HStack {
-                    Image(systemName: "plus")
+                    Image(systemName: "plus.circle.fill")
+                        .symbolRenderingMode(.hierarchical)
                     Text("Soru Ekle")
                 }
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(12)
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.05)))
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
             }
         }
@@ -296,12 +420,135 @@ struct CreateSurveyView: View {
             
             // Diğer Ayarlar
             VStack(alignment: .leading, spacing: 12) {
-                Text("Diğer Ayarlar").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
-                VStack(spacing: 16) {
-                    SettingsToggle(title: "Katılımcıların yanıtlarını değiştirmesine izin ver", isOn: .constant(true))
-                    SettingsToggle(title: "Bir yanıt seçmeden ankete geçmeyi engelle", isOn: .constant(true))
+                Text("Gelişmiş Seçenekler").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                VStack(spacing: 12) {
+                    SettingsToggle(title: "Yanıtları değiştirmeye izin ver", icon: "arrow.left.arrow.right.circle", isOn: .constant(true))
+                    SettingsToggle(title: "Yanıtlamayı zorunlu tut", icon: "exclamationmark.circle", isOn: .constant(true))
+                    SettingsToggle(title: "Sonuçları anonimleştir", icon: "eye.slash", isOn: .constant(false))
                 }
             }
+            
+            // Bitiş Tarihi Ayarı
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("Anket Bitiş Tarihi")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                    Spacer()
+                    Text("Max 3 Ay")
+                        .font(.system(size: 10, weight: .bold))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.purple.opacity(0.1))
+                        .foregroundColor(.purple)
+                        .cornerRadius(6)
+                }
+                
+                VStack(spacing: 12) {
+                    DatePicker(
+                        "Bitiş Tarihi",
+                        selection: $endDate,
+                        in: Date()...maxEndDate,
+                        displayedComponents: [.date]
+                    )
+                    .datePickerStyle(.graphical)
+                    .accentColor(.purple)
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.03)))
+                    .colorScheme(.dark)
+                }
+                
+                Text("Anketiniz en geç \(maxEndDate.formatted(date: .long, time: .omitted)) tarihinde otomatik olarak kapanacaktır.")
+                    .font(.system(size: 11))
+                    .foregroundColor(AppColors.textSecondary)
+            }
+        }
+    }
+    
+    private var step4Preview: some View {
+        VStack(spacing: 24) {
+            HStack {
+                ZStack {
+                    Circle().fill(Color.green.opacity(0.1)).frame(width: 40, height: 40)
+                    Image(systemName: "eye.fill").foregroundColor(.green)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Son Önizleme").font(.system(size: 16, weight: .bold)).foregroundColor(.white)
+                    Text("Anketiniz yayınlandığında böyle görünecek.").font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
+                }
+                Spacer()
+            }
+            
+            // Preview Card
+            VStack(alignment: .leading, spacing: 20) {
+                if let category = selectedCategory {
+                    HStack(spacing: 6) {
+                        Image(systemName: category.icon ?? "tag")
+                        Text(category.name)
+                    }
+                    .font(.system(size: 10, weight: .bold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.purple.opacity(0.2))
+                    .foregroundColor(.purple)
+                    .cornerRadius(6)
+                }
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(title.isEmpty ? "Anket Başlığı" : title)
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    if !description.isEmpty {
+                        Text(description)
+                            .font(.system(size: 14))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                }
+                
+                Divider().background(Color.white.opacity(0.1))
+                
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Sorular (\(questions.count))")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white.opacity(0.6))
+                    
+                    ForEach(questions.indices, id: \.self) { i in
+                        HStack(spacing: 12) {
+                            Text("\(i + 1)")
+                                .font(.system(size: 10, weight: .bold))
+                                .frame(width: 20, height: 20)
+                                .background(Circle().fill(Color.white.opacity(0.1)))
+                            Text(questions[i].text.isEmpty ? "Soru metni..." : questions[i].text)
+                                .font(.system(size: 14))
+                        }
+                        .foregroundColor(.white)
+                    }
+                }
+            }
+            .padding(24)
+            .background(RoundedRectangle(cornerRadius: 24).fill(Color.white.opacity(0.03)))
+            .overlay(RoundedRectangle(cornerRadius: 24).stroke(Color.white.opacity(0.1), lineWidth: 1))
+            
+            // Final Call to Action
+            VStack(spacing: 16) {
+                Image(systemName: "paperplane.circle.fill")
+                    .font(.system(size: 60))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundColor(.purple)
+                    .symbolEffect(.bounce, options: .repeating)
+                
+                Text("Anketiniz Yayına Hazır!")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("Yayınla butonuna bastığınızda tüm CEO'lar anketinize katılabilecek.")
+                    .font(.system(size: 14))
+                    .foregroundColor(AppColors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
+            .padding(.vertical, 20)
         }
     }
     
@@ -320,21 +567,7 @@ struct CreateSurveyView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(12)
-                    }
-                } else {
-                    Button(action: {}) {
-                        HStack {
-                            Image(systemName: "archivebox")
-                            Text("Taslak Olarak Kaydet")
-                        }
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(12)
+                        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.05)))
                     }
                 }
                 
@@ -377,12 +610,13 @@ struct StepperItem: View {
             ZStack {
                 Circle()
                     .fill(isCompleted ? Color.purple : (isCurrent ? Color.purple.opacity(0.2) : Color.white.opacity(0.05)))
-                    .frame(width: 24, height: 24)
+                    .frame(width: 28, height: 28)
                 
                 if isCompleted {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: 12, weight: .bold))
                         .foregroundColor(.white)
+                        .symbolEffect(.bounce, value: isCompleted)
                 } else {
                     Text("\(number)")
                         .font(.system(size: 12, weight: .bold))
@@ -390,13 +624,17 @@ struct StepperItem: View {
                 }
             }
             .overlay(
-                Circle().stroke(isCurrent ? Color.purple : Color.clear, lineWidth: 1)
+                Circle()
+                    .stroke(isCurrent ? Color.purple : Color.clear, lineWidth: 1)
+                    .scaleEffect(isCurrent ? 1.2 : 1.0)
+                    .opacity(isCurrent ? 0.5 : 0)
             )
             
             Text(title)
                 .font(.system(size: 10, weight: isCurrent ? .bold : .medium))
                 .foregroundColor(isCurrent ? .purple : AppColors.textSecondary)
         }
+        .animation(.spring(), value: isCurrent)
     }
 }
 
@@ -412,11 +650,14 @@ struct AudienceCard: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Image(systemName: icon)
-                        .font(.system(size: 18))
+                        .font(.system(size: 20))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundColor(isSelected ? .purple : .white)
                     Spacer()
                     if isSelected {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image(systemName: "checkmark.seal.fill")
                             .foregroundColor(.purple)
+                            .symbolEffect(.bounce, value: isSelected)
                     }
                 }
                 
@@ -429,14 +670,18 @@ struct AudienceCard: View {
                         .opacity(0.7)
                 }
             }
-            .padding(12)
-            .frame(maxWidth: .infinity, minHeight: 110)
-            .background(isSelected ? Color.purple.opacity(0.1) : Color.white.opacity(0.05))
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.purple : Color.clear, lineWidth: 1)
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 120)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(isSelected ? Color.purple.opacity(0.1) : Color.white.opacity(0.05))
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(isSelected ? Color.purple : Color.white.opacity(0.1), lineWidth: 1)
+            )
+            .scaleEffect(isSelected ? 1.02 : 1.0)
+            .animation(.spring(), value: isSelected)
             .foregroundColor(.white)
         }
     }
@@ -457,34 +702,52 @@ struct QuestionEditCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("\(number). Soru").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
-                Text("(Zorunlu)").font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
+                HStack(spacing: 8) {
+                    Text("\(number)")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 20, height: 20)
+                        .background(Circle().fill(Color.purple))
+                    Text("Soru").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                }
+                Text(question.isRequired ? "(Zorunlu)" : "(İsteğe Bağlı)")
+                    .font(.system(size: 12))
+                    .foregroundColor(AppColors.textSecondary)
                 Spacer()
-                Image(systemName: "line.3.horizontal").foregroundColor(AppColors.textSecondary)
+                Image(systemName: "line.3.horizontal")
+                    .foregroundColor(AppColors.textSecondary)
+                    .font(.system(size: 18))
             }
             
             TextField("Sorunuzu buraya yazın...", text: $question.text)
                 .padding()
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(12)
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.05)))
                 .foregroundColor(.white)
             
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("Yanıt Seçenekleri").font(.system(size: 13, weight: .medium)).foregroundColor(.white)
                     Spacer()
-                    Button("Seçenek Ekle") {
-                        question.options.append("")
+                    Button(action: {
+                        withAnimation { question.options.append("") }
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus")
+                            Text("Seçenek Ekle")
+                        }
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.purple)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Color.purple.opacity(0.1)))
                     }
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.purple)
-                    .padding(.horizontal, 10).padding(.vertical, 5).background(Color.purple.opacity(0.1)).cornerRadius(6)
                 }
                 
                 ForEach(0..<question.options.count, id: \.self) { i in
                     HStack {
-                        Image(systemName: question.type == .singleChoice ? "circle" : "square")
-                            .foregroundColor(AppColors.textSecondary)
+                        Image(systemName: question.type == .singleChoice ? "circle.fill" : "checkmark.square.fill")
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundColor(.purple)
                         
                         TextField("Seçenek \(i + 1)", text: $question.options[i])
                             .font(.system(size: 14))
@@ -492,31 +755,46 @@ struct QuestionEditCard: View {
                         
                         Spacer()
                         
-                        Image(systemName: "line.3.horizontal").foregroundColor(AppColors.textSecondary)
-                        Button(action: { if question.options.count > 2 { question.options.remove(at: i) } }) {
-                            Image(systemName: "trash").foregroundColor(.red.opacity(0.7))
+                        Button(action: { 
+                            if question.options.count > 2 {
+                                withAnimation { _ = question.options.remove(at: i) }
+                            }
+                        }) {
+                            Image(systemName: "minus.circle.fill")
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(.red, .red.opacity(0.1))
                         }
                     }
                     .padding()
-                    .background(Color.white.opacity(0.03))
-                    .cornerRadius(10)
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.03)))
                 }
             }
             
             Divider().background(Color.white.opacity(0.1))
             
-            HStack {
-                Toggle("Çoklu yanıt verilebilir", isOn: $question.allowMultiple)
-                    .font(.system(size: 13))
-                Spacer()
-                Toggle("Zorunlu soru", isOn: $question.isRequired)
-                    .font(.system(size: 13))
+            HStack(spacing: 20) {
+                Toggle(isOn: $question.allowMultiple) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checklist")
+                            .symbolRenderingMode(.hierarchical)
+                        Text("Çoklu yanıt").font(.system(size: 13))
+                    }
+                }
+                .tint(.purple)
+                
+                Toggle(isOn: $question.isRequired) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "asterisk.circle.fill")
+                            .symbolRenderingMode(.hierarchical)
+                        Text("Zorunlu").font(.system(size: 13))
+                    }
+                }
+                .tint(.purple)
             }
             .foregroundColor(.white)
         }
         .padding(16)
-        .background(Color.white.opacity(0.03))
-        .cornerRadius(16)
+        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.03)))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.05), lineWidth: 1))
     }
 }
@@ -528,33 +806,69 @@ struct RadioButtonField: View {
     var sublabel: String? = nil
     
     var body: some View {
-        HStack(alignment: sublabel != nil ? .top : .center, spacing: 12) {
+        HStack(alignment: sublabel != nil ? .top : .center, spacing: 14) {
             ZStack {
-                Circle().stroke(isSelected ? Color.purple : Color.white.opacity(0.3), lineWidth: 2).frame(width: 20, height: 20)
+                Circle()
+                    .stroke(isSelected ? Color.purple : Color.white.opacity(0.2), lineWidth: 2)
+                    .frame(width: 22, height: 22)
+                
                 if isSelected {
-                    Circle().fill(Color.purple).frame(width: 12, height: 12)
+                    Circle()
+                        .fill(Color.purple)
+                        .frame(width: 12, height: 12)
+                        .symbolEffect(.bounce, value: isSelected)
                 }
             }
             
-            VStack(alignment: .leading, spacing: 2) {
-                Text(label).font(.system(size: 14, weight: .medium)).foregroundColor(.white)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(label)
+                    .font(.system(size: 15, weight: isSelected ? .bold : .medium))
+                    .foregroundColor(isSelected ? .white : .white.opacity(0.8))
+                
                 if let sub = sublabel {
-                    Text(sub).font(.system(size: 11)).foregroundColor(AppColors.textSecondary)
+                    Text(sub)
+                        .font(.system(size: 12))
+                        .foregroundColor(AppColors.textSecondary)
+                        .lineLimit(2)
                 }
             }
+            Spacer()
         }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(isSelected ? Color.purple.opacity(0.05) : Color.clear)
+        )
+        .contentShape(Rectangle())
+        .animation(.spring(response: 0.3), value: isSelected)
     }
 }
 
 struct SettingsToggle: View {
     let title: String
+    let icon: String
     @Binding var isOn: Bool
     
     var body: some View {
-        HStack {
-            Text(title).font(.system(size: 13)).foregroundColor(.white)
+        HStack(spacing: 16) {
+            ZStack {
+                Circle().fill(Color.white.opacity(0.05)).frame(width: 36, height: 36)
+                Image(systemName: icon)
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundColor(.purple)
+            }
+            
+            Text(title)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.white)
+            
             Spacer()
-            Toggle("", isOn: $isOn).labelsHidden()
+            
+            Toggle("", isOn: $isOn)
+                .tint(.purple)
+                .labelsHidden()
         }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
     }
 }
