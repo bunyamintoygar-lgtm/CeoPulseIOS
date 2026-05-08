@@ -5,7 +5,7 @@ struct Survey: Identifiable, Codable {
     let creatorId: UUID
     let title: String
     let description: String?
-    let categoryId: UUID?
+    let categoryId: String?
     let coverImageUrl: String?
     let targetAudience: String
     let status: SurveyStatus
@@ -27,7 +27,7 @@ struct Survey: Identifiable, Codable {
 }
 
 struct SurveyCategory: Identifiable, Codable {
-    let id: UUID
+    let id: String
     let tr: String
     let en: String
     let icon: String?

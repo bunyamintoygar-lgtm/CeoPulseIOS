@@ -1,16 +1,15 @@
--- Migration: Move Survey Categories to app_config JSON
+-- Migration: Move Survey Categories to app_config JSON with Readable IDs
 -- Date: 2026-05-09
 
 DO $$
 DECLARE
     categories_json JSONB;
 BEGIN
-    -- 1. Mevcut kategorileri JSONB formatına dönüştür ve bir değişkene ata
-    -- Not: ConfigManager'daki LocalizedValue yapısıyla (id, tr, en) uyumlu olması için 
-    -- name_tr -> tr, name_en -> en olarak eşliyoruz.
+    -- 1. Mevcut kategorileri JSONB formatına dönüştür
+    -- ID olarak UUID yerine name_en'den türetilmiş slug kullanıyoruz (örn: 'Artificial Intelligence' -> 'artificial-intelligence')
     SELECT jsonb_agg(
         jsonb_build_object(
-            'id', id,
+            'id', LOWER(REPLACE(name_en, ' ', '-')),
             'tr', name_tr,
             'en', name_en,
             'icon', icon
@@ -18,18 +17,20 @@ BEGIN
     ) INTO categories_json
     FROM public.survey_categories;
 
-    -- 2. app_config tablosuna 'survey_categories' anahtarıyla ekle veya güncelle
-    -- Eğer app_config tablosunda 'key' alanı UNIQUE ise ON CONFLICT çalışacaktır.
+    -- 2. app_config tablosuna ekle/güncelle
     INSERT INTO public.app_config (key, value)
     VALUES ('survey_categories', categories_json)
     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 
-    -- 3. surveys tablosundaki Foreign Key kısıtlamasını kaldır
-    -- Bu sayede kategori tablosu silindiğinde hata almayız, UUID'ler referans olarak kalır.
+    -- 3. surveys tablosundaki category_id tipini UUID'den TEXT'e çevir
+    -- Önce kısıtlamayı kaldırıyoruz
     ALTER TABLE public.surveys DROP CONSTRAINT IF EXISTS surveys_category_id_fkey;
+    
+    -- Tipi değiştiriyoruz (Mevcut UUID verilerini slug'lara eşlemek zor olacağı için bu aşamada temizliyoruz)
+    ALTER TABLE public.surveys ALTER COLUMN category_id TYPE TEXT USING NULL;
 
-    -- 4. Artık ihtiyaç duyulmayan survey_categories tablosunu sil
+    -- 4. Eski tabloyu sil
     DROP TABLE IF EXISTS public.survey_categories;
     
-    RAISE NOTICE 'Anket kategorileri başarıyla app_config tablosuna taşındı.';
+    RAISE NOTICE 'Anket kategorileri okunabilir ID’lerle app_config’e taşındı.';
 END $$;
