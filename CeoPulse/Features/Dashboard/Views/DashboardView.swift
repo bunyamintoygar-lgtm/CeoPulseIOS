@@ -20,6 +20,8 @@ struct DashboardView: View {
                     ZStack(alignment: .topTrailing) {
                         Image(systemName: "bell.fill")
                             .font(.title3)
+                            .symbolRenderingMode(.hierarchical)
+                            .symbolEffect(.pulse, options: .repeating)
                             .foregroundColor(.white)
                         
                         Circle()

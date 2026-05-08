@@ -25,6 +25,7 @@ struct SurveyCard: View {
                         HStack(spacing: 4) {
                             Image(systemName: "eye.slash.fill")
                                 .font(.system(size: 10))
+                                .symbolRenderingMode(.hierarchical)
                             Text("Anonim")
                                 .font(.system(size: 10, weight: .medium))
                         }
@@ -40,6 +41,7 @@ struct SurveyCard: View {
                 
                 HStack(spacing: 4) {
                     Image(systemName: "clock")
+                        .symbolEffect(.pulse, options: .repeating)
                     Text(timeRemaining)
                 }
                 .font(.system(size: 11))
@@ -151,6 +153,7 @@ struct SurveyCompletedRow: View {
                     .fill(color.opacity(0.1))
                     .frame(width: 44, height: 44)
                 Image(systemName: icon)
+                    .symbolRenderingMode(.hierarchical)
                     .foregroundColor(color)
             }
             
@@ -163,6 +166,9 @@ struct SurveyCompletedRow: View {
                     Text(date)
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.circle.fill")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, .green)
+                            .symbolEffect(.bounce, value: true)
                         Text("Tamamlandı")
                     }
                     .foregroundColor(.green)

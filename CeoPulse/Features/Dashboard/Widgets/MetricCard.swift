@@ -22,6 +22,8 @@ struct MetricCard: View {
                         .frame(width: 36, height: 36)
                     Image(systemName: iconName)
                         .font(.system(size: 16, weight: .bold))
+                        .symbolRenderingMode(.hierarchical)
+                        .symbolEffect(.appear)
                         .foregroundColor(iconColor)
                 }
                 
