@@ -13,6 +13,8 @@ struct SurveysHomeView: View {
     @State private var isSearchVisible = false
     @State private var showingFilterMenu = false
     
+    @State private var surveyToDelete: Survey?
+    @State private var showingDeleteAlert = false
     @State private var surveyToEdit: Survey?
     
     // AI Rejection Popup States
@@ -278,6 +280,10 @@ struct SurveysHomeView: View {
                     }
                     .zIndex(100)
                 }
+                
+                if showingRejectionPopup, let survey = surveyWithRejection {
+                    rejectionPopup(for: survey)
+                }
             }
             .navigationBarHidden(true)
             .sheet(isPresented: $showCreateSurvey) {
@@ -300,11 +306,6 @@ struct SurveysHomeView: View {
             .sheet(isPresented: $showShareSheet) {
                 if let url = shareURL {
                     ShareSheet(activityItems: [url])
-                }
-            }
-            
-                if showingRejectionPopup, let survey = surveyWithRejection {
-                    rejectionPopup(for: survey)
                 }
             }
         }
