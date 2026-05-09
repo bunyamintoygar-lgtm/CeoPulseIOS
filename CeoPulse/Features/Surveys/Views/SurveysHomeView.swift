@@ -163,9 +163,13 @@ struct SurveysHomeView: View {
                     }
                     .onAppear {
                         viewModel.fetchSurveys()
+                        if ConfigManager.shared.surveyCategories.isEmpty {
+                            Task { await ConfigManager.shared.fetchConfigs() }
+                        }
                     }
                     .refreshable {
                         viewModel.fetchSurveys()
+                        Task { await ConfigManager.shared.fetchConfigs() }
                     }
                 }
                 
