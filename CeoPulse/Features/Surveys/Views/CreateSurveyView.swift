@@ -1467,8 +1467,8 @@ struct ContentModerator {
             }
             
             // Supabase proje URL ve anon key
-            let supabaseURL = SupabaseManager.shared.client.supabaseURL
-            let anonKey = SupabaseManager.shared.client.supabaseKey
+            let supabaseURL = SupabaseManager.shared.projectURL
+            let anonKey = SupabaseManager.shared.anonKey
             let functionURL = supabaseURL.appendingPathComponent("functions/v1/moderate-content")
             
             print("🛡️ [ContentModerator] URLSession ile çağrılıyor: \(functionURL)")
