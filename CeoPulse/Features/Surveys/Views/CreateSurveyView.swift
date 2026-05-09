@@ -28,7 +28,7 @@ struct CreateSurveyView: View {
                 let languageCode = Locale.current.language.languageCode?.identifier ?? "tr"
                 
                 // Invoke function and get raw data first for better debugging
-                let responseData = try await SupabaseManager.shared.client.functions
+                let responseData: Data = try await SupabaseManager.shared.client.functions
                     .invoke("generate-survey-questions", 
                             options: .init(body: [
                                 "title": title, 
