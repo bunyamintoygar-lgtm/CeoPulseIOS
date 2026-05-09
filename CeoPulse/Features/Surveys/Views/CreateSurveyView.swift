@@ -862,6 +862,21 @@ struct CreateSurveyView: View {
             return
         }
         
+        // Content Moderation Check
+        var allTexts: [String] = [title, description].compactMap { $0.isEmpty ? nil : $0 }
+        for q in questions {
+            allTexts.append(q.text)
+            for opt in q.options {
+                allTexts.append(opt)
+            }
+        }
+        
+        let moderationResult = ContentModerator.shared.isContentAppropriate(allTexts)
+        if !moderationResult.isAppropriate {
+            errorMessage = "İçeriğiniz topluluk kurallarına aykırı veya uygunsuz ifadeler içermektedir. Lütfen düzenleyip tekrar deneyin."
+            return
+        }
+        
         isPublishing = true
         errorMessage = nil
         
