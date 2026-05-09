@@ -27,7 +27,8 @@ struct CreateSurveyView: View {
             do {
                 let languageCode = Locale.current.language.languageCode?.identifier ?? "tr"
                 
-                let response: [DraftQuestion] = try await SupabaseManager.shared.client.functions
+                // Invoke function and get raw data first for better debugging
+                let responseData = try await SupabaseManager.shared.client.functions
                     .invoke("generate-survey-questions", 
                             options: .init(body: [
                                 "title": title, 
@@ -35,14 +36,27 @@ struct CreateSurveyView: View {
                                 "language": languageCode
                             ]))
                 
-                await MainActor.run {
-                    withAnimation {
-                        self.questions = response
-                        self.isGeneratingAI = false
+                // Try to decode
+                let decoder = JSONDecoder()
+                do {
+                    let response = try decoder.decode([DraftQuestion].self, from: responseData)
+                    await MainActor.run {
+                        withAnimation(.spring()) {
+                            self.questions = response
+                            self.isGeneratingAI = false
+                        }
                     }
+                } catch {
+                    print("AI decoding error: \(error)")
+                    // If it's a single object with an "error" field, show that
+                    if let errorObj = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any],
+                       let errMsg = errorObj["error"] as? String {
+                        print("AI Edge Function Error: \(errMsg)")
+                    }
+                    await MainActor.run { self.isGeneratingAI = false }
                 }
             } catch {
-                print("AI generation error: \(error)")
+                print("AI invocation error: \(error)")
                 await MainActor.run { self.isGeneratingAI = false }
             }
         }
