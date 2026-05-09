@@ -17,7 +17,8 @@ serve(async (req) => {
   }
 
   try {
-    const { survey_id } = await req.json()
+    const { record, survey_id: body_id } = await req.json()
+    const survey_id = body_id || record?.id
 
     if (!survey_id) {
       return new Response(JSON.stringify({ error: 'survey_id is required' }), {
@@ -25,6 +26,9 @@ serve(async (req) => {
         headers: { 'Content-Type': 'application/json' },
       })
     }
+
+    // Webhook'tan geliyorsa soruların tam yazılması için 2 saniye bekle
+    await new Promise(resolve => setTimeout(resolve, 2000))
 
     // Service role ile Supabase bağlantısı (tüm verilere erişebilir)
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)

@@ -9,6 +9,7 @@ struct Survey: Identifiable, Codable {
     let coverImageUrl: String?
     let targetAudience: String
     let status: SurveyStatus
+    let rejectionReason: String?
     let startDate: Date
     let endDate: Date?
     let isAnonymous: Bool
@@ -19,7 +20,7 @@ struct Survey: Identifiable, Codable {
     let language: String?
     
     enum SurveyStatus: String, Codable {
-        case active, completed, draft, archived
+        case active, completed, draft, archived, rejected
     }
     
     enum ResultVisibility: String, Codable {
@@ -35,6 +36,7 @@ struct Survey: Identifiable, Codable {
         case coverImageUrl = "cover_image_url"
         case targetAudience = "target_audience"
         case status
+        case rejectionReason = "rejection_reason"
         case startDate = "start_date"
         case endDate = "end_date"
         case isAnonymous = "is_anonymous"
