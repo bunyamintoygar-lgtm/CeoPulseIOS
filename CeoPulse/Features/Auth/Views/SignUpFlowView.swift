@@ -388,7 +388,7 @@ struct SingleOTPInput: View {
                     .stroke(activeField == index ? Color.purple : Color.white.opacity(0.1), lineWidth: 1)
             )
             .focused($activeField, equals: index)
-            .onChange(of: otpCode[index]) { (newValue: String) in
+            .onChange(of: otpCode[index]) { oldValue, newValue in
                 if newValue.count > 1 {
                     otpCode[index] = String(newValue.suffix(1))
                 }
