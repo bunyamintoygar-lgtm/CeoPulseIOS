@@ -297,17 +297,6 @@ struct CreateSurveyView: View {
                 }
             }
             
-            // Target Audience
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Hedef Kitle")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
-                
-                HStack(spacing: 12) {
-                    AudienceCard(title: "Herkese Açık", subtitle: "Herkes görebilir ve katılabilir.", icon: "globe", isSelected: targetAudience == "Herkese Açık") { targetAudience = "Herkese Açık" }
-                    AudienceCard(title: "Topluluk İçi", subtitle: "Sadece topluluk üyeleri görebilir.", icon: "person.2", isSelected: targetAudience == "Topluluk İçi") { targetAudience = "Topluluk İçi" }
-                    AudienceCard(title: "Özel", subtitle: "Sadece davet ettiğiniz kişiler görebilir.", icon: "lock", isSelected: targetAudience == "Özel") { targetAudience = "Özel" }
-                }
             }
         }
     }
