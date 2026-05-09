@@ -219,6 +219,46 @@ struct SurveysHomeView: View {
             SurveyCompletedRow(title: "Sürdürülebilirlik yatırımlarınızın öncelik alanı nedir?", date: "Şubat 2025", rate: 91, icon: "leaf.fill", color: .green)
         }
     }
+    
+    private func errorView(_ message: String) -> some View {
+        VStack(spacing: 16) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 40))
+                .foregroundColor(.orange)
+            
+            Text(message)
+                .font(.system(size: 16))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+            
+            Button("Tekrar Dene") {
+                viewModel.fetchSurveys()
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .background(Capsule().fill(Color.purple))
+            .foregroundColor(.white)
+        }
+        .padding(.top, 60)
+    }
+    
+    private func emptyStateView(title: String) -> some View {
+        VStack(spacing: 20) {
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.05))
+                    .frame(width: 80, height: 80)
+                Image(systemName: "doc.text.magnifyingglass")
+                    .font(.system(size: 32))
+                    .foregroundColor(.purple.opacity(0.5))
+            }
+            
+            Text(title)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(AppColors.textSecondary)
+        }
+        .padding(.top, 60)
+    }
 }
 
 struct SurveyTabButton: View {
@@ -254,6 +294,3 @@ struct SurveyTabButton: View {
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
     }
 }
-
-}
-
