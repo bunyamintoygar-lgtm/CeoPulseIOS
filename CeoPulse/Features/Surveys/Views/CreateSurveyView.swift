@@ -157,50 +157,8 @@ struct CreateSurveyView: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
-        .confirmationDialog("Anketi Taslak Olarak Kaydet?", isPresented: $showingExitConfirmation, titleVisibility: .visible) {
-            Button("Taslağı Kaydet") {
-                draftManager.saveDraft(title: title, description: description, category: selectedCategory, audience: targetAudience, questions: questions, step: currentStep)
-                presentationMode.wrappedValue.dismiss()
-            }
-            Button("Değişiklikleri Sil", role: .destructive) {
-                draftManager.clearDraft()
-                presentationMode.wrappedValue.dismiss()
-            }
-            Button("Düzenlemeye Devam Et", role: .cancel) {}
-        } message: {
-            Text("Çıkmak üzeresiniz. Yaptığınız değişiklikleri taslak olarak kaydetmek ister misiniz?")
-        }
-        .alert("Yarım Kalan Anket", isPresented: $showingResumeAlert) {
-            Button("Devam Et") {
-                loadDraft()
-            }
-            Button("Yeni Başla", role: .destructive) {
-                draftManager.clearDraft()
-            }
-        } message: {
-            Text("Daha önceden yarım bıraktığınız bir taslağınız mevcut. Kaldığınız yerden devam etmek ister misiniz?")
-        }
-        .onAppear {
-            if draftManager.hasDraft() && !hasChanges {
-                showingResumeAlert = true
-            }
-        }
     }
     
-    private func loadDraft() {
-        if let draft = draftManager.loadDraft() {
-            title = draft.title
-            description = draft.description
-            targetAudience = draft.targetAudience
-            questions = draft.questions
-            currentStep = draft.currentStep
-            
-            // Re-map category
-            if let catId = draft.categoryId {
-                selectedCategory = configManager.surveyCategories.first(where: { $0.id == catId })
-            }
-        }
-    }
     
     private var surveyStepper: some View {
         HStack {
