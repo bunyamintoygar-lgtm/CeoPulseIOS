@@ -827,6 +827,8 @@ struct QuestionEditCard: View {
     let number: Int
     let onDelete: () -> Void
     
+    @State private var showingDeleteAlert = false
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -841,8 +843,11 @@ struct QuestionEditCard: View {
                 Text((question.isRequired ?? true) ? "(Zorunlu)" : "(İsteğe Bağlı)")
                     .font(.system(size: 12))
                     .foregroundColor(AppColors.textSecondary)
+                
+                Spacer() // Pushes delete button to the far right
+                
                 Button(action: {
-                    withAnimation { onDelete() }
+                    showingDeleteAlert = true
                 }) {
                     Image(systemName: "trash.fill")
                         .font(.system(size: 14))
@@ -850,6 +855,14 @@ struct QuestionEditCard: View {
                         .padding(8)
                         .background(Circle().fill(Color.red.opacity(0.1)))
                 }
+            }
+            .alert("Soruyu Sil", isPresented: $showingDeleteAlert) {
+                Button("İptal", role: .cancel) { }
+                Button("Sil", role: .destructive) {
+                    onDelete()
+                }
+            } message: {
+                Text("Bu soruyu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")
             }
             
             TextField("Sorunuzu buraya yazın...", text: $question.text, axis: .vertical)
