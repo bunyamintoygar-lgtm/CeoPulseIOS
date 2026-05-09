@@ -250,7 +250,7 @@ struct JoinSurveyView: View {
                 
                 Button(action: {
                     if viewModel.currentQuestionIndex < viewModel.questions.count - 1 {
-                        withAnimation(.easeInOut(duration: 0.4)) {
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                             viewModel.currentQuestionIndex += 1
                             proxy.scrollTo(viewModel.currentQuestionIndex, anchor: .top)
                         }
@@ -326,9 +326,10 @@ struct QuestionActionCard: View {
                         .foregroundColor(.purple)
                     
                     Text(question.questionText)
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.white)
                         .fixedSize(horizontal: false, vertical: true)
+                        .lineSpacing(4)
                 }
                 Spacer()
                 if question.isRequired {
