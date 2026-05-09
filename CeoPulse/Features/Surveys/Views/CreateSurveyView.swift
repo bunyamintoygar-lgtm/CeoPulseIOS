@@ -1456,8 +1456,8 @@ struct ContentModerator {
                 .invoke(
                     "moderate-content", 
                     options: .init(
-                        body: ["text": combinedText],
-                        method: .post
+                        method: .post,
+                        body: ["text": combinedText]
                     )
                 )
             
@@ -1479,7 +1479,7 @@ struct ContentModerator {
         let reason: String?
     }
     
-    func isContentAppropriate(_ texts: [String]) -> (isAppropriate: Bool, offendingWord: String?) {
+    func isContentAppropriate(_ texts: [String]) -> (isAppropriate: Bool, reason: String?) {
         for text in texts {
             let normalizedText = text.lowercased()
                 .replacingOccurrences(of: "ı", with: "i")
