@@ -24,32 +24,33 @@ serve(async (req) => {
       })
     }
 
-    const response = await fetch('https://api.openai.com/v1/moderations', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        input: text,
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "Sen bir içerik moderatörüsün. Verilen metni müstehcenlik, hakaret, küfür, nefret söylemi ve topluluk kuralları açısından incele. Eğer içerik uygunsuzsa 'flagged' değerini true yap ve kısa bir 'reason' (Türkçe) ekle. Uygunsa 'flagged' false olsun. Yanıtını sadece JSON formatında dön: {\"flagged\": boolean, \"reason\": string|null}"
+          },
+          {
+            role: "user",
+            content: text
+          }
+        ],
+        response_format: { type: "json_object" }
       }),
     })
 
     const result = await response.json()
+    const aiResponse = JSON.parse(result.choices[0].message.content)
     
-    // Check if any results were flagged
-    const flagged = result.results?.[0]?.flagged || false
-    const categories = result.results?.[0]?.categories || {}
-    
-    // Find the primary reason for flagging
-    let reason = null
-    if (flagged) {
-      const offendingCategory = Object.keys(categories).find(key => categories[key] === true)
-      reason = offendingCategory ? `Uygunsuz içerik tespit edildi: ${offendingCategory}` : "Topluluk kuralları ihlali tespit edildi."
-    }
-
     return new Response(
-      JSON.stringify({ flagged, reason }),
+      JSON.stringify(aiResponse),
       { 
         headers: { 
           'Content-Type': 'application/json',
