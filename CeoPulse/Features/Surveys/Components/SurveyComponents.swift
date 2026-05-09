@@ -61,17 +61,11 @@ struct SurveyCard: View {
                         .multilineTextAlignment(.leading)
                     
                     // Category only
-                    HStack(spacing: 8) {
-                        if let category = configManager.surveyCategories.first(where: { $0.id == survey.categoryId }) {
-                            Text(category.name)
-                                .font(.system(size: 12, weight: .medium))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.white.opacity(0.05))
-                                .cornerRadius(6)
-                        }
+                    if let category = configManager.surveyCategories.first(where: { $0.id == survey.categoryId }) {
+                        Text(category.name)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(AppColors.textSecondary)
                     }
-                    .foregroundColor(AppColors.textSecondary)
                 }
                 
                 Spacer()
