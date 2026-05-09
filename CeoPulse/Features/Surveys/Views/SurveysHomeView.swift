@@ -105,20 +105,24 @@ struct SurveysHomeView: View {
                 // Floating Action Button
                 VStack {
                     Spacer()
-                    Button(action: { showCreateSurvey = true }) {
-                        ZStack {
-                            Circle()
-                                .fill(LinearGradient(colors: [.purple, Color(hex: "6C38FF")], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                .frame(width: 64, height: 64)
-                                .shadow(color: Color.purple.opacity(0.4), radius: 12, y: 6)
-                            
-                            Image(systemName: "plus")
-                                .font(.system(size: 28, weight: .bold))
-                                .foregroundColor(.white)
-                                .symbolEffect(.bounce, options: .repeating, value: showCreateSurvey)
+                    HStack {
+                        Spacer()
+                        Button(action: { showCreateSurvey = true }) {
+                            ZStack {
+                                Circle()
+                                    .fill(LinearGradient(colors: [.purple, Color(hex: "6C38FF")], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                    .frame(width: 52, height: 52)
+                                    .shadow(color: Color.purple.opacity(0.4), radius: 10, y: 5)
+                                
+                                Image(systemName: "plus")
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .symbolEffect(.bounce, options: .repeating, value: showCreateSurvey)
+                            }
                         }
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 20)
                     }
-                    .padding(.bottom, 30)
                 }
             }
             .navigationBarHidden(true)
