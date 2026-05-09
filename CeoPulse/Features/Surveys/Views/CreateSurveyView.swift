@@ -38,6 +38,12 @@ struct CreateSurveyView: View {
                 
                 // Try to decode
                 let decoder = JSONDecoder()
+                
+                // Debug log raw JSON
+                if let jsonString = String(data: responseData, encoding: .utf8) {
+                    print("AI Raw JSON Response: \(jsonString)")
+                }
+                
                 do {
                     let response = try decoder.decode([DraftQuestion].self, from: responseData)
                     await MainActor.run {
