@@ -31,24 +31,8 @@ class SurveyService {
         }
         
         if let query = query, !query.isEmpty {
-            // Turkish character aware search (i/İ, ı/I, etc.)
-            // We transform the query to a regex that matches both Turkish case variants
-            let normalizedQuery = query
-                .replacingOccurrences(of: "i", with: "[iİ]")
-                .replacingOccurrences(of: "İ", with: "[iİ]")
-                .replacingOccurrences(of: "ı", with: "[ıI]")
-                .replacingOccurrences(of: "I", with: "[ıI]")
-                .replacingOccurrences(of: "ş", with: "[şŞ]")
-                .replacingOccurrences(of: "Ş", with: "[şŞ]")
-                .replacingOccurrences(of: "ğ", with: "[ğĞ]")
-                .replacingOccurrences(of: "Ğ", with: "[ğĞ]")
-                .replacingOccurrences(of: "ü", with: "[üÜ]")
-                .replacingOccurrences(of: "Ü", with: "[üÜ]")
-                .replacingOccurrences(of: "ö", with: "[öÖ]")
-                .replacingOccurrences(of: "Ö", with: "[öÖ]")
-            
-            // Using iregex (case-insensitive regex) for maximum compatibility
-            request = request.or("title.iregex.\(normalizedQuery),description.iregex.\(normalizedQuery)")
+            let escapedQuery = query.replacingOccurrences(of: "%", with: "\\%")
+            request = request.or("title.ilike.%\(escapedQuery)%,description.ilike.%\(escapedQuery)%")
         }
         
         if let categoryId = categoryId {
