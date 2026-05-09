@@ -1459,50 +1459,55 @@ struct ContentModerator {
         texts.enumerated().forEach { i, t in
             print("   [\(i+1)] \(t.prefix(100))...")
         }
+        print("🛡️ [ContentModerator] Supabase Edge Function 'moderate-content' çağrılıyor...")
         
-        do {
-            guard let bodyData = try? JSONSerialization.data(withJSONObject: ["text": combinedText]) else {
-                print("❌ [ContentModerator] Body encode edilemedi, fallback'e geçiliyor.")
+        // 15 saniyelik timeout ile Edge Function çağrısı
+        return try await withThrowingTaskGroup(of: (Bool, String?).self) { group in
+            // Asıl istek
+            group.addTask {
+                do {
+                    let responseData = try await SupabaseManager.shared.client.functions
+                        .invoke(
+                            "moderate-content",
+                            options: .init(body: ["text": combinedText]),
+                            decode: { data, _ in data }
+                        )
+                    
+                    let rawJSON = String(data: responseData, encoding: .utf8) ?? "Okunamadı"
+                    print("✅ [ContentModerator] Edge Function yanıtı: \(rawJSON)")
+                    
+                    if let result = try? JSONDecoder().decode(ModerationResponse.self, from: responseData) {
+                        print("🛡️ flagged: \(result.flagged), reason: \(result.reason ?? "nil")")
+                        if result.flagged {
+                            print("🚫 [ContentModerator] İçerik UYGUNSUZ! Engellendi.")
+                            return (false, result.reason ?? "İçeriğiniz uygunsuz bulundu.")
+                        }
+                        print("✅ [ContentModerator] İçerik UYGUN.")
+                        return (true, nil)
+                    }
+                    return (true, nil)
+                } catch {
+                    print("❌ [ContentModerator] Edge Function hatası: \(error.localizedDescription)")
+                    throw error
+                }
+            }
+            
+            // 15 saniye timeout
+            group.addTask {
+                try await Task.sleep(nanoseconds: 15_000_000_000)
+                print("⏱️ [ContentModerator] Timeout! Fallback'e geçiliyor...")
+                throw CancellationError()
+            }
+            
+            do {
+                let result = try await group.next()!
+                group.cancelAll()
+                return result
+            } catch {
+                group.cancelAll()
+                print("⚠️ [ContentModerator] Fallback: yerel kelime listesi kullanılıyor.")
                 return isContentAppropriate(texts)
             }
-            
-            // Supabase proje URL ve anon key
-            let supabaseURL = SupabaseManager.shared.projectURL
-            let anonKey = SupabaseManager.shared.anonKey
-            let functionURL = supabaseURL.appendingPathComponent("functions/v1/moderate-content")
-            
-            print("🛡️ [ContentModerator] URLSession ile çağrılıyor: \(functionURL)")
-            
-            var request = URLRequest(url: functionURL, timeoutInterval: 10)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
-            request.httpBody = bodyData
-            
-            let (responseData, httpResponse) = try await URLSession.shared.data(for: request)
-            
-            let statusCode = (httpResponse as? HTTPURLResponse)?.statusCode ?? 0
-            let rawJSON = String(data: responseData, encoding: .utf8) ?? "Okunamadı"
-            print("✅ [ContentModerator] HTTP \(statusCode) - Ham yanıt:")
-            print("   \(rawJSON)")
-            
-            let decoder = JSONDecoder()
-            if let result = try? decoder.decode(ModerationResponse.self, from: responseData) {
-                print("🛡️ [ContentModerator] Decode başarılı → flagged: \(result.flagged), reason: \(result.reason ?? "nil")")
-                if result.flagged {
-                    print("🚫 [ContentModerator] İçerik UYGUNSUZ bulundu! Yayınlama engellendi.")
-                    return (false, result.reason ?? "İçeriğiniz uygunsuz bulundu.")
-                }
-                print("✅ [ContentModerator] İçerik UYGUN. Yayınlama onaylandı.")
-                return (true, nil)
-            }
-            
-            print("⚠️ [ContentModerator] JSON decode başarısız, varsayılan olarak onaylandı.")
-            return (true, nil)
-            
-        } catch {
-            print("❌ [ContentModerator] HATA (\(error.localizedDescription)) - Fallback'e geçiliyor...")
-            return isContentAppropriate(texts)
         }
     }
     
