@@ -1452,12 +1452,14 @@ struct ContentModerator {
         let combinedText = texts.joined(separator: "\n---\n")
         
         do {
+            let bodyData = try? JSONSerialization.data(withJSONObject: ["text": combinedText])
+            
             let response = try await SupabaseManager.shared.client.functions
                 .invoke(
                     "moderate-content", 
                     options: .init(
                         method: .post,
-                        body: ["text": combinedText]
+                        body: bodyData
                     )
                 )
             
