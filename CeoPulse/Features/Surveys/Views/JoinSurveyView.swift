@@ -13,80 +13,83 @@ struct JoinSurveyView: View {
         ZStack {
             AppColors.background.ignoresSafeArea()
             
-            VStack(spacing: 0) {
-                // Header
-                headerView
-                
-                // Top Progress Bar
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Rectangle()
-                            .fill(Color.white.opacity(0.05))
-                            .frame(height: 4)
-                        
-                        if !viewModel.questions.isEmpty {
+            ScrollViewReader { proxy in
+                VStack(spacing: 0) {
+                    // Header
+                    headerView
+                    
+                    // Top Progress Bar
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
                             Rectangle()
-                                .fill(LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing))
-                                .frame(width: geo.size.width * CGFloat(Double(viewModel.currentQuestionIndex + 1) / Double(viewModel.questions.count)), height: 4)
-                                .animation(.spring(), value: viewModel.currentQuestionIndex)
-                        }
-                    }
-                }
-                .frame(height: 4)
-                
-                if viewModel.isLoading {
-                    Spacer()
-                    ProgressView()
-                        .tint(.purple)
-                    Spacer()
-                } else if let error = viewModel.errorMessage {
-                    Spacer()
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 40))
-                            .foregroundColor(.orange)
-                        Text(error)
-                            .font(.system(size: 14))
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                        Button("Tekrar Dene") {
-                            viewModel.fetchQuestions()
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.purple)
-                        .cornerRadius(12)
-                    }
-                    .padding(40)
-                    Spacer()
-                } else {
-                    ScrollView {
-                        VStack(spacing: 24) {
-                            // Survey Info Card
-                            surveyInfoCard
+                                .fill(Color.white.opacity(0.05))
+                                .frame(height: 4)
                             
-                            // Anonymous Warning
-                            anonymousWarning
-                            
-                            // Questions
-                            VStack(spacing: 20) {
-                                ForEach(0..<viewModel.questions.count, id: \.self) { index in
-                                    QuestionActionCard(
-                                        question: viewModel.questions[index],
-                                        options: viewModel.options[viewModel.questions[index].id] ?? [],
-                                        selectedOptions: binding(for: viewModel.questions[index].id),
-                                        number: index + 1
-                                    )
-                                }
+                            if !viewModel.questions.isEmpty {
+                                Rectangle()
+                                    .fill(LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing))
+                                    .frame(width: geo.size.width * CGFloat(Double(viewModel.currentQuestionIndex + 1) / Double(viewModel.questions.count)), height: 4)
+                                    .animation(.spring(), value: viewModel.currentQuestionIndex)
                             }
                         }
-                        .padding(20)
-                        .padding(.bottom, 100)
                     }
+                    .frame(height: 4)
+                    
+                    if viewModel.isLoading {
+                        Spacer()
+                        ProgressView()
+                            .tint(.purple)
+                        Spacer()
+                    } else if let error = viewModel.errorMessage {
+                        Spacer()
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 40))
+                                .foregroundColor(.orange)
+                            Text(error)
+                                .font(.system(size: 14))
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.center)
+                            Button("Tekrar Dene") {
+                                viewModel.fetchQuestions()
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(Color.purple)
+                            .cornerRadius(12)
+                        }
+                        .padding(40)
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            VStack(spacing: 24) {
+                                // Survey Info Card
+                                surveyInfoCard
+                                
+                                // Anonymous Warning
+                                anonymousWarning
+                                
+                                // Questions
+                                VStack(spacing: 20) {
+                                    ForEach(0..<viewModel.questions.count, id: \.self) { index in
+                                        QuestionActionCard(
+                                            question: viewModel.questions[index],
+                                            options: viewModel.options[viewModel.questions[index].id] ?? [],
+                                            selectedOptions: binding(for: viewModel.questions[index].id),
+                                            number: index + 1
+                                        )
+                                        .id(index) // Unique ID for scrolling
+                                    }
+                                }
+                            }
+                            .padding(20)
+                            .padding(.bottom, 100)
+                        }
+                    }
+                    
+                    // Bottom Actions
+                    bottomActions(proxy: proxy)
                 }
-                
-                // Bottom Actions
-                bottomActions
             }
         }
         .onAppear {
@@ -229,7 +232,7 @@ struct JoinSurveyView: View {
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.green.opacity(0.1), lineWidth: 1))
     }
     
-    private var bottomActions: some View {
+    private func bottomActions(proxy: ScrollViewProxy) -> some View {
         VStack(spacing: 16) {
             Rectangle()
                 .fill(LinearGradient(colors: [.clear, .white.opacity(0.05), .clear], startPoint: .leading, endPoint: .trailing))
@@ -247,7 +250,10 @@ struct JoinSurveyView: View {
                 
                 Button(action: {
                     if viewModel.currentQuestionIndex < viewModel.questions.count - 1 {
-                        withAnimation { viewModel.currentQuestionIndex += 1 }
+                        withAnimation(.easeInOut(duration: 0.4)) {
+                            viewModel.currentQuestionIndex += 1
+                            proxy.scrollTo(viewModel.currentQuestionIndex, anchor: .top)
+                        }
                     } else {
                         Task {
                             let success = await viewModel.submitAnswers()
