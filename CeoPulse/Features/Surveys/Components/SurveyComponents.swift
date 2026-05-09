@@ -11,6 +11,8 @@ struct SurveyCard: View {
     var onEdit: (() -> Void)? = nil
     var onDelete: (() -> Void)? = nil
     
+    @ObservedObject var configManager = ConfigManager.shared
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             // Top Row: Badges and Timer
@@ -82,7 +84,7 @@ struct SurveyCard: View {
                     
                     // Category only
                     HStack(spacing: 8) {
-                        if let category = ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId }) {
+                        if let category = configManager.surveyCategories.first(where: { $0.id == survey.categoryId }) {
                             Text(category.name)
                                 .font(.system(size: 12, weight: .medium))
                                 .padding(.horizontal, 8)
