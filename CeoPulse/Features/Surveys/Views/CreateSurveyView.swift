@@ -146,18 +146,18 @@ struct CreateSurveyView: View {
             }
         }
         .navigationBarHidden(true)
-        .onChange(of: title) { saveDraftSilently() }
-        .onChange(of: description) { saveDraftSilently() }
-        .onChange(of: selectedCategory) { saveDraftSilently() }
-        .onChange(of: questions) { saveDraftSilently() }
-        .onChange(of: targetAudience) { saveDraftSilently() }
-        .onChange(of: endDate) { saveDraftSilently() }
-        .onChange(of: participationLimit) { saveDraftSilently() }
-        .onChange(of: participationLimitType) { saveDraftSilently() }
-        .onChange(of: resultsVisibility) { saveDraftSilently() }
-        .onChange(of: allowChangeResponse) { saveDraftSilently() }
-        .onChange(of: isRequiredToAnswer) { saveDraftSilently() }
-        .onChange(of: isAnonymous) { saveDraftSilently() }
+        .onChange(of: title) { _, _ in saveDraftSilently() }
+        .onChange(of: description) { _, _ in saveDraftSilently() }
+        .onChange(of: selectedCategory) { _, _ in saveDraftSilently() }
+        .onChange(of: questions) { _, _ in saveDraftSilently() }
+        .onChange(of: targetAudience) { _, _ in saveDraftSilently() }
+        .onChange(of: endDate) { _, _ in saveDraftSilently() }
+        .onChange(of: participationLimit) { _, _ in saveDraftSilently() }
+        .onChange(of: participationLimitType) { _, _ in saveDraftSilently() }
+        .onChange(of: resultsVisibility) { _, _ in saveDraftSilently() }
+        .onChange(of: allowChangeResponse) { _, _ in saveDraftSilently() }
+        .onChange(of: isRequiredToAnswer) { _, _ in saveDraftSilently() }
+        .onChange(of: isAnonymous) { _, _ in saveDraftSilently() }
         .onAppear {
             if draftManager.hasDraft() && title.isEmpty && questions.count == 1 && questions[0].text.isEmpty {
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
