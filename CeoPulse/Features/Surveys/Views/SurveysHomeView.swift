@@ -319,55 +319,9 @@ struct SurveysHomeView: View {
                 }
             
             VStack(spacing: 24) {
-                // Icon Header
-                ZStack {
-                    Circle()
-                        .fill(Color.orange.opacity(0.1))
-                        .frame(width: 80, height: 80)
-                    
-                    Image(systemName: "exclamationmark.shield.fill")
-                        .font(.system(size: 40))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [.orange, .red],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                }
+                rejectionHeaderView
                 
-                VStack(spacing: 12) {
-                    Text("Topluluk Kuralları İhlali")
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(.white)
-                    
-                    Text("Anket içeriğiniz topluluk kurallarına uymadığı için yayınlanmamıştır.")
-                        .font(.system(size: 15))
-                        .foregroundColor(AppColors.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                
-                // Reason Box
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("REDDEDİLME NEDENİ")
-                        .font(.system(size: 11, weight: .black))
-                        .foregroundColor(.orange.opacity(0.8))
-                        .letterSpacing(1.2)
-                    
-                    Text(survey.rejectionReason ?? "İçeriğiniz yapay zeka tarafından uygunsuz bulundu.")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.white.opacity(0.9))
-                        .lineSpacing(4)
-                }
-                .padding(20)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(16)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.orange.opacity(0.2), lineWidth: 1)
-                )
+                rejectionReasonBox(reason: survey.rejectionReason)
                 
                 // Close Button
                 Button(action: {
@@ -399,6 +353,60 @@ struct SurveysHomeView: View {
             )
             .padding(.horizontal, 24)
         }
+    }
+
+    private var rejectionHeaderView: some View {
+        VStack(spacing: 24) {
+            ZStack {
+                Circle()
+                    .fill(Color.orange.opacity(0.1))
+                    .frame(width: 80, height: 80)
+                
+                Image(systemName: "exclamationmark.shield.fill")
+                    .font(.system(size: 40))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.orange, .red],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
+            
+            VStack(spacing: 12) {
+                Text("Topluluk Kuralları İhlali")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("Anket içeriğiniz topluluk kurallarına uymadığı için yayınlanmamıştır.")
+                    .font(.system(size: 15))
+                    .foregroundColor(AppColors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+        }
+    }
+
+    private func rejectionReasonBox(reason: String?) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("REDDEDİLME NEDENİ")
+                .font(.system(size: 11, weight: .black))
+                .foregroundColor(.orange.opacity(0.8))
+                .letterSpacing(1.2)
+            
+            Text(reason ?? "İçeriğiniz yapay zeka tarafından uygunsuz bulundu.")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(.white.opacity(0.9))
+                .lineSpacing(4)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+        )
     }
     
     private var activeSurveysList: some View {
