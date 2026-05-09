@@ -959,6 +959,12 @@ struct CreateSurveyView: View {
                     )
                 }
                 
+                // Arka planda AI moderasyon (UI'ı bloklamaz)
+                let savedSurveyId = surveyId
+                Task.detached {
+                    try? await AutoModerator.checkSurvey(id: savedSurveyId)
+                }
+                
                 await MainActor.run {
                     isPublishing = false
                     draftManager.clearDraft()
@@ -1488,5 +1494,18 @@ struct ContentModerator {
             }
         }
         return (true, nil)
+    }
+}
+
+// MARK: - Auto Moderator (Fire & Forget)
+struct AutoModerator {
+    static func checkSurvey(id: UUID) async throws {
+        let url = URL(string: "https://wvsbpsahpshgmrgcxpmq.supabase.co/functions/v1/auto-moderate-survey")!
+        var request = URLRequest(url: url, timeoutInterval: 30)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(SupabaseManager.shared.anonKey)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: ["survey_id": id.uuidString])
+        _ = try? await URLSession.shared.data(for: request)
     }
 }
