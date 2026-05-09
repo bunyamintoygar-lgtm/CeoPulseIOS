@@ -642,10 +642,21 @@ struct CreateSurveyView: View {
                 }
                 
                 Button(action: { 
-                    if currentStep == 1 && selectedCategory == nil {
-                        errorMessage = "Lütfen devam etmeden önce bir kategori seçin."
-                        showingCategoryPicker = true
-                        return
+                    if currentStep == 1 {
+                        let words = title.trimmingCharacters(in: .whitespacesAndNewlines)
+                            .components(separatedBy: .whitespacesAndNewlines)
+                            .filter { !$0.isEmpty }
+                        
+                        if words.count < 3 {
+                            errorMessage = "Anket başlığı en az 3 kelimeden oluşmalıdır."
+                            return
+                        }
+                        
+                        if selectedCategory == nil {
+                            errorMessage = "Lütfen devam etmeden önce bir kategori seçin."
+                            showingCategoryPicker = true
+                            return
+                        }
                     }
                     
                     errorMessage = nil // Clear error if validated
