@@ -1332,9 +1332,6 @@ struct SettingsToggle: View {
     }
 }
 
-    }
-}
-
 struct CategoryPickerSheet: View {
     @Environment(\.presentationMode) var presentationMode
     let categories: [SurveyCategory]
