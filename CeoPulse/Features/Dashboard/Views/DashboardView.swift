@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct DashboardView: View {
+    @StateObject private var surveyViewModel = SurveyViewModel()
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -76,15 +78,15 @@ struct DashboardView: View {
                         NavigationLink(destination: SurveysHomeView()) {
                             MetricCard(
                                 title: "surveys".localized(),
-                                value: "2",
-                                description: "pending_survey".localized(),
+                                value: "\(surveyViewModel.activeSurveys.count)",
+                                description: surveyViewModel.activeSurveys.count > 0 ? "active_surveys_ready".localized() : "no_active_surveys".localized(),
                                 iconName: "chart.pie.fill",
                                 iconColor: .green,
                                 actionLabel: "vote".localized(),
-                                showProgress: true,
-                                progressValue: 0.62,
-                                showBadge: false,
-                                badgeText: nil
+                                showProgress: surveyViewModel.activeSurveys.count > 0,
+                                progressValue: 0.5, // Placeholder for progress
+                                showBadge: surveyViewModel.activeSurveys.count > 0,
+                                badgeText: "new".localized()
                             )
                             .frame(width: 150)
                         }
@@ -141,6 +143,9 @@ struct DashboardView: View {
         }
         .background(AppColors.background.ignoresSafeArea())
         .navigationBarHidden(true)
+        .onAppear {
+            surveyViewModel.fetchSurveys()
+        }
     }
 }
 

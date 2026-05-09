@@ -207,16 +207,31 @@ struct SurveysHomeView: View {
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
                 Spacer()
-                Button("Tümünü Gör") {
-                    // Action
+                if !viewModel.completedSurveys.isEmpty {
+                    Text("\(viewModel.completedSurveys.count)")
+                        .font(.system(size: 13))
+                        .foregroundColor(.purple)
                 }
-                .font(.system(size: 13))
-                .foregroundColor(.purple)
             }
             
-            SurveyCompletedRow(title: "Hibrit çalışma modellerinin verimliliğe etkisi nedir?", date: "Nisan 2025", rate: 92, icon: "chart.line.uptrend.xyaxis", color: .purple)
-            SurveyCompletedRow(title: "2025'te en büyük iş önceliğiniz hangisi?", date: "Mart 2025", rate: 89, icon: "person.2.fill", color: .blue)
-            SurveyCompletedRow(title: "Sürdürülebilirlik yatırımlarınızın öncelik alanı nedir?", date: "Şubat 2025", rate: 91, icon: "leaf.fill", color: .green)
+            if viewModel.completedSurveys.isEmpty && !viewModel.isLoading {
+                Text("Henüz tamamlanmış bir anket bulunmuyor.")
+                    .font(.system(size: 14))
+                    .foregroundColor(AppColors.textSecondary)
+                    .padding(.vertical, 10)
+            } else {
+                ForEach(viewModel.completedSurveys) { survey in
+                    NavigationLink(destination: SurveyResultsView(survey: survey)) {
+                        SurveyCompletedRow(
+                            title: survey.title,
+                            date: survey.endDate?.formatted(date: .abbreviated, time: .omitted) ?? "Tamamlandı",
+                            rate: 100,
+                            icon: "chart.bar.fill",
+                            color: .purple
+                        )
+                    }
+                }
+            }
         }
     }
     

@@ -15,10 +15,10 @@ struct MainTabView: View {
                 NetworkView()
                     .tag(1)
                 
-                AIInsightsView()
+                SurveysHomeView()
                     .tag(2)
                 
-                Color.black.ignoresSafeArea() // Placeholder for Notifications
+                NotificationsView()
                     .tag(3)
                 
                 ProfileView()
@@ -31,7 +31,7 @@ struct MainTabView: View {
                 Divider()
                     .background(Color.white.opacity(0.1))
                 
-                HStack {
+                HStack(alignment: .bottom) {
                     TabItem(icon: "house.fill", label: "nav_home".localized(), isSelected: selectedTab == 0) { selectedTab = 0 }
                     TabItem(icon: "person.2.fill", label: "nav_network".localized(), isSelected: selectedTab == 1) { selectedTab = 1 }
                     
@@ -39,23 +39,23 @@ struct MainTabView: View {
                     Button(action: { showCreateSurvey = true }) {
                         ZStack {
                             Circle()
-                                .fill(AppColors.primaryAccent)
+                                .fill(LinearGradient(colors: [.purple, Color(hex: "6C38FF")], startPoint: .topLeading, endPoint: .bottomTrailing))
                                 .frame(width: 56, height: 56)
-                                .shadow(color: AppColors.primaryAccent.opacity(0.4), radius: 10, x: 0, y: 5)
+                                .shadow(color: Color.purple.opacity(0.4), radius: 10, x: 0, y: 5)
                             
                             Image(systemName: "plus")
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(.white)
                         }
                     }
-                    .offset(y: -20)
+                    .offset(y: -15)
                     
-                    TabItem(icon: "bell.fill", label: "nav_notifications".localized(), isSelected: selectedTab == 3) { selectedTab = 3 }
+                    TabItem(icon: "chart.bar.fill", label: "Anketler", isSelected: selectedTab == 2) { selectedTab = 2 }
                     TabItem(icon: "person.fill", label: "nav_profile".localized(), isSelected: selectedTab == 4) { selectedTab = 4 }
                 }
                 .padding(.top, 12)
                 .padding(.bottom, 24)
-                .background(AppColors.surface.opacity(0.95))
+                .background(AppColors.surface.opacity(0.98))
             }
         }
         .ignoresSafeArea(.all, edges: .bottom)
