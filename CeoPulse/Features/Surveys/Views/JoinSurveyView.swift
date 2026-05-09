@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 struct JoinSurveyView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -43,7 +44,7 @@ struct JoinSurveyView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 40))
-                            .foregroundColor(.amber)
+                            .foregroundColor(.orange)
                         Text(error)
                             .font(.system(size: 14))
                             .foregroundColor(.white)

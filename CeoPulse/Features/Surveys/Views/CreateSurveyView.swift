@@ -1,4 +1,5 @@
 import SwiftUI
+import Supabase
 
 struct CreateSurveyView: View {
     @Environment(\.presentationMode) var presentationMode

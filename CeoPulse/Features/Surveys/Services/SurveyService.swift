@@ -74,8 +74,12 @@ class SurveyService {
     }
     
     func fetchResults(for surveyId: UUID) async throws -> [UUID: Int] {
+        struct ResponseItem: Codable {
+            let option_id: UUID
+        }
+        
         // Fetch all responses for the survey
-        let responses: [[String: Any]] = try await client
+        let responses: [ResponseItem] = try await client
             .from("survey_responses")
             .select("option_id")
             .eq("survey_id", value: surveyId)
@@ -85,10 +89,7 @@ class SurveyService {
         // Count occurrences of each option_id
         var results: [UUID: Int] = [:]
         for response in responses {
-            if let optionIdString = response["option_id"] as? String,
-               let optionId = UUID(uuidString: optionIdString) {
-                results[optionId, default: 0] += 1
-            }
+            results[response.option_id, default: 0] += 1
         }
         return results
     }
@@ -129,16 +130,23 @@ class SurveyService {
     func submitVote(surveyId: UUID, answers: [UUID: Set<UUID>]) async throws {
         let userId = try await getCurrentUserId()
         
-        var voteEntries: [[String: Any]] = []
+        struct VoteEntry: Encodable {
+            let survey_id: UUID
+            let question_id: UUID
+            let option_id: UUID
+            let user_id: UUID
+        }
+        
+        var voteEntries: [VoteEntry] = []
         
         for (questionId, optionIds) in answers {
             for optionId in optionIds {
-                voteEntries.append([
-                    "survey_id": surveyId.uuidString,
-                    "question_id": questionId.uuidString,
-                    "option_id": optionId.uuidString,
-                    "user_id": userId.uuidString
-                ])
+                voteEntries.append(VoteEntry(
+                    survey_id: surveyId,
+                    question_id: questionId,
+                    option_id: optionId,
+                    user_id: userId
+                ))
             }
         }
         

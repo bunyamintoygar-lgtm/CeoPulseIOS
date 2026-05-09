@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import Combine
 
 class JoinSurveyViewModel: ObservableObject {
     let survey: Survey
