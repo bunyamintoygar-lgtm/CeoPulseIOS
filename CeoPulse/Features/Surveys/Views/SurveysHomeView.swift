@@ -11,6 +11,8 @@ struct SurveysHomeView: View {
     @State private var selectedResultsSurvey: Survey?
     @State private var shareURL: URL?
     @State private var showShareSheet = false
+    @State private var isSearchVisible = false
+    @State private var showingFilterMenu = false
     
     let tabs = ["Aktif Anketler", "Tamamlananlar", "Taslaklarım", "Arşiv"]
     
@@ -38,13 +40,12 @@ struct SurveysHomeView: View {
                         Spacer()
                         
                         HStack(spacing: 12) {
-                            Button(action: {}) {
+                            Button(action: { withAnimation(.spring()) { isSearchVisible.toggle() } }) {
                                 ZStack {
                                     Circle().fill(Color.white.opacity(0.05)).frame(width: 44, height: 44)
-                                    Image(systemName: "bell.badge.fill")
-                                        .symbolRenderingMode(.palette)
-                                        .foregroundStyle(.red, .white)
+                                    Image(systemName: isSearchVisible ? "xmark" : "magnifyingglass")
                                         .font(.system(size: 18))
+                                        .foregroundColor(.white)
                                 }
                             }
                             
@@ -58,6 +59,65 @@ struct SurveysHomeView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
+                    
+                    // Search and Filter Bar
+                    if isSearchVisible {
+                        HStack(spacing: 12) {
+                            HStack(spacing: 12) {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundColor(.purple)
+                                    .font(.system(size: 14, weight: .bold))
+                                
+                                TextField("Anket ara...", text: Binding(
+                                    get: { viewModel.searchQuery },
+                                    set: { viewModel.updateSearchQuery($0) }
+                                ))
+                                .foregroundColor(.white)
+                                .font(.system(size: 14))
+                                
+                                if !viewModel.searchQuery.isEmpty {
+                                    Button(action: { viewModel.updateSearchQuery("") }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundColor(.white.opacity(0.3))
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(Color.white.opacity(0.05))
+                            .cornerRadius(12)
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                            
+                            // Filter Button
+                            Menu {
+                                Button(action: { viewModel.updateCategoryFilter(nil) }) {
+                                    Label("Tüm Kategoriler", systemImage: viewModel.selectedCategoryId == nil ? "checkmark.circle.fill" : "circle")
+                                }
+                                
+                                Divider()
+                                
+                                ForEach(ConfigManager.shared.surveyCategories) { category in
+                                    Button(action: { viewModel.updateCategoryFilter(category.id) }) {
+                                        Label(category.name, systemImage: viewModel.selectedCategoryId == category.id ? "checkmark.circle.fill" : (category.icon ?? "tag"))
+                                    }
+                                }
+                            } label: {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(viewModel.selectedCategoryId != nil ? Color.purple.opacity(0.2) : Color.white.opacity(0.05))
+                                        .frame(width: 48, height: 48)
+                                    
+                                    Image(systemName: "line.3.horizontal.decrease.circle")
+                                        .font(.system(size: 20))
+                                        .foregroundColor(viewModel.selectedCategoryId != nil ? .purple : .white)
+                                }
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(viewModel.selectedCategoryId != nil ? Color.purple.opacity(0.5) : Color.white.opacity(0.1), lineWidth: 1))
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 16)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
                     
                     // Tabs
                     ScrollView(.horizontal, showsIndicators: false) {

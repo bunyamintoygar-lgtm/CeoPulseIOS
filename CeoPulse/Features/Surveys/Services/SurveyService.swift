@@ -7,37 +7,35 @@ class SurveyService {
     
     // MARK: - Fetch Methods
     
-    func searchSurveys(query: String, page: Int = 0, pageSize: Int = 15) async throws -> [Survey] {
+    func fetchSurveys(
+        query: String? = nil,
+        categoryId: String? = nil,
+        page: Int = 0,
+        pageSize: Int = 15
+    ) async throws -> [Survey] {
         let from = page * pageSize
         let to = from + pageSize - 1
         
-        // PostgreSQL ilike automatically handles most case-insensitive scenarios.
-        // For strict Turkish support, we could use custom RPC, but ilike is generally sufficient 
-        // if the database is UTF-8. We'll also lower-case the query for safety.
-        let surveys: [Survey] = try await client
+        var request = client
             .from("surveys")
             .select()
             .eq("status", value: "active")
-            .ilike("title", pattern: "%\(query)%")
+        
+        if let query = query, !query.isEmpty {
+            // Search in title OR description using PostgreSQL ilike
+            request = request.or("title.ilike.%\(query)%,description.ilike.%\(query)%")
+        }
+        
+        if let categoryId = categoryId {
+            request = request.eq("category_id", value: categoryId)
+        }
+        
+        let surveys: [Survey] = try await request
             .order("created_at", ascending: false)
             .range(from: from, to: to)
             .execute()
             .value
-        return surveys
-    }
-    
-    func fetchSurveys(page: Int = 0, pageSize: Int = 15) async throws -> [Survey] {
-        let from = page * pageSize
-        let to = from + pageSize - 1
-        
-        let surveys: [Survey] = try await client
-            .from("surveys")
-            .select()
-            .eq("status", value: "active")
-            .order("created_at", ascending: false)
-            .range(from: from, to: to)
-            .execute()
-            .value
+            
         return surveys
     }
     

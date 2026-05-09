@@ -10,6 +10,7 @@ class SurveyViewModel: ObservableObject {
     @Published var surveyStats: [UUID: SurveyService.SurveyStats] = [:]
     
     @Published var searchQuery = ""
+    @Published var selectedCategoryId: String? = nil
     private var searchSubject = PassthroughSubject<String, Never>()
     private var cancellables = Set<AnyCancellable>()
     
@@ -37,6 +38,11 @@ class SurveyViewModel: ObservableObject {
         searchSubject.send(query)
     }
     
+    func updateCategoryFilter(_ categoryId: String?) {
+        selectedCategoryId = categoryId
+        fetchSurveys(isRefresh: true)
+    }
+    
     func fetchSurveys(isRefresh: Bool = true) {
         if isRefresh {
             currentPage = 0
@@ -51,12 +57,12 @@ class SurveyViewModel: ObservableObject {
         
         Task {
             do {
-                let fetchedSurveys: [Survey]
-                if searchQuery.isEmpty {
-                    fetchedSurveys = try await service.fetchSurveys(page: currentPage, pageSize: pageSize)
-                } else {
-                    fetchedSurveys = try await service.searchSurveys(query: searchQuery, page: currentPage, pageSize: pageSize)
-                }
+                let fetchedSurveys = try await service.fetchSurveys(
+                    query: searchQuery.isEmpty ? nil : searchQuery,
+                    categoryId: selectedCategoryId,
+                    page: currentPage,
+                    pageSize: pageSize
+                )
                 
                 await MainActor.run {
                     if isRefresh {
