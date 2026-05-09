@@ -1452,9 +1452,11 @@ struct ContentModerator {
         let combinedText = texts.joined(separator: "\n---\n")
         
         do {
-            let bodyData = try? JSONSerialization.data(withJSONObject: ["text": combinedText])
+            guard let bodyData = try? JSONSerialization.data(withJSONObject: ["text": combinedText]) else {
+                return (true, nil)
+            }
             
-            let response = try await SupabaseManager.shared.client.functions
+            let responseData: Data = try await SupabaseManager.shared.client.functions
                 .invoke(
                     "moderate-content", 
                     options: .init(
@@ -1464,7 +1466,7 @@ struct ContentModerator {
                 )
             
             let decoder = JSONDecoder()
-            if let result = try? decoder.decode(ModerationResponse.self, from: response) {
+            if let result = try? decoder.decode(ModerationResponse.self, from: responseData) {
                 if result.flagged {
                     return (false, result.reason ?? "İçeriğiniz uygunsuz bulundu.")
                 }
