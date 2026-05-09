@@ -190,7 +190,7 @@ struct CreateSurveyView: View {
             line
             StepperItem(number: 3, title: "Ayarlar", isCurrent: currentStep == 3, isCompleted: currentStep > 3)
             line
-            StepperItem(number: 4, title: "Önizleme", isCurrent: currentStep == 4, isCompleted: currentStep > 4)
+            StepperItem(number: 4, title: "Yayınla", isCurrent: currentStep == 4, isCompleted: currentStep > 4)
         }
         .padding(.horizontal, 30)
         .padding(.vertical, 20)
