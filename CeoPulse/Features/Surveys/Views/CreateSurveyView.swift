@@ -57,6 +57,14 @@ struct CreateSurveyView: View {
                 }
             } catch {
                 print("AI invocation error: \(error)")
+                
+                // Try to extract detailed error message if it's an HTTP error
+                if let functionsError = error as? FunctionsError,
+                   case .httpError(let code, let data) = functionsError {
+                    let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error body"
+                    print("AI Function HTTP Error \(code): \(errorBody)")
+                }
+                
                 await MainActor.run { self.isGeneratingAI = false }
             }
         }
