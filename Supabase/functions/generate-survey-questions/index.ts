@@ -27,10 +27,15 @@ serve(async (req) => {
     
     Instructions:
     - Generate 5-8 insightful questions.
-    - For each question, decide if it should be 'singleChoice' or 'multipleChoice'.
+    - For each question, decide if it should be 'single_choice' or 'multiple_choice'.
     - Provide 4-6 high-quality options for each question.
     - Return ONLY a valid JSON array of objects.
-    - Each object must have: "text" (string), "type" (either "singleChoice" or "multipleChoice"), and "options" (array of strings).
+    - Each object must have: 
+      "text" (string), 
+      "type" (either "single_choice" or "multiple_choice"), 
+      "options" (array of strings),
+      "isRequired": true,
+      "allowMultiple": (true if type is multiple_choice, else false)
     - Language: ${langName}.`
 
     const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {

@@ -695,8 +695,8 @@ struct DraftQuestion: Codable {
     var text: String
     var options: [String]
     var type: SurveyQuestion.QuestionType
-    var isRequired: Bool = true
-    var allowMultiple: Bool = false
+    var isRequired: Bool? = true
+    var allowMultiple: Bool? = false
 }
 
 struct QuestionEditCard: View {
