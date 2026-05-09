@@ -768,6 +768,7 @@ struct CreateSurveyView: View {
                 self.selectedCategory = configManager.surveyCategories.first(where: { $0.id == catId })
             }
         }
+    }
     
     private func publishSurvey() {
         guard let category = selectedCategory else {
