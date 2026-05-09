@@ -18,6 +18,16 @@ struct CreateSurveyView: View {
         Calendar.current.date(byAdding: .month, value: 3, to: startDate) ?? startDate
     }
     @State private var isGeneratingAI = false
+    @State private var isPublishing = false
+    @State private var errorMessage: String?
+    
+    // Step 3 Settings
+    @State private var participationLimitType = "unlimited" // "unlimited" or "limit"
+    @State private var participationLimit = "1000"
+    @State private var resultsVisibility = "immediate" // "immediate", "closed", "never"
+    @State private var allowChangeResponse = true
+    @State private var isRequiredToAnswer = true
+    @State private var isAnonymous = false
     
     private func generateAIQuestions() {
         guard !title.isEmpty else { return }
@@ -141,6 +151,13 @@ struct CreateSurveyView: View {
         .onChange(of: selectedCategory) { saveDraftSilently() }
         .onChange(of: questions) { saveDraftSilently() }
         .onChange(of: targetAudience) { saveDraftSilently() }
+        .onChange(of: endDate) { saveDraftSilently() }
+        .onChange(of: participationLimit) { saveDraftSilently() }
+        .onChange(of: participationLimitType) { saveDraftSilently() }
+        .onChange(of: resultsVisibility) { saveDraftSilently() }
+        .onChange(of: allowChangeResponse) { saveDraftSilently() }
+        .onChange(of: isRequiredToAnswer) { saveDraftSilently() }
+        .onChange(of: isAnonymous) { saveDraftSilently() }
         .onAppear {
             if draftManager.hasDraft() && title.isEmpty && questions.count == 1 && questions[0].text.isEmpty {
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
@@ -411,25 +428,37 @@ struct CreateSurveyView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Katılım Limiti (İsteğe bağlı)").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
                 HStack(spacing: 20) {
-                    RadioButtonField(id: "unlimited", label: "Sınırsız katılım", isSelected: true)
-                    RadioButtonField(id: "limit", label: "Katılım limiti belirle", isSelected: false)
+                    RadioButtonField(id: "unlimited", label: "Sınırsız katılım", isSelected: participationLimitType == "unlimited") {
+                        participationLimitType = "unlimited"
+                    }
+                    RadioButtonField(id: "limit", label: "Katılım limiti belirle", isSelected: participationLimitType == "limit") {
+                        participationLimitType = "limit"
+                    }
                 }
                 
-                TextField("Katılım limiti", text: .constant("1000"))
-                    .keyboardType(.numberPad)
-                    .padding()
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(10)
-                    .foregroundColor(AppColors.textSecondary)
+                if participationLimitType == "limit" {
+                    TextField("Katılım limiti", text: $participationLimit)
+                        .keyboardType(.numberPad)
+                        .padding()
+                        .background(Color.white.opacity(0.05))
+                        .cornerRadius(10)
+                        .foregroundColor(.white)
+                }
             }
             
             // Sonuçların Görünürlüğü
             VStack(alignment: .leading, spacing: 12) {
                 Text("Sonuçların Görünürlüğü").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
                 VStack(alignment: .leading, spacing: 16) {
-                    RadioButtonField(id: "immediate", label: "Kapanır kapanmaz herkese göster", isSelected: true, sublabel: "Anket bittiği anda sonuçlar herkes tarafından görülebilir.")
-                    RadioButtonField(id: "closed", label: "Katılımcılara kapandıktan sonra göster", isSelected: false, sublabel: "Anket bittiğinde yalnızca katılımcılar sonuçları görebilir.")
-                    RadioButtonField(id: "never", label: "Hiç sonuç gösterme", isSelected: false, sublabel: "Sonuçlar yalnızca siz tarafınızdan görülebilir.")
+                    RadioButtonField(id: "immediate", label: "Kapanır kapanmaz herkese göster", isSelected: resultsVisibility == "immediate", sublabel: "Anket bittiği anda sonuçlar herkes tarafından görülebilir.") {
+                        resultsVisibility = "immediate"
+                    }
+                    RadioButtonField(id: "closed", label: "Katılımcılara kapandıktan sonra göster", isSelected: resultsVisibility == "closed", sublabel: "Anket bittiğinde yalnızca katılımcılar sonuçları görebilir.") {
+                        resultsVisibility = "closed"
+                    }
+                    RadioButtonField(id: "never", label: "Hiç sonuç gösterme", isSelected: resultsVisibility == "never", sublabel: "Sonuçlar yalnızca siz tarafınızdan görülebilir.") {
+                        resultsVisibility = "never"
+                    }
                 }
             }
             
@@ -437,9 +466,9 @@ struct CreateSurveyView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Gelişmiş Seçenekler").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
                 VStack(spacing: 12) {
-                    SettingsToggle(title: "Yanıtları değiştirmeye izin ver", icon: "arrow.left.arrow.right.circle", isOn: .constant(true))
-                    SettingsToggle(title: "Yanıtlamayı zorunlu tut", icon: "exclamationmark.circle", isOn: .constant(true))
-                    SettingsToggle(title: "Sonuçları anonimleştir", icon: "eye.slash", isOn: .constant(false))
+                    SettingsToggle(title: "Yanıtları değiştirmeye izin ver", icon: "arrow.left.arrow.right.circle", isOn: $allowChangeResponse)
+                    SettingsToggle(title: "Yanıtlamayı zorunlu tut", icon: "exclamationmark.circle", isOn: $isRequiredToAnswer)
+                    SettingsToggle(title: "Sonuçları anonimleştir", icon: "eye.slash", isOn: $isAnonymous)
                 }
             }
             
@@ -586,10 +615,23 @@ struct CreateSurveyView: View {
                     }
                 }
                 
-                Button(action: { if currentStep < 4 { withAnimation { currentStep += 1 } } }) {
+                Button(action: { 
+                    if currentStep < 4 { 
+                        withAnimation { currentStep += 1 } 
+                    } else {
+                        publishSurvey()
+                    }
+                }) {
                     HStack {
+                        if isPublishing {
+                            ProgressView()
+                                .tint(.white)
+                                .padding(.trailing, 8)
+                        }
                         Text(currentStep == 4 ? "Yayınla" : "Devam Et")
-                        Image(systemName: "arrow.right")
+                        if !isPublishing {
+                            Image(systemName: "arrow.right")
+                        }
                     }
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
@@ -597,6 +639,8 @@ struct CreateSurveyView: View {
                     .padding(.vertical, 16)
                     .background(Color(hex: "6C38FF"))
                     .cornerRadius(12)
+                    .opacity(isPublishing ? 0.7 : 1.0)
+                    .disabled(isPublishing)
                 }
             }
             .padding(.horizontal, 20)
@@ -692,7 +736,14 @@ struct CreateSurveyView: View {
             category: selectedCategory,
             audience: targetAudience,
             questions: questions,
-            step: currentStep
+            step: currentStep,
+            hasEndDate: hasEndDate,
+            endDate: endDate,
+            participationLimit: participationLimit,
+            resultsVisibility: resultsVisibility,
+            allowChangeResponse: allowChangeResponse,
+            isRequired: isRequiredToAnswer,
+            isAnonymous: isAnonymous
         )
     }
     
@@ -703,9 +754,105 @@ struct CreateSurveyView: View {
             self.targetAudience = draft.targetAudience
             self.questions = draft.questions
             self.currentStep = draft.currentStep
+            self.hasEndDate = draft.hasEndDate
+            self.endDate = draft.endDate
+            self.participationLimit = draft.participationLimit
+            self.participationLimitType = draft.participationLimit == "unlimited" ? "unlimited" : "limit"
+            self.resultsVisibility = draft.resultsVisibility
+            self.allowChangeResponse = draft.allowChangeResponse
+            self.isRequiredToAnswer = draft.isRequired
+            self.isAnonymous = draft.isAnonymous
+            
             // Category lookup
             if let catId = draft.categoryId {
                 self.selectedCategory = configManager.surveyCategories.first(where: { $0.id == catId })
+            }
+        }
+    
+    private func publishSurvey() {
+        guard let category = selectedCategory else {
+            errorMessage = "Lütfen bir kategori seçin."
+            return
+        }
+        
+        isPublishing = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                let session = try await SupabaseManager.shared.client.auth.session
+                let userId = session.user.id
+                
+                let surveyId = UUID()
+                
+                // 1. Create Survey Object
+                let survey = Survey(
+                    id: surveyId,
+                    creatorId: userId,
+                    title: title,
+                    description: description.isEmpty ? nil : description,
+                    categoryId: category.id,
+                    coverImageUrl: nil,
+                    targetAudience: targetAudience.lowercased() == "herkese açık" ? "public" : (targetAudience.lowercased() == "topluluk içi" ? "community" : "private"),
+                    status: .active,
+                    startDate: Date(),
+                    endDate: endDate,
+                    isAnonymous: isAnonymous,
+                    resultVisibility: resultsVisibility == "immediate" ? .immediate : (resultsVisibility == "closed" ? .after_closed : .never),
+                    allowEditResponses: allowChangeResponse,
+                    participationLimit: participationLimitType == "limit" ? Int(participationLimit) : nil,
+                    createdAt: Date(),
+                    language: Locale.current.language.languageCode?.identifier ?? "tr"
+                )
+                
+                // 2. Prepare Questions & Options
+                var dbQuestions: [SurveyQuestion] = []
+                var dbOptionsMap: [UUID: [SurveyOption]] = [:]
+                
+                for (index, draftQ) in questions.enumerated() {
+                    let qId = UUID()
+                    let dbQ = SurveyQuestion(
+                        id: qId,
+                        surveyId: surveyId,
+                        questionText: draftQ.text,
+                        questionType: draftQ.type == .singleChoice ? .singleChoice : .multipleChoice,
+                        isRequired: draftQ.isRequired ?? true,
+                        maxSelections: draftQ.allowMultiple == true ? 10 : 1, // multiple choice logic
+                        order: index
+                    )
+                    dbQuestions.append(dbQ)
+                    
+                    var qOptions: [SurveyOption] = []
+                    for (optIndex, optText) in draftQ.options.enumerated() {
+                        let dbOpt = SurveyOption(
+                            id: UUID(),
+                            questionId: qId,
+                            optionText: optText,
+                            order: optIndex
+                        )
+                        qOptions.append(dbOpt)
+                    }
+                    dbOptionsMap[qId] = qOptions
+                }
+                
+                // 3. Save to Supabase
+                try await SurveyService.shared.createSurvey(
+                    survey: survey,
+                    questions: dbQuestions,
+                    options: dbOptionsMap
+                )
+                
+                await MainActor.run {
+                    isPublishing = false
+                    draftManager.clearDraft()
+                    presentationMode.wrappedValue.dismiss()
+                }
+            } catch {
+                print("Publish error: \(error)")
+                await MainActor.run {
+                    isPublishing = false
+                    errorMessage = "Anket yayınlanırken bir hata oluştu: \(error.localizedDescription)"
+                }
             }
         }
     }

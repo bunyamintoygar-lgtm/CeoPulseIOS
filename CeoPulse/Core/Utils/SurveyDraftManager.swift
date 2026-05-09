@@ -13,9 +13,32 @@ class SurveyDraftManager: ObservableObject {
         var questions: [DraftQuestion]
         var currentStep: Int
         var lastEdited: Date
+        
+        // Settings
+        var hasEndDate: Bool
+        var endDate: Date
+        var participationLimit: String
+        var resultsVisibility: String
+        var allowChangeResponse: Bool
+        var isRequired: Bool
+        var isAnonymous: Bool
     }
     
-    func saveDraft(title: String, description: String, category: SurveyCategory?, audience: String, questions: [DraftQuestion], step: Int) {
+    func saveDraft(
+        title: String, 
+        description: String, 
+        category: SurveyCategory?, 
+        audience: String, 
+        questions: [DraftQuestion], 
+        step: Int,
+        hasEndDate: Bool,
+        endDate: Date,
+        participationLimit: String,
+        resultsVisibility: String,
+        allowChangeResponse: Bool,
+        isRequired: Bool,
+        isAnonymous: Bool
+    ) {
         let draft = DraftData(
             title: title,
             description: description,
@@ -23,7 +46,14 @@ class SurveyDraftManager: ObservableObject {
             targetAudience: audience,
             questions: questions,
             currentStep: step,
-            lastEdited: Date()
+            lastEdited: Date(),
+            hasEndDate: hasEndDate,
+            endDate: endDate,
+            participationLimit: participationLimit,
+            resultsVisibility: resultsVisibility,
+            allowChangeResponse: allowChangeResponse,
+            isRequired: isRequired,
+            isAnonymous: isAnonymous
         )
         
         if let encoded = try? JSONEncoder().encode(draft) {
