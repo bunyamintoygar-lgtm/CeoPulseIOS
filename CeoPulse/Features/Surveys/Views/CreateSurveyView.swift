@@ -1150,41 +1150,46 @@ struct RadioButtonField: View {
     let label: String
     let isSelected: Bool
     var sublabel: String? = nil
+    let action: () -> Void
     
     var body: some View {
-        HStack(alignment: sublabel != nil ? .top : .center, spacing: 14) {
-            ZStack {
-                Circle()
-                    .stroke(isSelected ? Color.purple : Color.white.opacity(0.2), lineWidth: 2)
-                    .frame(width: 22, height: 22)
-                
-                if isSelected {
+        Button(action: action) {
+            HStack(alignment: sublabel != nil ? .top : .center, spacing: 14) {
+                ZStack {
                     Circle()
-                        .fill(Color.purple)
-                        .frame(width: 12, height: 12)
-                        .symbolEffect(.bounce, value: isSelected)
+                        .stroke(isSelected ? Color.purple : Color.white.opacity(0.2), lineWidth: 2)
+                        .frame(width: 22, height: 22)
+                    
+                    if isSelected {
+                        Circle()
+                            .fill(Color.purple)
+                            .frame(width: 12, height: 12)
+                    }
                 }
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(label)
-                    .font(.system(size: 15, weight: isSelected ? .bold : .medium))
-                    .foregroundColor(isSelected ? .white : .white.opacity(0.8))
                 
-                if let sub = sublabel {
-                    Text(sub)
-                        .font(.system(size: 12))
-                        .foregroundColor(AppColors.textSecondary)
-                        .lineLimit(2)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(label)
+                        .font(.system(size: 15, weight: isSelected ? .bold : .medium))
+                        .foregroundColor(isSelected ? .white : .white.opacity(0.8))
+                        .multilineTextAlignment(.leading)
+                    
+                    if let sub = sublabel {
+                        Text(sub)
+                            .font(.system(size: 12))
+                            .foregroundColor(AppColors.textSecondary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
                 }
+                Spacer()
             }
-            Spacer()
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? Color.purple.opacity(0.05) : Color.clear)
+            )
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(isSelected ? Color.purple.opacity(0.05) : Color.clear)
-        )
+        .buttonStyle(.plain)
         .contentShape(Rectangle())
         .animation(.spring(response: 0.3), value: isSelected)
     }
