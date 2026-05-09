@@ -16,7 +16,6 @@ struct SurveysHomeView: View {
     @State private var surveyToDelete: Survey?
     @State private var showingDeleteAlert = false
     @State private var surveyToEdit: Survey?
-    @State private var showEditSurvey = false
     
     let tabs = ["Aktif Anketler", "Tamamlananlar", "Oluşturduklarım", "Arşiv"]
     
@@ -199,13 +198,11 @@ struct SurveysHomeView: View {
                     viewModel.fetchSurveys()
                 })
             }
-            .sheet(isPresented: $showEditSurvey) {
-                if let survey = surveyToEdit {
-                    CreateSurveyView(onPublish: {
-                        viewModel.fetchSurveys()
-                        surveyToEdit = nil
-                    }, surveyToEdit: survey)
-                }
+            .sheet(item: $surveyToEdit) { survey in
+                CreateSurveyView(onPublish: {
+                    viewModel.fetchSurveys()
+                    surveyToEdit = nil
+                }, surveyToEdit: survey)
             }
             .sheet(item: $selectedSurvey) { survey in
                 JoinSurveyView(survey: survey)
@@ -328,7 +325,6 @@ struct SurveysHomeView: View {
                         },
                         onEdit: (isCreator && totalVotes == 0) ? {
                             surveyToEdit = survey
-                            showEditSurvey = true
                         } : nil,
                         onDelete: (isCreator && totalVotes == 0) ? {
                             surveyToDelete = survey
@@ -450,7 +446,6 @@ struct SurveysHomeView: View {
                         },
                         onEdit: (isCreator && totalVotes == 0) ? {
                             surveyToEdit = survey
-                            showEditSurvey = true
                         } : nil,
                         onDelete: (isCreator && totalVotes == 0) ? {
                             surveyToDelete = survey
