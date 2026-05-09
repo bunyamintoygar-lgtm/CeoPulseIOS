@@ -12,7 +12,7 @@ struct CreateSurveyView: View {
     @State private var targetAudience = "Herkese Açık"
     @State private var hasEndDate = true // Default to true as per new 3-month rule
     @State private var startDate = Date()
-    @State private var endDate = Calendar.current.date(byAdding: .month, value: 3, to: Date()) ?? Date()
+    @State private var endDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
     
     private var maxEndDate: Date {
         Calendar.current.date(byAdding: .month, value: 3, to: startDate) ?? startDate
@@ -463,7 +463,7 @@ struct CreateSurveyView: View {
                     DatePicker(
                         "Bitiş Tarihi",
                         selection: $endDate,
-                        in: Date()...maxEndDate,
+                        in: startDate...maxEndDate,
                         displayedComponents: [.date]
                     )
                     .datePickerStyle(.graphical)
