@@ -127,7 +127,9 @@ struct SurveysHomeView: View {
             }
             .navigationBarHidden(true)
             .sheet(isPresented: $showCreateSurvey) {
-                CreateSurveyView()
+                CreateSurveyView(onPublish: {
+                    viewModel.fetchSurveys()
+                })
             }
             .sheet(item: $selectedSurvey) { survey in
                 JoinSurveyView(survey: survey)

@@ -4,6 +4,7 @@ import Supabase
 struct CreateSurveyView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var currentStep = 1
+    var onPublish: (() -> Void)? = nil
     
     // Step 1: Details
     @State private var title = ""
@@ -867,6 +868,7 @@ struct CreateSurveyView: View {
                 await MainActor.run {
                     isPublishing = false
                     draftManager.clearDraft()
+                    onPublish?()
                     presentationMode.wrappedValue.dismiss()
                 }
             } catch {
