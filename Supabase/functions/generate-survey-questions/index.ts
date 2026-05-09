@@ -71,13 +71,20 @@ serve(async (req) => {
     }
 
     const content = openAiData.choices[0].message.content
-    let questions = JSON.parse(content)
-    if (questions.questions) {
-      questions = questions.questions
-    }
+    let rawData = JSON.parse(content)
+    let questionsArray = Array.isArray(rawData) ? rawData : (rawData.questions || [])
+
+    // Ensure each question has the exact expected structure and types
+    const cleanedQuestions = questionsArray.map((q: any) => ({
+      text: typeof q.text === 'string' ? q.text : (q.text?.tr || q.text?.en || JSON.stringify(q.text)),
+      type: typeof q.type === 'string' ? q.type : (q.type?.value || "single_choice"),
+      options: Array.isArray(q.options) ? q.options.map((opt: any) => typeof opt === 'string' ? opt : JSON.stringify(opt)) : [],
+      isRequired: true,
+      allowMultiple: q.type === 'multiple_choice' || q.allowMultiple === true
+    }))
 
     return new Response(
-      JSON.stringify(questions),
+      JSON.stringify(cleanedQuestions),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
 
