@@ -11,43 +11,41 @@ struct ContentModerator {
         "müstehcen1", "uygunsuz1"
     ]
     
-    // MARK: - AI Moderation (Real-time AI Check)
+    // MARK: - AI Moderation (via Supabase Edge Function)
     func checkWithAI(texts: [String]) async throws -> (isAppropriate: Bool, reason: String?) {
-        // OpenAI Moderation API or Gemini API integration
-        // For production, move the API key to a secure backend/Supabase Edge Function
-        let apiKey = "YOUR_API_KEY_HERE" 
-        guard apiKey != "YOUR_API_KEY_HERE" else {
-            // If no API key, fall back to local check but simulate AI delay
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            return isContentAppropriate(texts)
-        }
-        
-        let endpoint = "https://api.openai.com/v1/moderations"
         let combinedText = texts.joined(separator: "\n---\n")
         
-        var request = URLRequest(url: URL(string: endpoint)!)
-        request.httpMethod = "POST"
-        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        
-        let payload: [String: Any] = ["input": combinedText]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-            return isContentAppropriate(texts) // Fallback
-        }
-        
-        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let results = json["results"] as? [[String: Any]],
-           let firstResult = results.first {
-            let flagged = firstResult["flagged"] as? Bool ?? false
-            if flagged {
-                return (false, "İçeriğiniz AI tarafından uygunsuz bulundu.")
+        do {
+            // Call the 'moderate-content' Edge Function
+            let response = try await SupabaseManager.shared.client.functions
+                .invoke(
+                    "moderate-survey", 
+                    options: .init(
+                        body: ["text": combinedText],
+                        method: .post
+                    )
+                )
+            
+            // Supabase Edge Functions return data as raw Data
+            let decoder = JSONDecoder()
+            if let result = try? decoder.decode(ModerationResponse.self, from: response) {
+                if result.flagged {
+                    return (false, result.reason ?? "İçeriğiniz uygunsuz bulundu.")
+                }
+                return (true, nil)
             }
+            
+            return (true, nil) // Default to pass if decode fails
+        } catch {
+            print("Edge Function Moderation Error: \(error)")
+            // Fallback to local check if function fails
+            return isContentAppropriate(texts)
         }
-        
-        return (true, nil)
+    }
+    
+    private struct ModerationResponse: Codable {
+        let flagged: Bool
+        let reason: String?
     }
     
     func isContentAppropriate(_ texts: [String]) -> (isAppropriate: Bool, offendingWord: String?) {
