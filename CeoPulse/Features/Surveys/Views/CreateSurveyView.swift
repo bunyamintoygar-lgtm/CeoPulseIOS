@@ -361,13 +361,17 @@ struct CreateSurveyView: View {
             .disabled(isGeneratingAI || title.isEmpty)
             .opacity(title.isEmpty ? 0.5 : 1.0)
             
-            ForEach(0..<questions.count, id: \.self) { index in
-                QuestionEditCard(question: $questions[index], number: index + 1) {
+            ForEach($questions) { $question in
+                QuestionEditCard(question: $question, number: (questions.firstIndex(where: { $0.id == question.id }) ?? 0) + 1) {
                     if questions.count > 1 {
-                        questions.remove(at: index)
+                        if let index = questions.firstIndex(where: { $0.id == question.id }) {
+                            questions.remove(at: index)
+                        }
                     } else {
                         // Reset if it's the last one
-                        questions[index] = DraftQuestion(text: "", options: ["", ""], type: .singleChoice)
+                        if let index = questions.firstIndex(where: { $0.id == question.id }) {
+                            questions[index] = DraftQuestion(text: "", options: ["", ""], type: .singleChoice)
+                        }
                     }
                 }
             }
@@ -809,7 +813,8 @@ struct AudienceCard: View {
     }
 }
 
-struct DraftQuestion: Codable, Equatable {
+struct DraftQuestion: Codable, Equatable, Identifiable {
+    var id = UUID()
     var text: String
     var options: [String]
     var type: SurveyQuestion.QuestionType
