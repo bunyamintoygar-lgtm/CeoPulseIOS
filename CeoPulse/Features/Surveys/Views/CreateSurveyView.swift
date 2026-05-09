@@ -136,11 +136,11 @@ struct CreateSurveyView: View {
             }
         }
         .navigationBarHidden(true)
-        .onChange(of: title) { _ in saveDraftSilently() }
-        .onChange(of: description) { _ in saveDraftSilently() }
-        .onChange(of: selectedCategory) { _ in saveDraftSilently() }
-        .onChange(of: questions) { _ in saveDraftSilently() }
-        .onChange(of: targetAudience) { _ in saveDraftSilently() }
+        .onChange(of: title) { saveDraftSilently() }
+        .onChange(of: description) { saveDraftSilently() }
+        .onChange(of: selectedCategory) { saveDraftSilently() }
+        .onChange(of: questions) { saveDraftSilently() }
+        .onChange(of: targetAudience) { saveDraftSilently() }
         .onAppear {
             if draftManager.hasDraft() && title.isEmpty && questions.count == 1 && questions[0].text.isEmpty {
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
