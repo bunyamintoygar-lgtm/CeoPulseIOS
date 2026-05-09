@@ -319,7 +319,7 @@ struct CreateSurveyView: View {
                     } else {
                         Image(systemName: "sparkles")
                             .font(.system(size: 18))
-                            .symbolEffect(.bounce, options: .repeating)
+                            .symbolEffect(.bounce)
                     }
                     
                     VStack(alignment: .leading, spacing: 2) {
@@ -537,7 +537,7 @@ struct CreateSurveyView: View {
                     .font(.system(size: 60))
                     .symbolRenderingMode(.hierarchical)
                     .foregroundColor(.purple)
-                    .symbolEffect(.bounce, options: .repeating)
+                    .symbolEffect(.bounce)
                 
                 Text("Anketiniz Yayına Hazır!")
                     .font(.system(size: 18, weight: .bold))
