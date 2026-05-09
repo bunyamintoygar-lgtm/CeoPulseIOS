@@ -11,11 +11,11 @@ serve(async (req) => {
   }
 
   try {
-    const { title, description, language = 'tr' } = await req.json()
+    const { title, description = "", language = 'tr' } = await req.json()
 
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openaiApiKey) {
-      throw new Error('OPENAI_API_KEY is not set')
+      throw new Error('OPENAI_API_KEY is not set in Secrets')
     }
 
     const langName = language === 'tr' ? 'Turkish' : 'English'
@@ -45,7 +45,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: "You are a professional survey generator that outputs only JSON." },
           { role: "user", content: prompt }
@@ -57,18 +57,20 @@ serve(async (req) => {
     const openAiData = await openAiResponse.json()
     
     if (openAiData.error) {
-      console.error('OpenAI API Error:', openAiData.error)
-      throw new Error(`OpenAI Error: ${openAiData.error.message || 'Unknown error'}`)
+      return new Response(
+        JSON.stringify({ error: `OpenAI Error: ${openAiData.error.message}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
     }
 
     if (!openAiData.choices || openAiData.choices.length === 0) {
-      console.error('Unexpected OpenAI Response:', openAiData)
-      throw new Error('OpenAI returned no choices. Check your API key and quota.')
+      return new Response(
+        JSON.stringify({ error: "OpenAI returned no results. Please check your quota/balance." }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
     }
 
     const content = openAiData.choices[0].message.content
-    
-    // Sometimes GPT wraps the array in a root object, we'll try to find the array
     let questions = JSON.parse(content)
     if (questions.questions) {
       questions = questions.questions
