@@ -47,8 +47,6 @@ struct CreateSurveyView: View {
             }
         }
     }
-    @State private var showingResumeAlert = false
-    @State private var showingExitConfirmation = false
     
     @StateObject private var draftManager = SurveyDraftManager.shared
     
@@ -58,6 +56,7 @@ struct CreateSurveyView: View {
     }
     
     @StateObject private var configManager = ConfigManager.shared
+    @State private var showingResumeOverlay = false
     
     // Step 2: Questions
     @State private var questions: [DraftQuestion] = [
@@ -94,23 +93,44 @@ struct CreateSurveyView: View {
                 // Bottom Actions
                 bottomActions
             }
+            
+            // Premium Resume Draft Overlay
+            if showingResumeOverlay {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                
+                resumeDraftOverlay
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(10)
+            }
+        }
+        .navigationBarHidden(true)
+        .onAppear {
+            if draftManager.hasDraft() && title.isEmpty && questions.count == 1 && questions[0].text.isEmpty {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                    showingResumeOverlay = true
+                }
+            }
         }
     }
     
     private var headerView: some View {
         HStack {
-            Button(action: { 
+            Button(action: {
                 if hasChanges {
-                    showingExitConfirmation = true
-                } else {
-                    presentationMode.wrappedValue.dismiss()
+                    saveDraftSilently()
                 }
+                presentationMode.wrappedValue.dismiss()
             }) {
-                Image(systemName: "arrow.left")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 40, height: 40)
-                    .background(Circle().fill(Color.white.opacity(0.05)))
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.05))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                }
             }
             
             Spacer()
@@ -599,6 +619,104 @@ struct CreateSurveyView: View {
             .padding(.bottom, 10)
         }
         .background(AppColors.background)
+    }
+    
+    private var resumeDraftOverlay: some View {
+        VStack(spacing: 24) {
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(LinearGradient(colors: [.purple.opacity(0.2), .blue.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .frame(width: 80, height: 80)
+                
+                Image(systemName: "doc.text.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .symbolEffect(.bounce, options: .repeating)
+            }
+            
+            VStack(spacing: 8) {
+                Text("Yarım Kalan Anket")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("Daha önce başladığınız bir anket taslağı bulundu. Kaldığınız yerden devam etmek ister misiniz?")
+                    .font(.system(size: 15))
+                    .foregroundColor(AppColors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+            
+            VStack(spacing: 12) {
+                Button(action: {
+                    resumeDraft()
+                    withAnimation { showingResumeOverlay = false }
+                }) {
+                    Text("Taslaktan Devam Et")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(LinearGradient(colors: [.purple, Color(hex: "6C38FF")], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        )
+                        .shadow(color: Color.purple.opacity(0.3), radius: 10, y: 5)
+                }
+                
+                Button(action: {
+                    draftManager.clearDraft()
+                    withAnimation { showingResumeOverlay = false }
+                }) {
+                    Text("Yeni Anket Başlat")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(AppColors.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        )
+                }
+            }
+            .padding(.horizontal, 20)
+        }
+        .padding(.vertical, 32)
+        .background(
+            RoundedRectangle(cornerRadius: 32)
+                .fill(Color(hex: "121217"))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 32)
+                        .stroke(LinearGradient(colors: [.white.opacity(0.1), .clear], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, 24)
+        .shadow(color: .black.opacity(0.5), radius: 40, x: 0, y: 20)
+    }
+    
+    private func saveDraftSilently() {
+        draftManager.saveDraft(
+            title: title,
+            description: description,
+            category: selectedCategory,
+            audience: targetAudience,
+            questions: questions,
+            step: currentStep
+        )
+    }
+    
+    private func resumeDraft() {
+        if let draft = draftManager.loadDraft() {
+            self.title = draft.title
+            self.description = draft.description
+            self.targetAudience = draft.targetAudience
+            self.questions = draft.questions
+            self.currentStep = draft.currentStep
+            // Category lookup
+            if let catId = draft.categoryId {
+                self.selectedCategory = configManager.surveyCategories.first(where: { $0.id == catId })
+            }
+        }
     }
 }
 
