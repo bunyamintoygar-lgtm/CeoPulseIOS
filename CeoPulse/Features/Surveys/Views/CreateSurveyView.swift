@@ -820,129 +820,182 @@ struct QuestionEditCard: View {
     let number: Int
     let onDelete: () -> Void
     
-    @State private var showingDeleteAlert = false
+    @State private var showingDeleteConfirm = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                HStack(spacing: 8) {
-                    Text("\(number)")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(width: 20, height: 20)
-                        .background(Circle().fill(Color.purple))
-                    Text("Soru").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
-                }
-                Text((question.isRequired ?? true) ? "(Zorunlu)" : "(İsteğe Bağlı)")
-                    .font(.system(size: 12))
-                    .foregroundColor(AppColors.textSecondary)
-                
-                Spacer() // Pushes delete button to the far right
-                
-                Button(action: {
-                    showingDeleteAlert = true
-                }) {
-                    Image(systemName: "trash.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.red.opacity(0.8))
-                        .padding(8)
-                        .background(Circle().fill(Color.red.opacity(0.1)))
-                }
-            }
-            .alert("Soruyu Sil", isPresented: $showingDeleteAlert) {
-                Button("İptal", role: .cancel) { }
-                Button("Sil", role: .destructive) {
-                    onDelete()
-                }
-            } message: {
-                Text("Bu soruyu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")
-            }
-            
-            TextField("Sorunuzu buraya yazın...", text: $question.text, axis: .vertical)
-                .font(.system(size: 14, weight: .medium)) // Reduced font size
-                .padding()
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.05)))
-                .foregroundColor(.white)
-                .lineLimit(1...4)
-            
-            VStack(alignment: .leading, spacing: 12) {
+        ZStack {
+            VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("Yanıt Seçenekleri").font(.system(size: 13, weight: .medium)).foregroundColor(.white)
-                    Spacer()
+                    HStack(spacing: 8) {
+                        Text("\(number)")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 20, height: 20)
+                            .background(Circle().fill(Color.purple))
+                        Text("Soru").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                    }
+                    Text((question.isRequired ?? true) ? "(Zorunlu)" : "(İsteğe Bağlı)")
+                        .font(.system(size: 12))
+                        .foregroundColor(AppColors.textSecondary)
+                    
+                    Spacer() // Pushes delete button to the far right
+                    
                     Button(action: {
-                        withAnimation { question.options.append("") }
+                        withAnimation(.spring()) { showingDeleteConfirm = true }
                     }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus")
-                            Text("Seçenek Ekle")
-                        }
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.purple)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Capsule().fill(Color.purple.opacity(0.1)))
+                        Image(systemName: "trash.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.red.opacity(0.8))
+                            .padding(8)
+                            .background(Circle().fill(Color.red.opacity(0.1)))
                     }
                 }
                 
-                ForEach(0..<question.options.count, id: \.self) { i in
+                TextField("Sorunuzu buraya yazın...", text: $question.text, axis: .vertical)
+                    .font(.system(size: 14, weight: .medium)) // Reduced font size
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.05)))
+                    .foregroundColor(.white)
+                    .lineLimit(1...4)
+                
+                VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Image(systemName: question.type == .singleChoice ? "circle.fill" : "checkmark.square.fill")
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundColor(.purple)
-                        
-                        TextField("Seçenek \(i + 1)", text: $question.options[i])
-                            .font(.system(size: 14))
-                            .foregroundColor(.white)
-                        
+                        Text("Yanıt Seçenekleri").font(.system(size: 13, weight: .medium)).foregroundColor(.white)
                         Spacer()
+                        Button(action: {
+                            withAnimation { question.options.append("") }
+                        }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "plus")
+                                Text("Seçenek Ekle")
+                            }
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.purple)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Capsule().fill(Color.purple.opacity(0.1)))
+                        }
+                    }
+                    
+                    ForEach(0..<question.options.count, id: \.self) { i in
+                        HStack {
+                            Image(systemName: question.type == .singleChoice ? "circle.fill" : "checkmark.square.fill")
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundColor(.purple)
+                            
+                            TextField("Seçenek \(i + 1)", text: $question.options[i])
+                                .font(.system(size: 14))
+                                .foregroundColor(.white)
+                            
+                            Spacer()
+                            
+                            Button(action: { 
+                                if question.options.count > 2 {
+                                    withAnimation { _ = question.options.remove(at: i) }
+                                }
+                            }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.red, .red.opacity(0.1))
+                            }
+                        }
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.03)))
+                    }
+                }
+                
+                Divider().background(Color.white.opacity(0.1))
+                
+                HStack(spacing: 20) {
+                    Toggle(isOn: Binding(
+                        get: { question.allowMultiple ?? false },
+                        set: { question.allowMultiple = $0 }
+                    )) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "checklist")
+                                .symbolRenderingMode(.hierarchical)
+                            Text("Çoklu yanıt").font(.system(size: 13))
+                        }
+                    }
+                    .tint(.purple)
+                    
+                    Toggle(isOn: Binding(
+                        get: { question.isRequired ?? true },
+                        set: { question.isRequired = $0 }
+                    )) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "asterisk.circle.fill")
+                                .symbolRenderingMode(.hierarchical)
+                            Text("Zorunlu").font(.system(size: 13))
+                        }
+                    }
+                    .tint(.purple)
+                }
+                .foregroundColor(.white)
+            }
+            .padding(16)
+            .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.03)))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.05), lineWidth: 1))
+            
+            // Premium Delete Confirmation Overlay
+            if showingDeleteConfirm {
+                Color.black.opacity(0.4)
+                    .cornerRadius(16)
+                    .transition(.opacity)
+                
+                VStack(spacing: 16) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(.red)
+                        .symbolEffect(.bounce, value: showingDeleteConfirm)
+                    
+                    VStack(spacing: 4) {
+                        Text("Soruyu Sil")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                        Text("Bu işlem geri alınamaz.")
+                            .font(.system(size: 12))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                    
+                    HStack(spacing: 12) {
+                        Button(action: {
+                            withAnimation(.spring()) { showingDeleteConfirm = false }
+                        }) {
+                            Text("İptal")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.1)))
+                        }
                         
-                        Button(action: { 
-                            if question.options.count > 2 {
-                                withAnimation { _ = question.options.remove(at: i) }
+                        Button(action: {
+                            withAnimation(.spring()) {
+                                showingDeleteConfirm = false
+                                onDelete()
                             }
                         }) {
-                            Image(systemName: "minus.circle.fill")
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(.red, .red.opacity(0.1))
+                            Text("Sil")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color.red.opacity(0.8)))
                         }
                     }
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.03)))
                 }
+                .padding(20)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color(hex: "1A1A20"))
+                        .shadow(color: .black.opacity(0.5), radius: 20, y: 10)
+                )
+                .padding(10)
+                .transition(.scale(scale: 0.9).combined(with: .opacity))
+                .zIndex(10)
             }
-            
-            Divider().background(Color.white.opacity(0.1))
-            
-            HStack(spacing: 20) {
-                Toggle(isOn: Binding(
-                    get: { question.allowMultiple ?? false },
-                    set: { question.allowMultiple = $0 }
-                )) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "checklist")
-                            .symbolRenderingMode(.hierarchical)
-                        Text("Çoklu yanıt").font(.system(size: 13))
-                    }
-                }
-                .tint(.purple)
-                
-                Toggle(isOn: Binding(
-                    get: { question.isRequired ?? true },
-                    set: { question.isRequired = $0 }
-                )) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "asterisk.circle.fill")
-                            .symbolRenderingMode(.hierarchical)
-                        Text("Zorunlu").font(.system(size: 13))
-                    }
-                }
-                .tint(.purple)
-            }
-            .foregroundColor(.white)
         }
-        .padding(16)
-        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.03)))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.05), lineWidth: 1))
     }
 }
 
