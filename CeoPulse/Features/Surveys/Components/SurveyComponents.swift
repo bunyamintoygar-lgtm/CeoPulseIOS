@@ -104,7 +104,9 @@ struct SurveyCard: View {
             // Voter Avatars Row
             HStack(spacing: 12) {
                 HStack(spacing: -10) {
-                    ForEach(0..<4, id: \.self) { i in
+                    // Show up to 4 avatars based on totalVotes
+                    let avatarCount = min(totalVotes > 0 ? totalVotes : 4, 4)
+                    ForEach(0..<avatarCount, id: \.self) { i in
                         Image("ceo_profile_\(i + 1)")
                             .resizable()
                             .aspectRatio(contentMode: .fill)
@@ -121,8 +123,7 @@ struct SurveyCard: View {
                             .background(Circle().fill(Color.purple.opacity(0.4)))
                             .overlay(Circle().stroke(Color(hex: "121217"), lineWidth: 2))
                     } else if totalVotes == 0 {
-                        // Dummy avatars for premium look as in reference
-                        Text("+248")
+                        Text("+0")
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.white)
                             .frame(width: 32, height: 32)
@@ -131,7 +132,7 @@ struct SurveyCard: View {
                     }
                 }
                 
-                Text(totalVotes > 0 ? "Toplam \(totalVotes) CEO oy verdi" : "Toplam 248 CEO oy verdi")
+                Text("Toplam \(totalVotes) CEO oy verdi")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(AppColors.textSecondary)
                 

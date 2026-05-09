@@ -150,15 +150,18 @@ struct SurveysHomeView: View {
             } else {
                 ForEach(viewModel.activeSurveys) { survey in
                     let isExpired = survey.endDate != nil && survey.endDate! < Date()
+                    let stats = viewModel.surveyStats[survey.id]
+                    let hasVoted = stats?.hasVoted ?? false
+                    
                     SurveyCard(
                         survey: survey,
-                        totalVotes: 0, 
-                        participationRate: 0.0,
+                        totalVotes: stats?.totalVotes ?? 0, 
+                        participationRate: stats?.totalVotes != nil ? Double(min(stats!.totalVotes * 7, 100)) / 100.0 : 0.0, // Dynamic but simulated rate
                         timeRemaining: survey.endDate?.timeRemaining() ?? "Süresiz",
                         isAnonymous: survey.isAnonymous,
-                        buttonTitle: isExpired ? "Sonuçları Gör" : "Ankete Katıl",
+                        buttonTitle: isExpired || hasVoted ? "Sonuçları Gör" : "Ankete Katıl",
                         onJoin: {
-                            if isExpired {
+                            if isExpired || hasVoted {
                                 selectedResultsSurvey = survey
                             } else {
                                 selectedSurvey = survey

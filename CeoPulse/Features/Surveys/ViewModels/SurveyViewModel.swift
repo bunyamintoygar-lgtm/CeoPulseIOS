@@ -7,6 +7,8 @@ class SurveyViewModel: ObservableObject {
     @Published var isFetchingMore = false
     @Published var errorMessage: String?
     
+    @Published var surveyStats: [UUID: SurveyService.SurveyStats] = [:]
+    
     @Published var searchQuery = ""
     private var searchSubject = PassthroughSubject<String, Never>()
     private var cancellables = Set<AnyCancellable>()
@@ -67,6 +69,11 @@ class SurveyViewModel: ObservableObject {
                     self.currentPage += 1
                     self.isLoading = false
                     self.isFetchingMore = false
+                    
+                    // Fetch stats for these surveys
+                    Task {
+                        await self.fetchStats(for: fetchedSurveys)
+                    }
                 }
             } catch {
                 await MainActor.run {
@@ -95,5 +102,18 @@ class SurveyViewModel: ObservableObject {
     
     var completedSurveys: [Survey] {
         surveys.filter { $0.status == .completed }
+    }
+    
+    private func fetchStats(for surveys: [Survey]) async {
+        for survey in surveys {
+            do {
+                let stats = try await service.fetchSurveyStats(surveyId: survey.id)
+                await MainActor.run {
+                    self.surveyStats[survey.id] = stats
+                }
+            } catch {
+                print("Failed to fetch stats for \(survey.id): \(error)")
+            }
+        }
     }
 }
