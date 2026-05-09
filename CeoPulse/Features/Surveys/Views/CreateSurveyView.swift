@@ -714,7 +714,7 @@ struct QuestionEditCard: View {
                         .background(Circle().fill(Color.purple))
                     Text("Soru").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
                 }
-                Text(question.isRequired ? "(Zorunlu)" : "(İsteğe Bağlı)")
+                Text((question.isRequired ?? true) ? "(Zorunlu)" : "(İsteğe Bağlı)")
                     .font(.system(size: 12))
                     .foregroundColor(AppColors.textSecondary)
                 Spacer()
@@ -777,7 +777,10 @@ struct QuestionEditCard: View {
             Divider().background(Color.white.opacity(0.1))
             
             HStack(spacing: 20) {
-                Toggle(isOn: $question.allowMultiple) {
+                Toggle(isOn: Binding(
+                    get: { question.allowMultiple ?? false },
+                    set: { question.allowMultiple = $0 }
+                )) {
                     HStack(spacing: 6) {
                         Image(systemName: "checklist")
                             .symbolRenderingMode(.hierarchical)
@@ -786,7 +789,10 @@ struct QuestionEditCard: View {
                 }
                 .tint(.purple)
                 
-                Toggle(isOn: $question.isRequired) {
+                Toggle(isOn: Binding(
+                    get: { question.isRequired ?? true },
+                    set: { question.isRequired = $0 }
+                )) {
                     HStack(spacing: 6) {
                         Image(systemName: "asterisk.circle.fill")
                             .symbolRenderingMode(.hierarchical)
