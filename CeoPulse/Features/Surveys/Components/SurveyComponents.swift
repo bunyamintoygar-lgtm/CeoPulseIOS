@@ -42,35 +42,13 @@ struct SurveyCard: View {
                 
                 Spacer()
                 
-                HStack(spacing: 14) {
-                    if let onEdit = onEdit {
-                        Button(action: onEdit) {
-                            Image(systemName: "pencil")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.blue)
-                                .frame(width: 32, height: 32)
-                                .background(Circle().fill(Color.blue.opacity(0.1)))
-                        }
-                    }
-                    
-                    if let onDelete = onDelete {
-                        Button(action: onDelete) {
-                            Image(systemName: "trash")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.red)
-                                .frame(width: 32, height: 32)
-                                .background(Circle().fill(Color.red.opacity(0.1)))
-                        }
-                    }
-                    
-                    HStack(spacing: 4) {
-                        Image(systemName: "clock")
-                            .symbolRenderingMode(.hierarchical)
-                        Text(timeRemaining)
-                    }
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(AppColors.textSecondary)
+                HStack(spacing: 4) {
+                    Image(systemName: "clock")
+                        .symbolRenderingMode(.hierarchical)
+                    Text(timeRemaining)
                 }
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(AppColors.textSecondary)
             }
             
             // Middle Content: Title and Progress
@@ -166,22 +144,51 @@ struct SurveyCard: View {
                 .foregroundColor(AppColors.textSecondary)
             }
             
-            // Bottom Action Button (Full Width)
-            Button(action: onJoin) {
-                HStack {
-                    Text(buttonTitle)
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .bold))
+            // Action Buttons
+            HStack(spacing: 12) {
+                // Main Action (Join/Results)
+                Button(action: onJoin) {
+                    HStack {
+                        Text(buttonTitle)
+                            .font(.system(size: 16, weight: .bold))
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .bold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "6C38FF"), .purple],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(16)
+                    .shadow(color: Color(hex: "6C38FF").opacity(0.3), radius: 10, y: 5)
                 }
-                .font(.system(size: 15, weight: .bold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(LinearGradient(colors: [Color(hex: "4F46E5"), Color(hex: "9333EA")], startPoint: .leading, endPoint: .trailing))
-                        .shadow(color: .purple.opacity(0.3), radius: 8, y: 4)
-                )
+                
+                if let onEdit = onEdit {
+                    Button(action: onEdit) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 52, height: 52)
+                            .background(Color.blue)
+                            .cornerRadius(16)
+                    }
+                }
+                
+                if let onDelete = onDelete {
+                    Button(action: onDelete) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 52, height: 52)
+                            .background(Color.red)
+                            .cornerRadius(16)
+                    }
+                }
             }
         }
         .padding(24)
