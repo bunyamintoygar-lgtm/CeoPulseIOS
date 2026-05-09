@@ -5,6 +5,7 @@ struct CreateSurveyView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var currentStep = 1
     var onPublish: (() -> Void)? = nil
+    var surveyToEdit: Survey? = nil
     
     // Step 1: Details
     @State private var title = ""
@@ -180,7 +181,13 @@ struct CreateSurveyView: View {
         .onChange(of: allowChangeResponse) { _, _ in saveDraftSilently() }
         .onChange(of: isRequiredToAnswer) { _, _ in saveDraftSilently() }
         .onChange(of: isAnonymous) { _, _ in saveDraftSilently() }
-        .onAppear(perform: checkForResumeDraft)
+        .onAppear {
+            if let survey = surveyToEdit {
+                loadSurveyForEditing(survey)
+            } else {
+                checkForResumeDraft()
+            }
+        }
         .sheet(isPresented: $showingCategoryPicker) {
             CategoryPickerSheet(categories: configManager.surveyCategories, selectedCategory: $selectedCategory)
         }
@@ -212,11 +219,11 @@ struct CreateSurveyView: View {
                         .symbolRenderingMode(.hierarchical)
                         .foregroundColor(.purple)
                         .symbolEffect(.bounce, value: currentStep)
-                    Text("Yeni Anket Ekle")
+                    Text(surveyToEdit == nil ? "Yeni Anket Ekle" : "Anketi Düzenle")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
                 }
-                Text("Anketinizi oluşturun ve paylaşın.")
+                Text(surveyToEdit == nil ? "Anketinizi oluşturun ve paylaşın." : "Anketinizi güncelleyin.")
                     .font(.system(size: 12))
                     .foregroundColor(AppColors.textSecondary)
             }
@@ -797,6 +804,47 @@ struct CreateSurveyView: View {
         }
     }
     
+    private func loadSurveyForEditing(_ survey: Survey) {
+        self.title = survey.title
+        self.description = survey.description ?? ""
+        self.targetAudience = survey.targetAudience
+        self.startDate = survey.startDate
+        self.endDate = survey.endDate ?? Date()
+        self.participationLimit = String(survey.participationLimit ?? 1000)
+        self.participationLimitType = survey.participationLimit == nil ? "unlimited" : "limit"
+        self.resultsVisibility = survey.resultVisibility.rawValue
+        self.allowChangeResponse = survey.allowEditResponses
+        self.isAnonymous = survey.isAnonymous
+        
+        if let catId = survey.categoryId {
+            self.selectedCategory = configManager.surveyCategories.first(where: { $0.id == catId })
+        }
+        
+        // Fetch questions and options
+        Task {
+            do {
+                let fetchedQuestions = try await SurveyService.shared.fetchQuestions(for: survey.id)
+                var draftQuestions: [DraftQuestion] = []
+                
+                for q in fetchedQuestions {
+                    let options = try await SurveyService.shared.fetchOptions(for: q.id)
+                    draftQuestions.append(DraftQuestion(
+                        id: q.id,
+                        text: q.questionText,
+                        options: options.map { $0.optionText },
+                        type: q.questionType == .singleChoice ? .singleChoice : .multipleChoice
+                    ))
+                }
+                
+                await MainActor.run {
+                    self.questions = draftQuestions
+                }
+            } catch {
+                print("Failed to load questions for editing: \(error)")
+            }
+        }
+    }
+    
     private func publishSurvey() {
         guard let category = selectedCategory else {
             errorMessage = "Lütfen bir kategori seçin."
@@ -811,25 +859,25 @@ struct CreateSurveyView: View {
                 let session = try await SupabaseManager.shared.client.auth.session
                 let userId = session.user.id
                 
-                let surveyId = UUID()
+                let surveyId = surveyToEdit?.id ?? UUID()
                 
-                // 1. Create Survey Object
+                // 1. Create/Update Survey Object
                 let survey = Survey(
                     id: surveyId,
                     creatorId: userId,
                     title: title,
                     description: description.isEmpty ? nil : description,
                     categoryId: category.id,
-                    coverImageUrl: nil,
+                    coverImageUrl: surveyToEdit?.coverImageUrl,
                     targetAudience: targetAudience.lowercased() == "herkese açık" ? "public" : (targetAudience.lowercased() == "topluluk içi" ? "community" : "private"),
-                    status: .active,
-                    startDate: Date(),
+                    status: surveyToEdit?.status ?? .active,
+                    startDate: surveyToEdit?.startDate ?? Date(),
                     endDate: endDate,
                     isAnonymous: isAnonymous,
                     resultVisibility: resultsVisibility == "immediate" ? .immediate : (resultsVisibility == "closed" ? .after_closed : .never),
                     allowEditResponses: allowChangeResponse,
                     participationLimit: participationLimitType == "limit" ? Int(participationLimit) : nil,
-                    createdAt: Date(),
+                    createdAt: surveyToEdit?.createdAt ?? Date(),
                     language: Locale.current.language.languageCode?.identifier ?? "tr"
                 )
                 
@@ -864,11 +912,19 @@ struct CreateSurveyView: View {
                 }
                 
                 // 3. Save to Supabase
-                try await SurveyService.shared.createSurvey(
-                    survey: survey,
-                    questions: dbQuestions,
-                    options: dbOptionsMap
-                )
+                if surveyToEdit != nil {
+                    try await SurveyService.shared.updateSurvey(
+                        survey: survey,
+                        questions: dbQuestions,
+                        options: dbOptionsMap
+                    )
+                } else {
+                    try await SurveyService.shared.createSurvey(
+                        survey: survey,
+                        questions: dbQuestions,
+                        options: dbOptionsMap
+                    )
+                }
                 
                 await MainActor.run {
                     isPublishing = false

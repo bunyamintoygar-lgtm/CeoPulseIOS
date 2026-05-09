@@ -13,6 +13,11 @@ struct SurveysHomeView: View {
     @State private var isSearchVisible = false
     @State private var showingFilterMenu = false
     
+    @State private var surveyToDelete: Survey?
+    @State private var showingDeleteAlert = false
+    @State private var surveyToEdit: Survey?
+    @State private var showEditSurvey = false
+    
     let tabs = ["Aktif Anketler", "Tamamlananlar", "Oluşturduklarım", "Arşiv"]
     
     var body: some View {
@@ -189,10 +194,26 @@ struct SurveysHomeView: View {
                 }
             }
             .navigationBarHidden(true)
+            .alert("Anketi Sil", isPresented: $showingDeleteAlert, presenting: surveyToDelete) { survey in
+                Button("Sil", role: .destructive) {
+                    viewModel.deleteSurvey(survey)
+                }
+                Button("Vazgeç", role: .cancel) {}
+            } message: { survey in
+                Text("'\(survey.title)' anketini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")
+            }
             .sheet(isPresented: $showCreateSurvey) {
                 CreateSurveyView(onPublish: {
                     viewModel.fetchSurveys()
                 })
+            }
+            .sheet(isPresented: $showEditSurvey) {
+                if let survey = surveyToEdit {
+                    CreateSurveyView(onPublish: {
+                        viewModel.fetchSurveys()
+                        surveyToEdit = nil
+                    }, surveyToEdit: survey)
+                }
             }
             .sheet(item: $selectedSurvey) { survey in
                 JoinSurveyView(survey: survey)
@@ -214,14 +235,16 @@ struct SurveysHomeView: View {
                 emptyStateView(title: "Aktif anket bulunamadı")
             } else {
                 ForEach(viewModel.activeSurveys) { survey in
-                    let isExpired = survey.endDate != nil && survey.endDate! < Date()
                     let stats = viewModel.surveyStats[survey.id]
                     let hasVoted = stats?.hasVoted ?? false
+                    let totalVotes = stats?.totalVotes ?? 0
+                    let isExpired = survey.endDate != nil && survey.endDate! < Date()
+                    let isCreator = survey.creatorId == viewModel.currentUserId
                     
                     SurveyCard(
                         survey: survey,
-                        totalVotes: stats?.totalVotes ?? 0, 
-                        participationRate: stats?.totalVotes != nil ? Double(min(stats!.totalVotes * 7, 100)) / 100.0 : 0.0, // Dynamic but simulated rate
+                        totalVotes: totalVotes, 
+                        participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
                         timeRemaining: survey.endDate?.timeRemaining() ?? "Süresiz",
                         isAnonymous: survey.isAnonymous,
                         buttonTitle: isExpired || hasVoted ? "Sonuçları Gör" : "Ankete Katıl",
@@ -231,7 +254,15 @@ struct SurveysHomeView: View {
                             } else {
                                 selectedSurvey = survey
                             }
-                        }
+                        },
+                        onEdit: (isCreator && totalVotes == 0) ? {
+                            surveyToEdit = survey
+                            showEditSurvey = true
+                        } : nil,
+                        onDelete: (isCreator && totalVotes == 0) ? {
+                            surveyToDelete = survey
+                            showingDeleteAlert = true
+                        } : nil
                     )
                     .onAppear {
                         viewModel.loadMoreIfNeeded(currentSurvey: survey)
@@ -333,16 +364,27 @@ struct SurveysHomeView: View {
             } else {
                 ForEach(viewModel.mySurveys) { survey in
                     let stats = viewModel.surveyStats[survey.id]
+                    let totalVotes = stats?.totalVotes ?? 0
+                    let isCreator = survey.creatorId == viewModel.currentUserId
+                    
                     SurveyCard(
                         survey: survey,
-                        totalVotes: stats?.totalVotes ?? 0,
-                        participationRate: stats?.totalVotes != nil ? Double(min(stats!.totalVotes * 7, 100)) / 100.0 : 0.0,
+                        totalVotes: totalVotes,
+                        participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
                         timeRemaining: survey.endDate?.timeRemaining() ?? "Süresiz",
                         isAnonymous: survey.isAnonymous,
                         buttonTitle: "Detayları Gör",
                         onJoin: {
                             selectedResultsSurvey = survey
-                        }
+                        },
+                        onEdit: (isCreator && totalVotes == 0) ? {
+                            surveyToEdit = survey
+                            showEditSurvey = true
+                        } : nil,
+                        onDelete: (isCreator && totalVotes == 0) ? {
+                            surveyToDelete = survey
+                            showingDeleteAlert = true
+                        } : nil
                     )
                     .onAppear {
                         viewModel.loadMoreIfNeeded(currentSurvey: survey)

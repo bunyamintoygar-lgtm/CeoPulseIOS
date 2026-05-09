@@ -221,6 +221,53 @@ class SurveyService {
         }
     }
     
+    func deleteSurvey(surveyId: UUID) async throws {
+        // CASCADE will handle questions, options, and responses
+        try await client
+            .from("surveys")
+            .delete()
+            .eq("id", value: surveyId)
+            .execute()
+    }
+    
+    func updateSurvey(survey: Survey, questions: [SurveyQuestion], options: [UUID: [SurveyOption]]) async throws {
+        // 1. Update Survey
+        try await client
+            .from("surveys")
+            .update(survey)
+            .eq("id", value: survey.id)
+            .execute()
+            
+        // 2. Handle Questions (delete existing ones for this survey)
+        // CASCADE will handle deleting existing options for these questions
+        try await client
+            .from("survey_questions")
+            .delete()
+            .eq("survey_id", value: survey.id)
+            .execute()
+            
+        // 3. Re-insert updated questions
+        try await client
+            .from("survey_questions")
+            .insert(questions)
+            .execute()
+            
+        // 4. Re-insert updated options
+        var allOptions: [SurveyOption] = []
+        for questionId in options.keys {
+            if let qOptions = options[questionId] {
+                allOptions.append(contentsOf: qOptions)
+            }
+        }
+        
+        if !allOptions.isEmpty {
+            try await client
+                .from("survey_options")
+                .insert(allOptions)
+                .execute()
+        }
+    }
+    
     func fetchCurrentUserId() async throws -> UUID {
         return try await getCurrentUserId()
     }

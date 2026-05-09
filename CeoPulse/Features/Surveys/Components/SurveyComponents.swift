@@ -8,6 +8,8 @@ struct SurveyCard: View {
     let isAnonymous: Bool
     let buttonTitle: String
     let onJoin: () -> Void
+    var onEdit: (() -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -38,13 +40,35 @@ struct SurveyCard: View {
                 
                 Spacer()
                 
-                HStack(spacing: 4) {
-                    Image(systemName: "clock")
-                        .symbolRenderingMode(.hierarchical)
-                    Text(timeRemaining)
+                HStack(spacing: 14) {
+                    if let onEdit = onEdit {
+                        Button(action: onEdit) {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.blue)
+                                .frame(width: 32, height: 32)
+                                .background(Circle().fill(Color.blue.opacity(0.1)))
+                        }
+                    }
+                    
+                    if let onDelete = onDelete {
+                        Button(action: onDelete) {
+                            Image(systemName: "trash")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.red)
+                                .frame(width: 32, height: 32)
+                                .background(Circle().fill(Color.red.opacity(0.1)))
+                        }
+                    }
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .symbolRenderingMode(.hierarchical)
+                        Text(timeRemaining)
+                    }
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(AppColors.textSecondary)
                 }
-                .font(.system(size: 11, weight: .medium))
-                .foregroundColor(AppColors.textSecondary)
             }
             
             // Middle Content: Title and Progress

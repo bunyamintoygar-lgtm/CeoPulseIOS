@@ -12,6 +12,7 @@ class SurveyViewModel: ObservableObject {
     @Published var searchQuery = ""
     @Published var selectedCategoryId: String? = nil
     @Published var selectedTab = "Aktif Anketler"
+    @Published var currentUserId: UUID? = nil
     private var searchSubject = PassthroughSubject<String, Never>()
     private var cancellables = Set<AnyCancellable>()
     
@@ -22,6 +23,20 @@ class SurveyViewModel: ObservableObject {
     
     init() {
         setupSearchDebounce()
+        fetchCurrentUserId()
+    }
+    
+    private func fetchCurrentUserId() {
+        Task {
+            do {
+                let userId = try await service.fetchCurrentUserId()
+                await MainActor.run {
+                    self.currentUserId = userId
+                }
+            } catch {
+                print("Failed to fetch current user ID: \(error)")
+            }
+        }
     }
     
     private func setupSearchDebounce() {
@@ -112,6 +127,21 @@ class SurveyViewModel: ObservableObject {
     func loadMoreIfNeeded(currentSurvey: Survey) {
         guard let lastSurvey = surveys.last, lastSurvey.id == currentSurvey.id else { return }
         fetchSurveys(isRefresh: false)
+    }
+    
+    func deleteSurvey(_ survey: Survey) {
+        Task {
+            do {
+                try await service.deleteSurvey(surveyId: survey.id)
+                await MainActor.run {
+                    self.surveys.removeAll { $0.id == survey.id }
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = "Anket silinemedi: \(error.localizedDescription)"
+                }
+            }
+        }
     }
     
     func generateShareLink(for survey: Survey) -> URL {
