@@ -184,7 +184,7 @@ struct CreateSurveyView: View {
     
     private var surveyStepper: some View {
         HStack {
-            StepperItem(number: 1, title: "Detaylar", isCurrent: currentStep == 1, isCompleted: currentStep > 1)
+            StepperItem(number: 1, title: "Detay", isCurrent: currentStep == 1, isCompleted: currentStep > 1)
             line
             StepperItem(number: 2, title: "Sorular", isCurrent: currentStep == 2, isCompleted: currentStep > 2)
             line
@@ -214,18 +214,19 @@ struct CreateSurveyView: View {
                 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Anket Başlığı *").font(.system(size: 13, weight: .medium)).foregroundColor(.white)
-                    ZStack(alignment: .bottomTrailing) {
-                        TextEditor(text: $title)
-                            .frame(height: 80)
-                            .padding(12)
-                            .background(Color.white.opacity(0.05))
+                    ZStack(alignment: .trailing) {
+                        TextField("Anket başlığını girin...", text: $title)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 16)
+                            .background(Color.black)
                             .cornerRadius(12)
                             .foregroundColor(.white)
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
                         
                         Text("\(title.count)/120")
                             .font(.system(size: 10))
                             .foregroundColor(AppColors.textSecondary)
-                            .padding(8)
+                            .padding(.trailing, 12)
                     }
                 }
                 
@@ -235,9 +236,11 @@ struct CreateSurveyView: View {
                         TextEditor(text: $description)
                             .frame(height: 120)
                             .padding(12)
-                            .background(Color.white.opacity(0.05))
+                            .scrollContentBackground(.hidden)
+                            .background(Color.black)
                             .cornerRadius(12)
                             .foregroundColor(.white)
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
                         
                         Text("\(description.count)/500")
                             .font(.system(size: 10))

@@ -76,13 +76,20 @@ class JoinSurveyViewModel: ObservableObject {
     }
     
     func submitAnswers() async -> Bool {
+        await MainActor.run { 
+            self.isLoading = true 
+            self.errorMessage = nil
+        }
+        
         do {
             try await service.submitVote(surveyId: survey.id, answers: answers)
             clearDraft()
+            await MainActor.run { self.isLoading = false }
             return true
         } catch {
-            DispatchQueue.main.async {
+            await MainActor.run {
                 self.errorMessage = "Yanıtlarınız gönderilirken hata oluştu: \(error.localizedDescription)"
+                self.isLoading = false
             }
             return false
         }

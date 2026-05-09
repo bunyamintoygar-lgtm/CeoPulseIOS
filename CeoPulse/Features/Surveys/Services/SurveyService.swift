@@ -153,7 +153,7 @@ class SurveyService {
         if !voteEntries.isEmpty {
             try await client
                 .from("survey_responses")
-                .insert(voteEntries)
+                .upsert(voteEntries, on: "question_id,user_id")
                 .execute()
         }
     }
