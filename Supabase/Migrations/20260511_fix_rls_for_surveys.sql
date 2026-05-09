@@ -54,7 +54,7 @@ DROP POLICY IF EXISTS "Creators Manage Own Surveys" ON public.surveys;
 -- Sahibi için SELECT ve INSERT yetkisi
 CREATE POLICY "Creators Select Own Surveys" ON public.surveys 
 FOR SELECT TO authenticated 
-USING (auth.uid() = creator_id OR status != 'draft');
+USING (auth.uid() = creator_id OR status IN ('active', 'completed'));
 
 CREATE POLICY "Creators Insert Own Surveys" ON public.surveys 
 FOR INSERT TO authenticated 

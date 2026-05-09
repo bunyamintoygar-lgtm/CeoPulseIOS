@@ -80,12 +80,20 @@ class SurveyViewModel: ObservableObject {
                 let currentUserId = try? await service.fetchCurrentUserId()
                 
                 let statusFilter: Survey.SurveyStatus?
+                var statusesFilter: [Survey.SurveyStatus]? = nil
+                
                 switch selectedTab {
-                case "Aktif Anketler": statusFilter = .active
-                case "Tamamlananlar": statusFilter = .completed
-                case "Oluşturduklarım": statusFilter = nil // All my surveys
-                case "Arşiv": statusFilter = .archived
-                default: statusFilter = .active
+                case "Aktif Anketler": 
+                    statusFilter = nil
+                    statusesFilter = [.active, .rejected]
+                case "Tamamlananlar": 
+                    statusFilter = .completed
+                case "Oluşturduklarım": 
+                    statusFilter = nil // All my surveys
+                case "Arşiv": 
+                    statusFilter = .archived
+                default: 
+                    statusFilter = .active
                 }
                 
                 let fetchedSurveys = try await service.fetchSurveys(
@@ -93,6 +101,7 @@ class SurveyViewModel: ObservableObject {
                     categoryId: selectedCategoryId,
                     creatorId: selectedTab == "Oluşturduklarım" ? currentUserId : nil,
                     status: statusFilter,
+                    statuses: statusesFilter,
                     page: currentPage,
                     pageSize: pageSize
                 )
