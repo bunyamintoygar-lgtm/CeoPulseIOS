@@ -48,7 +48,7 @@ class SurveyService {
                 .replacingOccurrences(of: "Ö", with: "[öÖ]")
             
             // Using iregex (case-insensitive regex) for maximum compatibility
-            request = request.or("title.iregex.*\(normalizedQuery)*,description.iregex.*\(normalizedQuery)*")
+            request = request.or("title.iregex.\(normalizedQuery),description.iregex.\(normalizedQuery)")
         }
         
         if let categoryId = categoryId {
