@@ -53,15 +53,15 @@ struct CreateSurveyView: View {
     @StateObject private var draftManager = SurveyDraftManager.shared
     
     private var hasChanges: Bool {
-        // Only count as changes if title/desc is not empty OR questions are different from the single default question
-        !title.isEmpty || !description.isEmpty || questions.count > 1 || (questions.count == 1 && !questions[0].text.isEmpty && questions[0].text != "2026 yılında yapay zeka yatırımlarınızın toplam bütçenizdeki payı ne olacak?")
+        // Only count as changes if title/desc is not empty OR questions are different from the single default blank question
+        !title.isEmpty || !description.isEmpty || questions.count > 1 || (questions.count == 1 && !questions[0].text.isEmpty)
     }
     
     @StateObject private var configManager = ConfigManager.shared
     
     // Step 2: Questions
     @State private var questions: [DraftQuestion] = [
-        DraftQuestion(text: "2026 yılında yapay zeka yatırımlarınızın toplam bütçenizdeki payı ne olacak?", options: ["%0 (Yatırım yapmayacağız)", "%1 - %5", "%6 - %10", "%11 - %20", "%21 ve üzeri"], type: .singleChoice)
+        DraftQuestion(text: "", options: ["Seçenek 1", "Seçenek 2"], type: .singleChoice)
     ]
     
     var body: some View {
