@@ -158,13 +158,7 @@ struct CreateSurveyView: View {
         .onChange(of: allowChangeResponse) { _, _ in saveDraftSilently() }
         .onChange(of: isRequiredToAnswer) { _, _ in saveDraftSilently() }
         .onChange(of: isAnonymous) { _, _ in saveDraftSilently() }
-        .onAppear {
-            if draftManager.hasDraft() && title.isEmpty && questions.count == 1 && questions[0].text.isEmpty {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                    showingResumeOverlay = true
-                }
-            }
-        }
+        .onAppear(perform: checkForResumeDraft)
     }
     
     private var headerView: some View {
@@ -854,6 +848,16 @@ struct CreateSurveyView: View {
                     isPublishing = false
                     errorMessage = "Anket yayınlanırken bir hata oluştu: \(error.localizedDescription)"
                 }
+            }
+        }
+    }
+    
+    private func checkForResumeDraft() {
+        let isDefaultState = title.isEmpty && questions.count == 1 && (questions.first?.text.isEmpty ?? true)
+        
+        if draftManager.hasDraft() && isDefaultState {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                showingResumeOverlay = true
             }
         }
     }
