@@ -47,12 +47,42 @@ WITH CHECK (
     )
 );
 
--- 3. survey_questions için SELECT yetkisini de 'authenticated' ile kısıtlayalım (Opsiyonel ama daha güvenli)
--- Mevcut Public Questions Access politikasını güncelliyoruz
-DROP POLICY IF EXISTS "Public Questions Access" ON public.survey_questions;
+-- 3. surveys tablosu için yetkileri güçlendirelim
+-- Önce eski geniş kapsamlı politikayı kaldıralım
+DROP POLICY IF EXISTS "Creators Manage Own Surveys" ON public.surveys;
+
+-- Sahibi için SELECT ve INSERT yetkisi
+CREATE POLICY "Creators Select Own Surveys" ON public.surveys 
+FOR SELECT TO authenticated 
+USING (auth.uid() = creator_id OR status != 'draft');
+
+CREATE POLICY "Creators Insert Own Surveys" ON public.surveys 
+FOR INSERT TO authenticated 
+WITH CHECK (auth.uid() = creator_id);
+
+-- Sahibi için UPDATE ve DELETE yetkisi (SADECE HİÇ OY YOKSA)
+CREATE POLICY "Creators Update/Delete If No Votes" ON public.surveys 
+FOR ALL TO authenticated 
+USING (
+    auth.uid() = creator_id 
+    AND NOT EXISTS (
+        SELECT 1 FROM public.survey_responses 
+        WHERE public.survey_responses.survey_id = public.surveys.id
+    )
+)
+WITH CHECK (
+    auth.uid() = creator_id 
+    AND NOT EXISTS (
+        SELECT 1 FROM public.survey_responses 
+        WHERE public.survey_responses.survey_id = public.surveys.id
+    )
+);
+
+-- 4. survey_questions ve survey_options için SELECT yetkisi (authenticated için genel)
+DROP POLICY IF EXISTS "Authenticated View Questions" ON public.survey_questions;
 CREATE POLICY "Authenticated View Questions" ON public.survey_questions 
 FOR SELECT TO authenticated USING (true);
 
-DROP POLICY IF EXISTS "Public Options Access" ON public.survey_options;
+DROP POLICY IF EXISTS "Authenticated View Options" ON public.survey_options;
 CREATE POLICY "Authenticated View Options" ON public.survey_options 
 FOR SELECT TO authenticated USING (true);
