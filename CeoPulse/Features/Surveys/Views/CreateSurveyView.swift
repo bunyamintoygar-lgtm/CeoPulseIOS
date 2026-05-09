@@ -1438,3 +1438,68 @@ extension View {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
+
+// MARK: - Content Moderation Helper
+struct ContentModerator {
+    static let shared = ContentModerator()
+    
+    private let bannedWords: Set<String> = [
+        "küfür1", "küfür2", "hakaret1", "argo1",
+        "müstehcen1", "uygunsuz1"
+    ]
+    
+    func checkWithAI(texts: [String]) async throws -> (isAppropriate: Bool, reason: String?) {
+        let combinedText = texts.joined(separator: "\n---\n")
+        
+        do {
+            let response = try await SupabaseManager.shared.client.functions
+                .invoke(
+                    "moderate-content", 
+                    options: .init(
+                        body: ["text": combinedText],
+                        method: .post
+                    )
+                )
+            
+            let decoder = JSONDecoder()
+            if let result = try? decoder.decode(ModerationResponse.self, from: response) {
+                if result.flagged {
+                    return (false, result.reason ?? "İçeriğiniz uygunsuz bulundu.")
+                }
+                return (true, nil)
+            }
+            return (true, nil)
+        } catch {
+            return isContentAppropriate(texts)
+        }
+    }
+    
+    private struct ModerationResponse: Codable {
+        let flagged: Bool
+        let reason: String?
+    }
+    
+    func isContentAppropriate(_ texts: [String]) -> (isAppropriate: Bool, offendingWord: String?) {
+        for text in texts {
+            let normalizedText = text.lowercased()
+                .replacingOccurrences(of: "ı", with: "i")
+                .replacingOccurrences(of: "ğ", with: "g")
+                .replacingOccurrences(of: "ü", with: "u")
+                .replacingOccurrences(of: "ş", with: "s")
+                .replacingOccurrences(of: "ö", with: "o")
+                .replacingOccurrences(of: "ç", with: "c")
+            
+            let words = normalizedText.components(separatedBy: CharacterSet.alphanumerics.inverted)
+                .filter { !$0.isEmpty }
+            
+            for word in words {
+                if bannedWords.contains(word) { return (false, word) }
+            }
+            
+            for banned in bannedWords {
+                if normalizedText.contains(banned) { return (false, banned) }
+            }
+        }
+        return (true, nil)
+    }
+}
