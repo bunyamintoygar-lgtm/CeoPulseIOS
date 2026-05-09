@@ -1456,58 +1456,39 @@ struct ContentModerator {
         
         print("🛡️ [ContentModerator] ========== MODERASYON BAŞLADI ==========")
         print("🛡️ [ContentModerator] Gönderilen metin (\(texts.count) parça):")
-        texts.enumerated().forEach { i, t in
-            print("   [\(i+1)] \(t.prefix(100))...")
-        }
-        print("🛡️ [ContentModerator] Supabase Edge Function 'moderate-content' çağrılıyor...")
+        texts.enumerated().forEach { i, t in print("   [\(i+1)] \(t.prefix(80))...") }
+        print("🛡️ [ContentModerator] → Supabase Edge Function 'moderate-content' çağrılıyor (max 12s)...")
         
-        // 15 saniyelik timeout ile Edge Function çağrısı
-        return try await withThrowingTaskGroup(of: (Bool, String?).self) { group in
-            // Asıl istek
-            group.addTask {
-                do {
-                    let responseData = try await SupabaseManager.shared.client.functions
-                        .invoke(
-                            "moderate-content",
-                            options: .init(body: ["text": combinedText]),
-                            decode: { data, _ in data }
-                        )
-                    
-                    let rawJSON = String(data: responseData, encoding: .utf8) ?? "Okunamadı"
-                    print("✅ [ContentModerator] Edge Function yanıtı: \(rawJSON)")
-                    
-                    if let result = try? JSONDecoder().decode(ModerationResponse.self, from: responseData) {
-                        print("🛡️ flagged: \(result.flagged), reason: \(result.reason ?? "nil")")
-                        if result.flagged {
-                            print("🚫 [ContentModerator] İçerik UYGUNSUZ! Engellendi.")
-                            return (false, result.reason ?? "İçeriğiniz uygunsuz bulundu.")
-                        }
-                        print("✅ [ContentModerator] İçerik UYGUN.")
-                        return (true, nil)
-                    }
-                    return (true, nil)
-                } catch {
-                    print("❌ [ContentModerator] Edge Function hatası: \(error.localizedDescription)")
-                    throw error
+        // URLSession ile Supabase Edge Function'a istek (OpenAI çağrısı server-side'da kalır)
+        let edgeFunctionURL = URL(string: "https://wvsbpsahpshgmrgcxpmq.supabase.co/functions/v1/moderate-content")!
+        let anonKey = SupabaseManager.shared.anonKey
+        
+        var request = URLRequest(url: edgeFunctionURL, timeoutInterval: 12)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: ["text": combinedText])
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            let rawJSON = String(data: data, encoding: .utf8) ?? "Okunamadı"
+            print("✅ [ContentModerator] HTTP \(status) yanıt: \(rawJSON)")
+            
+            if let result = try? JSONDecoder().decode(ModerationResponse.self, from: data) {
+                print("🛡️ flagged=\(result.flagged) | reason=\(result.reason ?? "nil")")
+                if result.flagged {
+                    print("🚫 [ContentModerator] İçerik UYGUNSUZ! Yayınlama engellendi.")
+                    return (false, result.reason ?? "İçeriğiniz uygunsuz bulundu.")
                 }
+                print("✅ [ContentModerator] İçerik UYGUN. Yayınlama onaylandı.")
+                return (true, nil)
             }
-            
-            // 15 saniye timeout
-            group.addTask {
-                try await Task.sleep(nanoseconds: 15_000_000_000)
-                print("⏱️ [ContentModerator] Timeout! Fallback'e geçiliyor...")
-                throw CancellationError()
-            }
-            
-            do {
-                let result = try await group.next()!
-                group.cancelAll()
-                return result
-            } catch {
-                group.cancelAll()
-                print("⚠️ [ContentModerator] Fallback: yerel kelime listesi kullanılıyor.")
-                return isContentAppropriate(texts)
-            }
+            print("⚠️ [ContentModerator] Decode başarısız, onaylandı.")
+            return (true, nil)
+        } catch {
+            print("❌ [ContentModerator] Hata/Timeout: \(error.localizedDescription) → Fallback")
+            return isContentAppropriate(texts)
         }
     }
     
