@@ -194,14 +194,6 @@ struct SurveysHomeView: View {
                 }
             }
             .navigationBarHidden(true)
-            .alert("Anketi Sil", isPresented: $showingDeleteAlert, presenting: surveyToDelete) { survey in
-                Button("Sil", role: .destructive) {
-                    viewModel.deleteSurvey(survey)
-                }
-                Button("Vazgeç", role: .cancel) {}
-            } message: { survey in
-                Text("'\(survey.title)' anketini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")
-            }
             .sheet(isPresented: $showCreateSurvey) {
                 CreateSurveyView(onPublish: {
                     viewModel.fetchSurveys()
@@ -225,6 +217,85 @@ struct SurveysHomeView: View {
                 if let url = shareURL {
                     ShareSheet(activityItems: [url])
                 }
+            }
+            
+            // Custom Delete Confirmation Overlay
+            if showingDeleteAlert, let survey = surveyToDelete {
+                ZStack {
+                    Color.black.opacity(0.8).ignoresSafeArea()
+                        .onTapGesture { showingDeleteAlert = false }
+                    
+                    VStack(spacing: 24) {
+                        // Warning Icon
+                        ZStack {
+                            Circle()
+                                .fill(Color.red.opacity(0.1))
+                                .frame(width: 80, height: 80)
+                            
+                            Image(systemName: "trash.fill")
+                                .font(.system(size: 32, weight: .bold))
+                                .foregroundColor(.red)
+                                .symbolEffect(.bounce, options: .repeating)
+                        }
+                        
+                        VStack(spacing: 12) {
+                            Text("Anketi Sil")
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundColor(.white)
+                            
+                            Text("'\(survey.title)' anketini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")
+                                .font(.system(size: 15))
+                                .foregroundColor(AppColors.textSecondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 20)
+                        }
+                        
+                        VStack(spacing: 12) {
+                            Button(action: {
+                                viewModel.deleteSurvey(survey)
+                                withAnimation { showingDeleteAlert = false }
+                            }) {
+                                Text("Anketi Sil")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 54)
+                                    .background(Color.red)
+                                    .cornerRadius(16)
+                                    .shadow(color: Color.red.opacity(0.3), radius: 10, y: 5)
+                            }
+                            
+                            Button(action: { 
+                                withAnimation { showingDeleteAlert = false }
+                            }) {
+                                Text("Vazgeç")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 54)
+                                    .background(Color.white.opacity(0.05))
+                                    .cornerRadius(16)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                    )
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                    }
+                    .padding(.vertical, 32)
+                    .background(
+                        RoundedRectangle(cornerRadius: 32)
+                            .fill(Color(hex: "121217"))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 32)
+                                    .stroke(LinearGradient(colors: [.white.opacity(0.1), .clear], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+                            )
+                    )
+                    .padding(.horizontal, 30)
+                    .transition(.asymmetric(insertion: .scale.combined(with: .opacity), removal: .opacity))
+                }
+                .zIndex(100)
             }
         }
     }
