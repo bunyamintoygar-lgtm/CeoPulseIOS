@@ -904,6 +904,7 @@ struct CreateSurveyView: View {
                     coverImageUrl: surveyToEdit?.coverImageUrl,
                     targetAudience: targetAudience.lowercased() == "herkese açık" ? "public" : (targetAudience.lowercased() == "topluluk içi" ? "community" : "private"),
                     status: surveyToEdit?.status ?? .active,
+                    rejectionReason: nil,
                     startDate: surveyToEdit?.startDate ?? Date(),
                     endDate: endDate,
                     isAnonymous: isAnonymous,
