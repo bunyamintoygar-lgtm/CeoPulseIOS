@@ -19,7 +19,7 @@ struct ContentModerator {
             // Call the 'moderate-content' Edge Function
             let response = try await SupabaseManager.shared.client.functions
                 .invoke(
-                    "moderate-survey", 
+                    "moderate-content", 
                     options: .init(
                         body: ["text": combinedText],
                         method: .post
