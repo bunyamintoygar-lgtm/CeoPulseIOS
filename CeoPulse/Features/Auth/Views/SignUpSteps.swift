@@ -390,7 +390,7 @@ struct SignUpStep4View: View {
                         .font(.system(size: 80))
                         .symbolRenderingMode(.palette)
                         .foregroundStyle(.white, .purple)
-                        .symbolEffect(.bounce)
+                        .symbolEffect(.bounce, options: .repeating)
                         .shadow(color: .purple.opacity(0.5), radius: 20)
                     
                     VStack(spacing: 12) {
