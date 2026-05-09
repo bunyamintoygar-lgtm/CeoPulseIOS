@@ -359,16 +359,23 @@ struct CreateSurveyView: View {
             .disabled(isGeneratingAI || title.isEmpty)
             .opacity(title.isEmpty ? 0.5 : 1.0)
             
-            ForEach($questions) { $question in
-                QuestionEditCard(question: $question, number: (questions.firstIndex(where: { $0.id == question.id }) ?? 0) + 1) {
-                    if questions.count > 1 {
-                        if let index = questions.firstIndex(where: { $0.id == question.id }) {
-                            questions.remove(at: index)
-                        }
-                    } else {
-                        // Reset if it's the last one
-                        if let index = questions.firstIndex(where: { $0.id == question.id }) {
-                            questions[index] = DraftQuestion(text: "", options: ["", ""], type: .singleChoice)
+            ForEach(questions) { question in
+                QuestionEditCard(
+                    question: binding(for: question.id),
+                    number: (questions.firstIndex(where: { $0.id == question.id }) ?? 0) + 1
+                ) {
+                    withAnimation(.spring()) {
+                        if questions.count > 1 {
+                            if let index = questions.firstIndex(where: { $0.id == question.id }) {
+                                questions.remove(at: index)
+                                saveDraftSilently()
+                            }
+                        } else {
+                            // Reset if it's the last one
+                            if let index = questions.firstIndex(where: { $0.id == question.id }) {
+                                questions[index] = DraftQuestion(text: "", options: ["", ""], type: .singleChoice)
+                                saveDraftSilently()
+                            }
                         }
                     }
                 }
@@ -850,6 +857,19 @@ struct CreateSurveyView: View {
                 }
             }
         }
+    }
+    
+    private func binding(for id: UUID) -> Binding<DraftQuestion> {
+        Binding(
+            get: { 
+                questions.first(where: { $0.id == id }) ?? DraftQuestion(text: "", options: [], type: .singleChoice)
+            },
+            set: { newValue in
+                if let index = questions.firstIndex(where: { $0.id == id }) {
+                    questions[index] = newValue
+                }
+            }
+        )
     }
     
     private func checkForResumeDraft() {
