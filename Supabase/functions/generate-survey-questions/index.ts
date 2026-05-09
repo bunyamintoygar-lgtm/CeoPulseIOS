@@ -55,6 +55,17 @@ serve(async (req) => {
     })
 
     const openAiData = await openAiResponse.json()
+    
+    if (openAiData.error) {
+      console.error('OpenAI API Error:', openAiData.error)
+      throw new Error(`OpenAI Error: ${openAiData.error.message || 'Unknown error'}`)
+    }
+
+    if (!openAiData.choices || openAiData.choices.length === 0) {
+      console.error('Unexpected OpenAI Response:', openAiData)
+      throw new Error('OpenAI returned no choices. Check your API key and quota.')
+    }
+
     const content = openAiData.choices[0].message.content
     
     // Sometimes GPT wraps the array in a root object, we'll try to find the array
