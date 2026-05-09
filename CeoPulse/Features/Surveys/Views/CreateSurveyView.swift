@@ -962,7 +962,7 @@ struct CreateSurveyView: View {
                 // Arka planda AI moderasyon (UI'ı bloklamaz)
                 let savedSurveyId = surveyId
                 Task.detached {
-                    try? await AutoModerator.checkSurvey(id: savedSurveyId)
+                    await AutoModerator.checkSurvey(id: savedSurveyId)
                 }
                 
                 await MainActor.run {
@@ -1498,14 +1498,17 @@ struct ContentModerator {
 }
 
 // MARK: - Auto Moderator (Fire & Forget)
+// iOS anket + sorular kaydedildikten sonra bu çağrılır.
+// Task.detached içinde çalıştığı için UI'ı ASLA bloke etmez.
+// DB webhook kullanamıyoruz çünkü sorular survey'den sonra ayrı ekleniyor.
 struct AutoModerator {
-    static func checkSurvey(id: UUID) async throws {
-        let url = URL(string: "https://wvsbpsahpshgmrgcxpmq.supabase.co/functions/v1/auto-moderate-survey")!
-        var request = URLRequest(url: url, timeoutInterval: 30)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(SupabaseManager.shared.anonKey)", forHTTPHeaderField: "Authorization")
-        request.httpBody = try? JSONSerialization.data(withJSONObject: ["survey_id": id.uuidString])
-        _ = try? await URLSession.shared.data(for: request)
+    static func checkSurvey(id: UUID) async {
+        // Supabase SDK ile edge function çağrısı (fire & forget)
+        try? await SupabaseManager.shared.client.functions
+            .invoke(
+                "auto-moderate-survey",
+                options: .init(body: ["survey_id": id.uuidString]),
+                decode: { data, _ in data }
+            )
     }
 }
