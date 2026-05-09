@@ -72,7 +72,22 @@ serve(async (req) => {
 
     const content = openAiData.choices[0].message.content
     let rawData = JSON.parse(content)
-    let questionsArray = Array.isArray(rawData) ? rawData : (rawData.questions || [])
+    
+    // Smartly find the array regardless of the key name (questions, survey, data etc.)
+    let questionsArray: any[] = []
+    if (Array.isArray(rawData)) {
+      questionsArray = rawData
+    } else if (rawData.survey && Array.isArray(rawData.survey)) {
+      questionsArray = rawData.survey
+    } else if (rawData.questions && Array.isArray(rawData.questions)) {
+      questionsArray = rawData.questions
+    } else if (rawData.data && Array.isArray(rawData.data)) {
+      questionsArray = rawData.data
+    } else {
+      // If still not found, look for any property that is an array
+      const anyArray = Object.values(rawData).find(val => Array.isArray(val))
+      questionsArray = (anyArray as any[]) || []
+    }
 
     // Ensure each question has the exact expected structure and types
     const cleanedQuestions = questionsArray.map((q: any) => ({
