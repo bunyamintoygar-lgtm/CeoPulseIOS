@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct SurveysHomeView: View {
-    @State private var selectedTab = "Aktif Anketler"
     @State private var searchText = ""
     @State private var showCreateSurvey = false
     @Namespace private var animationNamespace
@@ -123,9 +122,9 @@ struct SurveysHomeView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach(tabs, id: \.self) { tab in
-                                SurveyTabButton(title: tab, isSelected: selectedTab == tab, animationNamespace: animationNamespace) {
+                                SurveyTabButton(title: tab, isSelected: viewModel.selectedTab == tab, animationNamespace: animationNamespace) {
                                     withAnimation {
-                                        selectedTab = tab
+                                        viewModel.updateSelectedTab(tab)
                                     }
                                 }
                             }
@@ -144,10 +143,14 @@ struct SurveysHomeView: View {
                             } else if let error = viewModel.errorMessage {
                                 errorView(error)
                             } else {
-                                if selectedTab == "Aktif Anketler" {
+                                if viewModel.selectedTab == "Aktif Anketler" {
                                     activeSurveysList
-                                } else if selectedTab == "Tamamlananlar" {
+                                } else if viewModel.selectedTab == "Tamamlananlar" {
                                     completedSurveysList
+                                } else if viewModel.selectedTab == "Oluşturduklarım" {
+                                    mySurveysList
+                                } else {
+                                    emptyStateView(title: "\(viewModel.selectedTab) yakında burada olacak")
                                 }
                             }
                         }
@@ -318,6 +321,36 @@ struct SurveysHomeView: View {
                         Spacer()
                     }
                     .padding(.vertical, 20)
+                }
+            }
+        }
+    }
+    
+    private var mySurveysList: some View {
+        VStack(spacing: 20) {
+            if viewModel.mySurveys.isEmpty {
+                emptyStateView(title: "Henüz bir anket oluşturmadınız")
+            } else {
+                ForEach(viewModel.mySurveys) { survey in
+                    let stats = viewModel.surveyStats[survey.id]
+                    SurveyCard(
+                        survey: survey,
+                        totalVotes: stats?.totalVotes ?? 0,
+                        participationRate: stats?.totalVotes != nil ? Double(min(stats!.totalVotes * 7, 100)) / 100.0 : 0.0,
+                        timeRemaining: survey.endDate?.timeRemaining() ?? "Süresiz",
+                        isAnonymous: survey.isAnonymous,
+                        buttonTitle: "Detayları Gör",
+                        onJoin: {
+                            selectedResultsSurvey = survey
+                        }
+                    )
+                    .onAppear {
+                        viewModel.loadMoreIfNeeded(currentSurvey: survey)
+                    }
+                }
+                
+                if viewModel.isFetchingMore {
+                    ProgressView().tint(.purple).padding(.vertical, 10)
                 }
             }
         }

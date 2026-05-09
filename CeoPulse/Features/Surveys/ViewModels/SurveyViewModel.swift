@@ -11,6 +11,7 @@ class SurveyViewModel: ObservableObject {
     
     @Published var searchQuery = ""
     @Published var selectedCategoryId: String? = nil
+    @Published var selectedTab = "Aktif Anketler"
     private var searchSubject = PassthroughSubject<String, Never>()
     private var cancellables = Set<AnyCancellable>()
     
@@ -43,6 +44,11 @@ class SurveyViewModel: ObservableObject {
         fetchSurveys(isRefresh: true)
     }
     
+    func updateSelectedTab(_ tab: String) {
+        selectedTab = tab
+        fetchSurveys(isRefresh: true)
+    }
+    
     func fetchSurveys(isRefresh: Bool = true) {
         if isRefresh {
             currentPage = 0
@@ -57,9 +63,11 @@ class SurveyViewModel: ObservableObject {
         
         Task {
             do {
+                let currentUserId = try? await service.fetchCurrentUserId()
                 let fetchedSurveys = try await service.fetchSurveys(
                     query: searchQuery.isEmpty ? nil : searchQuery,
                     categoryId: selectedCategoryId,
+                    creatorId: selectedTab == "Oluşturduklarım" ? currentUserId : nil,
                     page: currentPage,
                     pageSize: pageSize
                 )
@@ -108,6 +116,12 @@ class SurveyViewModel: ObservableObject {
     
     var completedSurveys: [Survey] {
         surveys.filter { $0.status == .completed }
+    }
+    
+    var mySurveys: [Survey] {
+        // When in "Oluşturduklarım" tab, we already filtered by creatorId in the fetchSurveys call
+        // but let's be double sure and handle it if we ever use this list elsewhere.
+        surveys
     }
     
     private func fetchStats(for surveys: [Survey]) async {

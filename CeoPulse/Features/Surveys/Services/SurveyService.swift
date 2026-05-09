@@ -10,6 +10,7 @@ class SurveyService {
     func fetchSurveys(
         query: String? = nil,
         categoryId: String? = nil,
+        creatorId: UUID? = nil,
         page: Int = 0,
         pageSize: Int = 15
     ) async throws -> [Survey] {
@@ -20,6 +21,10 @@ class SurveyService {
             .from("surveys")
             .select()
             .eq("status", value: "active")
+        
+        if let creatorId = creatorId {
+            request = request.eq("creator_id", value: creatorId)
+        }
         
         if let query = query, !query.isEmpty {
             // Turkish character aware search (i/İ, ı/I, etc.)
@@ -210,6 +215,10 @@ class SurveyService {
                 .insert(voteEntries)
                 .execute()
         }
+    }
+    
+    func fetchCurrentUserId() async throws -> UUID {
+        return try await getCurrentUserId()
     }
     
     private func getCurrentUserId() async throws -> UUID {
