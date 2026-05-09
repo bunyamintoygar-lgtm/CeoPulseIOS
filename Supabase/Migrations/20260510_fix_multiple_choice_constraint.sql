@@ -10,3 +10,11 @@ DROP CONSTRAINT IF EXISTS survey_responses_user_id_question_id_key;
 ALTER TABLE public.survey_responses 
 ADD CONSTRAINT survey_responses_user_id_question_id_option_id_key 
 UNIQUE (user_id, question_id, option_id);
+
+-- 3. Kullanıcıların kendi yanıtlarını silebilmesi için RLS politikası ekle
+-- Bu politika eksik olduğu için 'Delete' işlemi başarısız oluyor ve çakışma hatasına yol açıyordu.
+DROP POLICY IF EXISTS "Users Delete Own Responses" ON public.survey_responses;
+CREATE POLICY "Users Delete Own Responses" 
+ON public.survey_responses 
+FOR DELETE 
+USING (auth.uid() = user_id);
