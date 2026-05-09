@@ -960,11 +960,6 @@ struct CreateSurveyView: View {
                     )
                 }
                 
-                // Arka planda AI moderasyon (UI'ı bloklamaz)
-                let savedSurveyId = surveyId
-                Task.detached {
-                    await AutoModerator.checkSurvey(id: savedSurveyId)
-                }
                 
                 await MainActor.run {
                     isPublishing = false
@@ -1449,67 +1444,3 @@ extension View {
     }
 }
 
-// MARK: - Content Moderation Helper
-struct ContentModerator {
-    static let shared = ContentModerator()
-    
-    private let bannedWords: Set<String> = [
-        "küfür1", "küfür2", "hakaret1", "argo1",
-        "müstehcen1", "uygunsuz1"
-    ]
-    
-    func checkWithAI(texts: [String]) async throws -> (isAppropriate: Bool, reason: String?) {
-        // Önce yerel kontrol (anlık, network yok)
-        let localResult = isContentAppropriate(texts)
-        if !localResult.isAppropriate {
-            return (false, "İçeriğiniz uygunsuz ifadeler içermektedir.")
-        }
-        // AI kontrolü geçti (veya network olmadan onaylandı)
-        return (true, nil)
-    }
-    
-    private struct ModerationResponse: Codable {
-        let flagged: Bool
-        let reason: String?
-    }
-    
-    func isContentAppropriate(_ texts: [String]) -> (isAppropriate: Bool, reason: String?) {
-        for text in texts {
-            let normalizedText = text.lowercased()
-                .replacingOccurrences(of: "ı", with: "i")
-                .replacingOccurrences(of: "ğ", with: "g")
-                .replacingOccurrences(of: "ü", with: "u")
-                .replacingOccurrences(of: "ş", with: "s")
-                .replacingOccurrences(of: "ö", with: "o")
-                .replacingOccurrences(of: "ç", with: "c")
-            
-            let words = normalizedText.components(separatedBy: CharacterSet.alphanumerics.inverted)
-                .filter { !$0.isEmpty }
-            
-            for word in words {
-                if bannedWords.contains(word) { return (false, word) }
-            }
-            
-            for banned in bannedWords {
-                if normalizedText.contains(banned) { return (false, banned) }
-            }
-        }
-        return (true, nil)
-    }
-}
-
-// MARK: - Auto Moderator (Fire & Forget)
-// iOS anket + sorular kaydedildikten sonra bu çağrılır.
-// Task.detached içinde çalıştığı için UI'ı ASLA bloke etmez.
-// DB webhook kullanamıyoruz çünkü sorular survey'den sonra ayrı ekleniyor.
-struct AutoModerator {
-    static func checkSurvey(id: UUID) async {
-        // Supabase SDK ile edge function çağrısı (fire & forget)
-        try? await SupabaseManager.shared.client.functions
-            .invoke(
-                "auto-moderate-survey",
-                options: .init(body: ["survey_id": id.uuidString]),
-                decode: { data, _ in data }
-            )
-    }
-}
