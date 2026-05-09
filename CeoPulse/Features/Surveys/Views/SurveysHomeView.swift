@@ -13,9 +13,11 @@ struct SurveysHomeView: View {
     @State private var isSearchVisible = false
     @State private var showingFilterMenu = false
     
-    @State private var surveyToDelete: Survey?
-    @State private var showingDeleteAlert = false
     @State private var surveyToEdit: Survey?
+    
+    // AI Rejection Popup States
+    @State private var showingRejectionPopup = false
+    @State private var surveyWithRejection: Survey?
     
     let tabs = ["Aktif Anketler", "Tamamlananlar", "Oluşturduklarım", "Arşiv"]
     
@@ -301,6 +303,100 @@ struct SurveysHomeView: View {
                 }
             }
             
+                if showingRejectionPopup, let survey = surveyWithRejection {
+                    rejectionPopup(for: survey)
+                }
+            }
+        }
+    }
+    
+    private func rejectionPopup(for survey: Survey) -> some View {
+        ZStack {
+            Color.black.opacity(0.8).ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation { showingRejectionPopup = false }
+                }
+            
+            VStack(spacing: 24) {
+                // Icon Header
+                ZStack {
+                    Circle()
+                        .fill(Color.orange.opacity(0.1))
+                        .frame(width: 80, height: 80)
+                    
+                    Image(systemName: "exclamationmark.shield.fill")
+                        .font(.system(size: 40))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.orange, .red],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                }
+                
+                VStack(spacing: 12) {
+                    Text("Topluluk Kuralları İhlali")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text("Anket içeriğiniz topluluk kurallarına uymadığı için yayınlanmamıştır.")
+                        .font(.system(size: 15))
+                        .foregroundColor(AppColors.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                
+                // Reason Box
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("REDDEDİLME NEDENİ")
+                        .font(.system(size: 11, weight: .black))
+                        .foregroundColor(.orange.opacity(0.8))
+                        .letterSpacing(1.2)
+                    
+                    Text(survey.rejectionReason ?? "İçeriğiniz yapay zeka tarafından uygunsuz bulundu.")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.white.opacity(0.9))
+                        .lineSpacing(4)
+                }
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.white.opacity(0.05))
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+                )
+                
+                // Close Button
+                Button(action: {
+                    withAnimation { showingRejectionPopup = false }
+                }) {
+                    Text("Anladım")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            LinearGradient(
+                                colors: [.orange, .red.opacity(0.8)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(16)
+                }
+            }
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 32)
+                    .fill(Color(hex: "1A1A23"))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 32)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    )
+            )
+            .padding(.horizontal, 24)
         }
     }
     
@@ -324,7 +420,12 @@ struct SurveysHomeView: View {
                         isAnonymous: survey.isAnonymous,
                         buttonTitle: isExpired || hasVoted ? "Sonuçları Gör" : "Ankete Katıl",
                         onJoin: {
-                            if isExpired || hasVoted {
+                            if survey.status == .rejected {
+                                withAnimation(.spring()) {
+                                    surveyWithRejection = survey
+                                    showingRejectionPopup = true
+                                }
+                            } else if isExpired || hasVoted {
                                 selectedResultsSurvey = survey
                             } else {
                                 selectedSurvey = survey
@@ -451,7 +552,14 @@ struct SurveysHomeView: View {
                         isAnonymous: survey.isAnonymous,
                         buttonTitle: "Detayları Gör",
                         onJoin: {
-                            selectedResultsSurvey = survey
+                            if survey.status == .rejected {
+                                withAnimation(.spring()) {
+                                    surveyWithRejection = survey
+                                    showingRejectionPopup = true
+                                }
+                            } else {
+                                selectedResultsSurvey = survey
+                            }
                         },
                         onEdit: (isCreator && totalVotes == 0) ? {
                             surveyToEdit = survey

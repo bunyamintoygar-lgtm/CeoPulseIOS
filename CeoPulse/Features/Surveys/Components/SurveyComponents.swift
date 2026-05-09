@@ -143,23 +143,27 @@ struct SurveyCard: View {
                 // Main Action (Join/Results)
                 Button(action: onJoin) {
                     HStack {
-                        Text(buttonTitle)
+                        Text(survey.status == .rejected ? "Reddedildi" : buttonTitle)
                             .font(.system(size: 16, weight: .bold))
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 14, weight: .bold))
+                        if survey.status != .rejected {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .bold))
+                        }
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
-                        LinearGradient(
+                        survey.status == .rejected ?
+                        AnyView(Color.red.opacity(0.8)) :
+                        AnyView(LinearGradient(
                             colors: [Color(hex: "6C38FF"), .purple],
                             startPoint: .leading,
                             endPoint: .trailing
-                        )
+                        ))
                     )
                     .cornerRadius(16)
-                    .shadow(color: Color(hex: "6C38FF").opacity(0.3), radius: 10, y: 5)
+                    .shadow(color: (survey.status == .rejected ? Color.red : Color(hex: "6C38FF")).opacity(0.3), radius: 10, y: 5)
                 }
                 
                 if let onEdit = onEdit {
