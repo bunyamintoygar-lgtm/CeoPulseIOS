@@ -234,6 +234,12 @@ struct SurveysHomeView: View {
                         viewModel.loadMoreIfNeeded(currentSurvey: survey)
                     }
                 }
+                
+                if viewModel.isFetchingMore {
+                    ProgressView()
+                        .tint(.purple)
+                        .padding(.vertical, 10)
+                }
             }
             
             // Privacy Note
@@ -299,6 +305,19 @@ struct SurveysHomeView: View {
                             color: .purple
                         )
                     }
+                    .buttonStyle(PlainButtonStyle())
+                    .onAppear {
+                        viewModel.loadMoreIfNeeded(currentSurvey: survey)
+                    }
+                }
+                
+                if viewModel.isFetchingMore {
+                    HStack {
+                        Spacer()
+                        ProgressView().tint(.purple)
+                        Spacer()
+                    }
+                    .padding(.vertical, 20)
                 }
             }
         }
