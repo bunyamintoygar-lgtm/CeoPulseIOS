@@ -114,6 +114,26 @@ struct CreateSurveyView: View {
                 // Stepper
                 surveyStepper
                 
+                if let error = errorMessage {
+                    HStack {
+                        Image(systemName: "exclamationmark.octagon.fill")
+                        Text(error)
+                            .font(.system(size: 13, weight: .medium))
+                        Spacer()
+                        Button(action: { errorMessage = nil }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 12, weight: .bold))
+                        }
+                    }
+                    .padding()
+                    .background(Color.red.opacity(0.1))
+                    .foregroundColor(.red)
+                    .cornerRadius(12)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 10)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+                
                 ScrollView {
                     VStack(spacing: 24) {
                         if currentStep == 1 {
