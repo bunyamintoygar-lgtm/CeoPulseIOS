@@ -809,7 +809,7 @@ struct AudienceCard: View {
     }
 }
 
-struct DraftQuestion: Codable {
+struct DraftQuestion: Codable, Equatable {
     var text: String
     var options: [String]
     var type: SurveyQuestion.QuestionType

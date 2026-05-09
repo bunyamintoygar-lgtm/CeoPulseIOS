@@ -46,7 +46,7 @@ struct Survey: Identifiable, Codable {
     }
 }
 
-struct SurveyCategory: Identifiable, Codable {
+struct SurveyCategory: Identifiable, Codable, Equatable {
     let id: String
     let tr: String
     let en: String
