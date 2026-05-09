@@ -21,6 +21,7 @@ struct CreateSurveyView: View {
     @State private var isGeneratingAI = false
     @State private var isPublishing = false
     @State private var errorMessage: String?
+    @State private var showingCategoryPicker = false
     
     // Step 3 Settings
     @State private var participationLimitType = "unlimited" // "unlimited" or "limit"
@@ -180,6 +181,9 @@ struct CreateSurveyView: View {
         .onChange(of: isRequiredToAnswer) { _, _ in saveDraftSilently() }
         .onChange(of: isAnonymous) { _, _ in saveDraftSilently() }
         .onAppear(perform: checkForResumeDraft)
+        .sheet(isPresented: $showingCategoryPicker) {
+            CategoryPickerSheet(categories: configManager.surveyCategories, selectedCategory: $selectedCategory)
+        }
     }
     
     private var headerView: some View {
@@ -299,18 +303,7 @@ struct CreateSurveyView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Kategori").font(.system(size: 13, weight: .medium)).foregroundColor(.white)
                 
-                Menu {
-                    ForEach(configManager.surveyCategories) { category in
-                        Button(action: { selectedCategory = category }) {
-                            HStack {
-                                Text(category.name)
-                                if let icon = category.icon {
-                                    Image(systemName: icon)
-                                }
-                            }
-                        }
-                    }
-                } label: {
+                Button(action: { showingCategoryPicker = true }) {
                     HStack {
                         Image(systemName: selectedCategory?.icon ?? "square.grid.2x2")
                         Text(selectedCategory?.name ?? "Kategori seçin")
@@ -321,6 +314,10 @@ struct CreateSurveyView: View {
                     .background(Color.white.opacity(0.05))
                     .cornerRadius(12)
                     .foregroundColor(selectedCategory == nil ? AppColors.textSecondary : .white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(selectedCategory == nil && errorMessage != nil ? Color.red.opacity(0.5) : Color.clear, lineWidth: 1)
+                    )
                 }
                 .onAppear {
                     if configManager.surveyCategories.isEmpty {
@@ -638,6 +635,14 @@ struct CreateSurveyView: View {
                 }
                 
                 Button(action: { 
+                    if currentStep == 1 && selectedCategory == nil {
+                        errorMessage = "Lütfen devam etmeden önce bir kategori seçin."
+                        showingCategoryPicker = true
+                        return
+                    }
+                    
+                    errorMessage = nil // Clear error if validated
+                    
                     if currentStep < 4 { 
                         withAnimation { currentStep += 1 } 
                     } else {
@@ -1268,6 +1273,80 @@ struct SettingsToggle: View {
         }
         .padding()
         .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
+    }
+}
+
+    }
+}
+
+struct CategoryPickerSheet: View {
+    @Environment(\.presentationMode) var presentationMode
+    let categories: [SurveyCategory]
+    @Binding var selectedCategory: SurveyCategory?
+    
+    var body: some View {
+        ZStack {
+            AppColors.background.ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                // Header
+                HStack {
+                    Text("Kategori Seçin")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                    Spacer()
+                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.white.opacity(0.3))
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 24)
+                
+                ScrollView {
+                    VStack(spacing: 12) {
+                        ForEach(categories) { category in
+                            Button(action: {
+                                selectedCategory = category
+                                presentationMode.wrappedValue.dismiss()
+                            }) {
+                                HStack(spacing: 16) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(selectedCategory?.id == category.id ? Color.purple.opacity(0.2) : Color.white.opacity(0.05))
+                                            .frame(width: 44, height: 44)
+                                        if let icon = category.icon {
+                                            Image(systemName: icon)
+                                                .foregroundColor(selectedCategory?.id == category.id ? .purple : .white)
+                                        }
+                                    }
+                                    
+                                    Text(category.name)
+                                        .font(.system(size: 16, weight: selectedCategory?.id == category.id ? .bold : .medium))
+                                        .foregroundColor(selectedCategory?.id == category.id ? .white : .white.opacity(0.8))
+                                    
+                                    Spacer()
+                                    
+                                    if selectedCategory?.id == category.id {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.purple)
+                                    }
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                                .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(selectedCategory?.id == category.id ? 0.08 : 0.03)))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(selectedCategory?.id == category.id ? Color.purple.opacity(0.3) : Color.clear, lineWidth: 1)
+                                )
+                            }
+                        }
+                    }
+                    .padding(24)
+                }
+            }
+        }
     }
 }
 
