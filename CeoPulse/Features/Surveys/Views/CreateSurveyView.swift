@@ -35,7 +35,7 @@ struct CreateSurveyView: View {
                                 "description": description,
                                 "language": languageCode
                             ]),
-                            decode: { $0 }) // This ensures we get raw Data
+                            decode: { data, _ in data }) // Updated to accept both Data and Response
                 
                 // Try to decode
                 let decoder = JSONDecoder()
