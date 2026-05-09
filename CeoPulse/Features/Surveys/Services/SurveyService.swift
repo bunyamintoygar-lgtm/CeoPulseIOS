@@ -22,8 +22,24 @@ class SurveyService {
             .eq("status", value: "active")
         
         if let query = query, !query.isEmpty {
-            // Search in title OR description using PostgreSQL ilike
-            request = request.or("title.ilike.%\(query)%,description.ilike.%\(query)%")
+            // Turkish character aware search (i/İ, ı/I, etc.)
+            // We transform the query to a regex that matches both Turkish case variants
+            let normalizedQuery = query
+                .replacingOccurrences(of: "i", with: "[iİ]")
+                .replacingOccurrences(of: "İ", with: "[iİ]")
+                .replacingOccurrences(of: "ı", with: "[ıI]")
+                .replacingOccurrences(of: "I", with: "[ıI]")
+                .replacingOccurrences(of: "ş", with: "[şŞ]")
+                .replacingOccurrences(of: "Ş", with: "[şŞ]")
+                .replacingOccurrences(of: "ğ", with: "[ğĞ]")
+                .replacingOccurrences(of: "Ğ", with: "[ğĞ]")
+                .replacingOccurrences(of: "ü", with: "[üÜ]")
+                .replacingOccurrences(of: "Ü", with: "[üÜ]")
+                .replacingOccurrences(of: "ö", with: "[öÖ]")
+                .replacingOccurrences(of: "Ö", with: "[öÖ]")
+            
+            // Using iregex (case-insensitive regex) for maximum compatibility
+            request = request.or("title.iregex.*\(normalizedQuery)*,description.iregex.*\(normalizedQuery)*")
         }
         
         if let categoryId = categoryId {
