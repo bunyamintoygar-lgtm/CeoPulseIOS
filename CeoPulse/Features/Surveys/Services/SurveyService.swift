@@ -11,6 +11,7 @@ class SurveyService {
         query: String? = nil,
         categoryId: String? = nil,
         creatorId: UUID? = nil,
+        status: Survey.SurveyStatus? = .active,
         page: Int = 0,
         pageSize: Int = 15
     ) async throws -> [Survey] {
@@ -20,7 +21,10 @@ class SurveyService {
         var request = client
             .from("surveys")
             .select()
-            .eq("status", value: "active")
+        
+        if let status = status {
+            request = request.eq("status", value: status.rawValue)
+        }
         
         if let creatorId = creatorId {
             request = request.eq("creator_id", value: creatorId)

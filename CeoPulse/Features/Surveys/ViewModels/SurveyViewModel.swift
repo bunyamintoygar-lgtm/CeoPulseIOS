@@ -60,14 +60,24 @@ class SurveyViewModel: ObservableObject {
         }
         
         errorMessage = nil
-        
         Task {
             do {
                 let currentUserId = try? await service.fetchCurrentUserId()
+                
+                let statusFilter: Survey.SurveyStatus?
+                switch selectedTab {
+                case "Aktif Anketler": statusFilter = .active
+                case "Tamamlananlar": statusFilter = .completed
+                case "Oluşturduklarım": statusFilter = nil // All my surveys
+                case "Arşiv": statusFilter = .archived
+                default: statusFilter = .active
+                }
+                
                 let fetchedSurveys = try await service.fetchSurveys(
                     query: searchQuery.isEmpty ? nil : searchQuery,
                     categoryId: selectedCategoryId,
                     creatorId: selectedTab == "Oluşturduklarım" ? currentUserId : nil,
+                    status: statusFilter,
                     page: currentPage,
                     pageSize: pageSize
                 )
