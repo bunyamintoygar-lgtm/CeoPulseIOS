@@ -51,6 +51,7 @@ struct CreateSurveyView: View {
                         withAnimation(.spring()) {
                             self.questions = response
                             self.isGeneratingAI = false
+                            saveDraftSilently() // Save immediately after AI generation
                         }
                     }
                 } catch {
@@ -135,6 +136,11 @@ struct CreateSurveyView: View {
             }
         }
         .navigationBarHidden(true)
+        .onChange(of: title) { _ in saveDraftSilently() }
+        .onChange(of: description) { _ in saveDraftSilently() }
+        .onChange(of: selectedCategory) { _ in saveDraftSilently() }
+        .onChange(of: questions) { _ in saveDraftSilently() }
+        .onChange(of: targetAudience) { _ in saveDraftSilently() }
         .onAppear {
             if draftManager.hasDraft() && title.isEmpty && questions.count == 1 && questions[0].text.isEmpty {
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
@@ -356,7 +362,14 @@ struct CreateSurveyView: View {
             .opacity(title.isEmpty ? 0.5 : 1.0)
             
             ForEach(0..<questions.count, id: \.self) { index in
-                QuestionEditCard(question: $questions[index], number: index + 1)
+                QuestionEditCard(question: $questions[index], number: index + 1) {
+                    if questions.count > 1 {
+                        questions.remove(at: index)
+                    } else {
+                        // Reset if it's the last one
+                        questions[index] = DraftQuestion(text: "", options: ["", ""], type: .singleChoice)
+                    }
+                }
             }
             
             Button(action: { 
@@ -807,6 +820,7 @@ struct DraftQuestion: Codable {
 struct QuestionEditCard: View {
     @Binding var question: DraftQuestion
     let number: Int
+    let onDelete: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -822,16 +836,23 @@ struct QuestionEditCard: View {
                 Text((question.isRequired ?? true) ? "(Zorunlu)" : "(İsteğe Bağlı)")
                     .font(.system(size: 12))
                     .foregroundColor(AppColors.textSecondary)
-                Spacer()
-                Image(systemName: "line.3.horizontal")
-                    .foregroundColor(AppColors.textSecondary)
-                    .font(.system(size: 18))
+                Button(action: {
+                    withAnimation { onDelete() }
+                }) {
+                    Image(systemName: "trash.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.red.opacity(0.8))
+                        .padding(8)
+                        .background(Circle().fill(Color.red.opacity(0.1)))
+                }
             }
             
-            TextField("Sorunuzu buraya yazın...", text: $question.text)
+            TextField("Sorunuzu buraya yazın...", text: $question.text, axis: .vertical)
+                .font(.system(size: 14, weight: .medium)) // Reduced font size
                 .padding()
                 .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.05)))
                 .foregroundColor(.white)
+                .lineLimit(1...4)
             
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
