@@ -59,8 +59,8 @@ struct SurveyCategory: Identifiable, Codable {
     
     enum CodingKeys: String, CodingKey {
         case id
-        case tr = "name_tr"
-        case en = "name_en"
+        case tr
+        case en
         case icon
     }
 }
