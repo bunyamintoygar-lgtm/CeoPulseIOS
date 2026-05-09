@@ -392,7 +392,7 @@ struct SurveysHomeView: View {
             Text("REDDEDİLME NEDENİ")
                 .font(.system(size: 11, weight: .black))
                 .foregroundColor(.orange.opacity(0.8))
-                .letterSpacing(1.2)
+                .kerning(1.2)
             
             Text(reason ?? "İçeriğiniz yapay zeka tarafından uygunsuz bulundu.")
                 .font(.system(size: 15, weight: .medium))
