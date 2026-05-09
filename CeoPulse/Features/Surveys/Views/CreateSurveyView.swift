@@ -1011,6 +1011,7 @@ struct QuestionEditCard: View {
                     Spacer() // Pushes delete button to the far right
                     
                     Button(action: {
+                        hideKeyboard()
                         withAnimation(.spring()) { showingDeleteConfirm = true }
                     }) {
                         Image(systemName: "trash.fill")
@@ -1245,5 +1246,11 @@ struct SettingsToggle: View {
         }
         .padding()
         .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
+    }
+}
+
+extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
