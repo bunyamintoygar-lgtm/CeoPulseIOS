@@ -151,9 +151,21 @@ class SurveyService {
         }
         
         if !voteEntries.isEmpty {
+            // Get the list of question IDs we are answering
+            let questionIds = Array(answers.keys)
+            
+            // 1. Delete existing responses for these specific questions by this user
             try await client
                 .from("survey_responses")
-                .upsert(voteEntries, onConflict: "question_id,user_id")
+                .delete()
+                .eq("user_id", value: userId)
+                .in("question_id", values: questionIds)
+                .execute()
+            
+            // 2. Insert new responses
+            try await client
+                .from("survey_responses")
+                .insert(voteEntries)
                 .execute()
         }
     }
