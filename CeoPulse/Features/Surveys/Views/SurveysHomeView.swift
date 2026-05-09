@@ -14,7 +14,7 @@ struct SurveysHomeView: View {
     @State private var isSearchVisible = false
     @State private var showingFilterMenu = false
     
-    let tabs = ["Aktif Anketler", "Tamamlananlar", "Taslaklarım", "Arşiv"]
+    let tabs = ["Aktif Anketler", "Tamamlananlar", "Oluşturduklarım", "Arşiv"]
     
     var body: some View {
         NavigationView {
