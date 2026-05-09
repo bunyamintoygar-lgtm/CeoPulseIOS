@@ -1463,23 +1463,27 @@ struct ContentModerator {
         do {
             guard let bodyData = try? JSONSerialization.data(withJSONObject: ["text": combinedText]) else {
                 print("❌ [ContentModerator] Body encode edilemedi, fallback'e geçiliyor.")
-                return (true, nil)
+                return isContentAppropriate(texts)
             }
             
-            print("🛡️ [ContentModerator] Edge Function çağrılıyor: 'moderate-content'")
+            // Supabase proje URL ve anon key
+            let supabaseURL = SupabaseManager.shared.client.supabaseURL
+            let anonKey = SupabaseManager.shared.client.supabaseKey
+            let functionURL = supabaseURL.appendingPathComponent("functions/v1/moderate-content")
             
-            let responseData: Data = try await SupabaseManager.shared.client.functions
-                .invoke(
-                    "moderate-content", 
-                    options: .init(
-                        method: .post,
-                        body: bodyData
-                    )
-                )
+            print("🛡️ [ContentModerator] URLSession ile çağrılıyor: \(functionURL)")
             
-            // Ham JSON yanıtı logla
+            var request = URLRequest(url: functionURL, timeoutInterval: 10)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
+            request.httpBody = bodyData
+            
+            let (responseData, httpResponse) = try await URLSession.shared.data(for: request)
+            
+            let statusCode = (httpResponse as? HTTPURLResponse)?.statusCode ?? 0
             let rawJSON = String(data: responseData, encoding: .utf8) ?? "Okunamadı"
-            print("✅ [ContentModerator] Edge Function'dan gelen ham yanıt:")
+            print("✅ [ContentModerator] HTTP \(statusCode) - Ham yanıt:")
             print("   \(rawJSON)")
             
             let decoder = JSONDecoder()
@@ -1495,9 +1499,9 @@ struct ContentModerator {
             
             print("⚠️ [ContentModerator] JSON decode başarısız, varsayılan olarak onaylandı.")
             return (true, nil)
+            
         } catch {
-            print("❌ [ContentModerator] Edge Function HATASI: \(error)")
-            print("⚠️ [ContentModerator] Yerel yasaklı kelime listesine fallback yapılıyor...")
+            print("❌ [ContentModerator] HATA (\(error.localizedDescription)) - Fallback'e geçiliyor...")
             return isContentAppropriate(texts)
         }
     }
