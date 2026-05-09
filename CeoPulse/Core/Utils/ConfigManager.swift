@@ -28,12 +28,6 @@ class ConfigManager: ObservableObject {
             let responseData = response.data
             let decoder = JSONDecoder()
             
-            // Raw representation to get the keys and raw values
-            struct RawConfigItem: Decodable {
-                let key: String
-                let value: AnyDecodable // Custom helper or use generic decoding
-            }
-            
             // Instead of a complex generic, let's decode to a dictionary first
             // Supabase returns an array of objects: [{key: "...", value: ...}, ...]
             let rawArray = try JSONSerialization.jsonObject(with: responseData) as? [[String: Any]] ?? []

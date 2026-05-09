@@ -14,11 +14,11 @@ class SurveyService {
         // PostgreSQL ilike automatically handles most case-insensitive scenarios.
         // For strict Turkish support, we could use custom RPC, but ilike is generally sufficient 
         // if the database is UTF-8. We'll also lower-case the query for safety.
-        let surveys: [Survey] = try await client.database
+        let surveys: [Survey] = try await client
             .from("surveys")
             .select()
             .eq("status", value: "active")
-            .ilike("title", value: "%\(query)%")
+            .ilike("title", pattern: "%\(query)%")
             .order("created_at", ascending: false)
             .range(from: from, to: to)
             .execute()
@@ -30,7 +30,7 @@ class SurveyService {
         let from = page * pageSize
         let to = from + pageSize - 1
         
-        let surveys: [Survey] = try await client.database
+        let surveys: [Survey] = try await client
             .from("surveys")
             .select()
             .eq("status", value: "active")
@@ -42,7 +42,7 @@ class SurveyService {
     }
     
     func fetchQuestions(for surveyId: UUID) async throws -> [SurveyQuestion] {
-        let questions: [SurveyQuestion] = try await client.database
+        let questions: [SurveyQuestion] = try await client
             .from("survey_questions")
             .select()
             .eq("survey_id", value: surveyId)
@@ -53,7 +53,7 @@ class SurveyService {
     }
     
     func fetchOptions(for questionId: UUID) async throws -> [SurveyOption] {
-        let options: [SurveyOption] = try await client.database
+        let options: [SurveyOption] = try await client
             .from("survey_options")
             .select()
             .eq("question_id", value: questionId)
@@ -64,7 +64,7 @@ class SurveyService {
     }
     
     func fetchParticipationCount(for surveyId: UUID) async throws -> Int {
-        let response = try await client.database
+        let response = try await client
             .from("survey_responses")
             .select("user_id", head: true, count: .exact)
             .eq("survey_id", value: surveyId)
@@ -75,7 +75,7 @@ class SurveyService {
     
     func fetchResults(for surveyId: UUID) async throws -> [UUID: Int] {
         // Fetch all responses for the survey
-        let responses: [[String: Any]] = try await client.database
+        let responses: [[String: Any]] = try await client
             .from("survey_responses")
             .select("option_id")
             .eq("survey_id", value: surveyId)
@@ -97,13 +97,13 @@ class SurveyService {
     
     func createSurvey(survey: Survey, questions: [SurveyQuestion], options: [UUID: [SurveyOption]]) async throws {
         // 1. Insert Survey
-        try await client.database
+        try await client
             .from("surveys")
             .insert(survey)
             .execute()
         
         // 2. Insert Questions
-        try await client.database
+        try await client
             .from("survey_questions")
             .insert(questions)
             .execute()
@@ -117,7 +117,7 @@ class SurveyService {
         }
         
         if !allOptions.isEmpty {
-            try await client.database
+            try await client
                 .from("survey_options")
                 .insert(allOptions)
                 .execute()
@@ -143,7 +143,7 @@ class SurveyService {
         }
         
         if !voteEntries.isEmpty {
-            try await client.database
+            try await client
                 .from("survey_responses")
                 .insert(voteEntries)
                 .execute()

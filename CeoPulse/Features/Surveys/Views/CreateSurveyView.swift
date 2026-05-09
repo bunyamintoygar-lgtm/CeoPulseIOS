@@ -687,7 +687,7 @@ struct AudienceCard: View {
     }
 }
 
-struct DraftQuestion {
+struct DraftQuestion: Codable {
     var text: String
     var options: [String]
     var type: SurveyQuestion.QuestionType
