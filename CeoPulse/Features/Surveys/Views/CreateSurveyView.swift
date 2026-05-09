@@ -27,14 +27,16 @@ struct CreateSurveyView: View {
             do {
                 let languageCode = Locale.current.language.languageCode?.identifier ?? "tr"
                 
-                // Invoke function and get raw data first for better debugging
-                let responseData: Data = try await SupabaseManager.shared.client.functions
+                // Invoke function and get response object
+                let response = try await SupabaseManager.shared.client.functions
                     .invoke("generate-survey-questions", 
                             options: .init(body: [
                                 "title": title, 
                                 "description": description,
                                 "language": languageCode
                             ]))
+                
+                let responseData = response.data
                 
                 // Try to decode
                 let decoder = JSONDecoder()
