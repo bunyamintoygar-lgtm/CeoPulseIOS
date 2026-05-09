@@ -1451,10 +1451,19 @@ struct ContentModerator {
     func checkWithAI(texts: [String]) async throws -> (isAppropriate: Bool, reason: String?) {
         let combinedText = texts.joined(separator: "\n---\n")
         
+        print("🛡️ [ContentModerator] ========== MODERASYON BAŞLADI ==========")
+        print("🛡️ [ContentModerator] Gönderilen metin (\(texts.count) parça):")
+        texts.enumerated().forEach { i, t in
+            print("   [\(i+1)] \(t.prefix(100))...")
+        }
+        
         do {
             guard let bodyData = try? JSONSerialization.data(withJSONObject: ["text": combinedText]) else {
+                print("❌ [ContentModerator] Body encode edilemedi, fallback'e geçiliyor.")
                 return (true, nil)
             }
+            
+            print("🛡️ [ContentModerator] Edge Function çağrılıyor: 'moderate-content'")
             
             let responseData: Data = try await SupabaseManager.shared.client.functions
                 .invoke(
@@ -1465,15 +1474,27 @@ struct ContentModerator {
                     )
                 )
             
+            // Ham JSON yanıtı logla
+            let rawJSON = String(data: responseData, encoding: .utf8) ?? "Okunamadı"
+            print("✅ [ContentModerator] Edge Function'dan gelen ham yanıt:")
+            print("   \(rawJSON)")
+            
             let decoder = JSONDecoder()
             if let result = try? decoder.decode(ModerationResponse.self, from: responseData) {
+                print("🛡️ [ContentModerator] Decode başarılı → flagged: \(result.flagged), reason: \(result.reason ?? "nil")")
                 if result.flagged {
+                    print("🚫 [ContentModerator] İçerik UYGUNSUZ bulundu! Yayınlama engellendi.")
                     return (false, result.reason ?? "İçeriğiniz uygunsuz bulundu.")
                 }
+                print("✅ [ContentModerator] İçerik UYGUN. Yayınlama onaylandı.")
                 return (true, nil)
             }
+            
+            print("⚠️ [ContentModerator] JSON decode başarısız, varsayılan olarak onaylandı.")
             return (true, nil)
         } catch {
+            print("❌ [ContentModerator] Edge Function HATASI: \(error)")
+            print("⚠️ [ContentModerator] Yerel yasaklı kelime listesine fallback yapılıyor...")
             return isContentAppropriate(texts)
         }
     }
