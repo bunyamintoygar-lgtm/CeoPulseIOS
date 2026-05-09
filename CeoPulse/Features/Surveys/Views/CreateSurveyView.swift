@@ -820,6 +820,10 @@ struct DraftQuestion: Codable, Equatable, Identifiable {
     var type: SurveyQuestion.QuestionType
     var isRequired: Bool? = true
     var allowMultiple: Bool? = false
+    
+    enum CodingKeys: String, CodingKey {
+        case text, options, type, isRequired, allowMultiple
+    }
 }
 
 struct QuestionEditCard: View {
