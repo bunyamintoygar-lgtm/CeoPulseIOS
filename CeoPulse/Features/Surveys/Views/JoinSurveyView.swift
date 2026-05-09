@@ -95,16 +95,6 @@ struct JoinSurveyView: View {
         .onAppear {
             viewModel.fetchQuestions()
         }
-        .alert("Yarım Kalan Cevaplar", isPresented: $viewModel.showingResumeAlert) {
-            Button("Devam Et") {
-                viewModel.loadDraft()
-            }
-            Button("Yeni Başla", role: .destructive) {
-                viewModel.clearDraft()
-            }
-        } message: {
-            Text("Bu anket için daha önceden kaydettiğiniz cevaplarınız mevcut. Kaldığınız yerden devam etmek ister misiniz?")
-        }
     }
     
     private var headerView: some View {

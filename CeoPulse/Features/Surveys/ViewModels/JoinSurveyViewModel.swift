@@ -25,7 +25,8 @@ class JoinSurveyViewModel: ObservableObject {
     
     func checkDraft() {
         if draftManager.hasDraft(for: survey.id) && answers.isEmpty {
-            showingResumeAlert = true
+            // Sorma, sessizce kaldığı yerden devam et
+            loadDraft()
         }
     }
     
