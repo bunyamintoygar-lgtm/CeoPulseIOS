@@ -845,6 +845,21 @@ struct SurveysHomeView: View {
                             let stats = viewModel.surveyStats[survey.id]
                             let totalVotes = stats?.totalVotes ?? 0
                             let participationRate = totalVotes > 0 ? Int((Double(totalVotes) / Double(max(viewModel.totalUserCount, 1))) * 100) : 0
+                            let isCreator = survey.creatorId == viewModel.currentUserId
+                            let isExpired = survey.endDate != nil && survey.endDate! < Date()
+                            
+                            let badgeText: String
+                            let badgeColor: Color
+                            if survey.status == .rejected {
+                                badgeText = NSLocalizedString("status_rejected", value: "REDDEDİLDİ", comment: "")
+                                badgeColor = .red
+                            } else if isExpired {
+                                badgeText = NSLocalizedString("status_passive", value: "PASİF", comment: "")
+                                badgeColor = .gray
+                            } else {
+                                badgeText = NSLocalizedString("status_active", value: "AKTİF", comment: "")
+                                badgeColor = .purple
+                            }
                             
                             Button(action: { 
                                 if survey.status == .rejected {
@@ -861,7 +876,18 @@ struct SurveysHomeView: View {
                                     date: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
                                     rate: participationRate,
                                     icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "person.circle",
-                                    color: .blue
+                                    color: .blue,
+                                    statusBadge: badgeText,
+                                    statusColor: badgeColor,
+                                    onEdit: (isCreator && totalVotes == 0) ? {
+                                        surveyToEdit = survey
+                                    } : nil,
+                                    onDelete: (isCreator && totalVotes == 0) ? {
+                                        surveyToDelete = survey
+                                        withAnimation(.spring()) {
+                                            showingDeleteAlert = true
+                                        }
+                                    } : nil
                                 )
                             }
                             .buttonStyle(PlainButtonStyle())

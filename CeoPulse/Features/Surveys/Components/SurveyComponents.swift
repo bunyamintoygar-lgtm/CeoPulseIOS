@@ -211,6 +211,10 @@ struct SurveyCompletedRow: View {
     let rate: Int
     let icon: String
     let color: Color
+    var statusBadge: String? = nil
+    var statusColor: Color? = nil
+    var onEdit: (() -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
     
     var body: some View {
         HStack(spacing: 16) {
@@ -227,28 +231,67 @@ struct SurveyCompletedRow: View {
                 Text(title)
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.white)
+                    .lineLimit(1)
                 
                 HStack(spacing: 8) {
                     Text(date)
+                    
+                    if let badge = statusBadge, let badgeColor = statusColor {
+                        Text(badge)
+                            .font(.system(size: 9, weight: .bold))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(badgeColor.opacity(0.2))
+                            .foregroundColor(badgeColor)
+                            .cornerRadius(4)
+                    }
                 }
                 .font(.system(size: 11))
                 .foregroundColor(AppColors.textSecondary)
             }
             
-            Spacer()
+            Spacer(minLength: 8)
             
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("%\(rate)")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.green)
-                Text(LocalizedStringKey("survey_participation_rate_label"))
-                    .font(.system(size: 8))
+            if onEdit != nil || onDelete != nil {
+                HStack(spacing: 8) {
+                    if let editAction = onEdit {
+                        Button(action: editAction) {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 32, height: 32)
+                                .background(Color.blue)
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
+                    }
+                    if let deleteAction = onDelete {
+                        Button(action: deleteAction) {
+                            Image(systemName: "trash")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 32, height: 32)
+                                .background(Color.red)
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
+                    }
+                }
+            } else {
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("%\(rate)")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.green)
+                    Text(LocalizedStringKey("survey_participation_rate_label"))
+                        .font(.system(size: 8))
+                        .foregroundColor(AppColors.textSecondary)
+                }
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12))
                     .foregroundColor(AppColors.textSecondary)
+                    .padding(.leading, 4)
             }
-            
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12))
-                .foregroundColor(AppColors.textSecondary)
         }
         .padding()
         .background(Color.white.opacity(0.02))
