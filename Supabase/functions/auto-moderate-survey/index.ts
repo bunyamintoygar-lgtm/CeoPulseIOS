@@ -47,11 +47,15 @@ serve(async (req) => {
       })
     }
 
-    const lang = survey.language === 'en' ? 'English' : 'Turkish'
-    const systemPrompt = `Sen bir içerik moderatörüsün. Verilen anket içeriğini müstehcenlik, hakaret, küfür, nefret söylemi ve topluluk kuralları açısından incele. 
-    Eğer içerik uygunsuzsa 'flagged' değerini true yap ve kısa bir 'reason' (${lang}) ekle. 
-    Uygunsa 'flagged' false olsun. 
-    Sadece JSON döndür: {"flagged": boolean, "reason": string|null}`
+    const systemPrompt = survey.language === 'en' 
+      ? `You are a content moderator. Review the provided survey content for obscenity, insults, profanity, hate speech, and community guidelines. 
+         If the content is inappropriate, set 'flagged' to true and add a short 'reason' in English. 
+         If it is appropriate, 'flagged' should be false. 
+         Return ONLY JSON: {"flagged": boolean, "reason": string|null}`
+      : `Sen bir içerik moderatörüsün. Verilen anket içeriğini müstehcenlik, hakaret, küfür, nefret söylemi ve topluluk kuralları açısından incele. 
+         Eğer içerik uygunsuzsa 'flagged' değerini true yap ve kısa bir 'reason' (Türkçe) ekle. 
+         Uygunsa 'flagged' false olsun. 
+         Sadece JSON döndür: {"flagged": boolean, "reason": string|null}`;
 
     // 2. Soruları ve seçenekleri çek
     const { data: questions } = await supabase
