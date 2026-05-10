@@ -30,8 +30,8 @@ struct SurveysHomeView: View {
         [
             TabItem(id: "discovery", title: NSLocalizedString("survey_tab_discovery", comment: "")),
             TabItem(id: "active", title: NSLocalizedString("survey_tab_active", comment: "")),
-            TabItem(id: "completed", title: NSLocalizedString("survey_tab_completed", comment: "")),
             TabItem(id: "my_surveys", title: NSLocalizedString("survey_tab_my_surveys", comment: "")),
+            TabItem(id: "completed", title: NSLocalizedString("survey_tab_completed", comment: "")),
             TabItem(id: "archive", title: NSLocalizedString("survey_tab_archive", comment: ""))
         ]
     }
@@ -315,12 +315,14 @@ struct SurveysHomeView: View {
             .sheet(isPresented: $showCreateSurvey) {
                 CreateSurveyView(onPublish: {
                     viewModel.refreshAll()
+                    viewModel.updateSelectedTab("my_surveys")
                 })
             }
             .sheet(item: $surveyToEdit) { survey in
                 CreateSurveyView(onPublish: {
                     viewModel.refreshAll()
                     surveyToEdit = nil
+                    viewModel.updateSelectedTab("my_surveys")
                 }, surveyToEdit: survey)
             }
             .sheet(item: $selectedSurvey) { survey in
