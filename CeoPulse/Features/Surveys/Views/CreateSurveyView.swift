@@ -51,15 +51,6 @@ struct CreateSurveyView: View {
                             decode: { data, _ in data }) // Updated to accept both Data and Response
                 
                 // Try to decode
-                let decoder = JSONDecoder()
-                
-                // Debug log raw JSON
-                if let jsonString = String(data: responseData, encoding: .utf8) {
-                    print("AI Raw JSON Response: \(jsonString)")
-                }
-                
-                do {
-                    let decoder = JSONDecoder()
                     // AI response might not have IDs, so we handle it gracefully
                     struct AIRawQuestion: Codable {
                         var text: String

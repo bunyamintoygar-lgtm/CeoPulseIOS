@@ -26,7 +26,7 @@ class SurveyService {
         if let status = status {
             request = request.eq("status", value: status.rawValue)
         } else if let statuses = statuses {
-            request = request.in("status", value: statuses.map { $0.rawValue })
+            request = request.in("status", values: statuses.map { $0.rawValue })
         }
         
         if let creatorId = creatorId {
