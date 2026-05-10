@@ -195,7 +195,7 @@ struct SurveysHomeView: View {
                             }
                             .padding(.horizontal, 20)
                             .padding(.bottom, 100)
-                            .onChange(of: viewModel.selectedTab) { _ in
+                            .onChange(of: viewModel.selectedTab) {
                                 withAnimation {
                                     proxy.scrollTo("topAnchor", anchor: .top)
                                 }
