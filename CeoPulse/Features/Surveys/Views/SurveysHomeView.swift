@@ -192,13 +192,12 @@ struct SurveysHomeView: View {
                         .padding(.bottom, 100)
                     }
                     .onAppear {
-                        viewModel.fetchSurveys()
                         if ConfigManager.shared.surveyCategories.isEmpty {
                             Task { await ConfigManager.shared.fetchConfigs() }
                         }
                     }
                     .refreshable {
-                        viewModel.fetchSurveys()
+                        viewModel.refreshAll()
                         Task { await ConfigManager.shared.fetchConfigs() }
                     }
                 }
@@ -314,12 +313,12 @@ struct SurveysHomeView: View {
             .navigationBarHidden(true)
             .sheet(isPresented: $showCreateSurvey) {
                 CreateSurveyView(onPublish: {
-                    viewModel.fetchSurveys()
+                    viewModel.refreshAll()
                 })
             }
             .sheet(item: $surveyToEdit) { survey in
                 CreateSurveyView(onPublish: {
-                    viewModel.fetchSurveys()
+                    viewModel.refreshAll()
                     surveyToEdit = nil
                 }, surveyToEdit: survey)
             }
@@ -453,10 +452,10 @@ struct SurveysHomeView: View {
     
     private var activeSurveysList: some View {
         VStack(spacing: 20) {
-            if viewModel.activeSurveys.isEmpty {
+            if viewModel.activeSurveysList.isEmpty {
                 emptyStateView(title: NSLocalizedString("rt_status_upcoming", comment: ""))
             } else {
-                ForEach(viewModel.activeSurveys) { survey in
+                ForEach(viewModel.activeSurveysList) { survey in
                     let stats = viewModel.surveyStats[survey.id]
                     let hasVoted = stats?.hasVoted ?? false
                     let totalVotes = stats?.totalVotes ?? 0
@@ -493,7 +492,11 @@ struct SurveysHomeView: View {
                         } : nil
                     )
                     .onAppear {
-                        viewModel.loadMoreIfNeeded(currentSurvey: survey)
+                        if let tabKey = ["active", "completed", "my_surveys", "archive"].first(where: { viewModel.selectedTab == $0 }) {
+                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: tabKey)
+                        } else {
+                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "discovery") // fallback
+                        }
                     }
                 }
                 
@@ -544,20 +547,20 @@ struct SurveysHomeView: View {
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
                 Spacer()
-                if !viewModel.completedSurveys.isEmpty {
-                    Text("\(viewModel.completedSurveys.count)")
+                if !viewModel.completedSurveysList.isEmpty {
+                    Text("\(viewModel.completedSurveysList.count)")
                         .font(.system(size: 13))
                         .foregroundColor(.purple)
                 }
             }
             
-            if viewModel.completedSurveys.isEmpty && !viewModel.isLoading {
+            if viewModel.completedSurveysList.isEmpty && !viewModel.isLoading {
                     Text(LocalizedStringKey("rt_tab_completed"))
                     .font(.system(size: 14))
                     .foregroundColor(AppColors.textSecondary)
                     .padding(.vertical, 10)
             } else {
-                ForEach(viewModel.completedSurveys) { survey in
+                ForEach(viewModel.completedSurveysList) { survey in
                     NavigationLink(destination: SurveyResultsView(survey: survey)) {
                         SurveyCompletedRow(
                             title: survey.title,
@@ -569,7 +572,11 @@ struct SurveysHomeView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                     .onAppear {
-                        viewModel.loadMoreIfNeeded(currentSurvey: survey)
+                        if let tabKey = ["active", "completed", "my_surveys", "archive"].first(where: { viewModel.selectedTab == $0 }) {
+                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: tabKey)
+                        } else {
+                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "discovery") // fallback
+                        }
                     }
                 }
                 
@@ -588,7 +595,7 @@ struct SurveysHomeView: View {
     private var discoveryDashboard: some View {
         VStack(spacing: 32) {
             // 1. Discovery Section (Not voted, Active/Archived mix)
-            let discoverySurveys = viewModel.surveys.filter { !viewModel.participatedSurveyIds.contains($0.id) }.prefix(4)
+            let discoverySurveys = viewModel.activeSurveysList.prefix(4)
             if !discoverySurveys.isEmpty {
                 VStack(alignment: .leading, spacing: 16) {
                     Text(LocalizedStringKey("survey_tab_discovery"))
@@ -637,7 +644,7 @@ struct SurveysHomeView: View {
             }
             
             // 2. Recent My Surveys (Creator is me)
-            let myRecentSurveys = viewModel.surveys.filter { $0.creatorId == viewModel.currentUserId }.prefix(3)
+            let myRecentSurveys = viewModel.mySurveysList.prefix(3)
             if !myRecentSurveys.isEmpty {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
@@ -674,7 +681,7 @@ struct SurveysHomeView: View {
             }
             
             // 3. Completed Surveys (Voted, List Style)
-            let completedRecent = viewModel.surveys.filter { viewModel.participatedSurveyIds.contains($0.id) }.prefix(5)
+            let completedRecent = viewModel.completedSurveysList.prefix(5)
             if !completedRecent.isEmpty {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
@@ -718,10 +725,10 @@ struct SurveysHomeView: View {
     
     private var archiveSurveysList: some View {
         VStack(spacing: 20) {
-            if viewModel.surveys.isEmpty {
+            if viewModel.archivedSurveysList.isEmpty {
                 emptyStateView(title: NSLocalizedString("rt_status_archived", comment: ""))
             } else {
-                ForEach(viewModel.surveys) { survey in
+                ForEach(viewModel.archivedSurveysList) { survey in
                     let stats = viewModel.surveyStats[survey.id]
                     let totalVotes = stats?.totalVotes ?? 0
                     
@@ -741,10 +748,10 @@ struct SurveysHomeView: View {
     
     private var mySurveysList: some View {
         VStack(spacing: 20) {
-            if viewModel.surveys.isEmpty {
+            if viewModel.mySurveysList.isEmpty {
                 emptyStateView(title: NSLocalizedString("rt_tab_my_discussions", comment: ""))
             } else {
-                ForEach(viewModel.surveys) { survey in
+                ForEach(viewModel.mySurveysList) { survey in
                     let stats = viewModel.surveyStats[survey.id]
                     let totalVotes = stats?.totalVotes ?? 0
                     let isCreator = survey.creatorId == viewModel.currentUserId
@@ -777,7 +784,11 @@ struct SurveysHomeView: View {
                         } : nil
                     )
                     .onAppear {
-                        viewModel.loadMoreIfNeeded(currentSurvey: survey)
+                        if let tabKey = ["active", "completed", "my_surveys", "archive"].first(where: { viewModel.selectedTab == $0 }) {
+                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: tabKey)
+                        } else {
+                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "discovery") // fallback
+                        }
                     }
                 }
                 
@@ -799,7 +810,7 @@ struct SurveysHomeView: View {
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
             
-            Button(action: { viewModel.fetchSurveys() }) {
+            Button(action: { viewModel.refreshAll() }) {
                 Text(LocalizedStringKey("common_retry"))
                     .font(.system(size: 15, weight: .bold))
                     .padding(.horizontal, 24)

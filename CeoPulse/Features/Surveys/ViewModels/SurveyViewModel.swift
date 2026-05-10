@@ -2,9 +2,13 @@ import Foundation
 import Combine
 
 class SurveyViewModel: ObservableObject {
-    @Published var surveys: [Survey] = []
+    // MARK: - Published States
+    @Published var activeSurveysList: [Survey] = []
+    @Published var completedSurveysList: [Survey] = []
+    @Published var mySurveysList: [Survey] = []
+    @Published var archivedSurveysList: [Survey] = []
+    
     @Published var isLoading = false
-    @Published var isFetchingMore = false
     @Published var errorMessage: String?
     
     @Published var surveyStats: [UUID: SurveyService.SurveyStats] = [:]
@@ -12,69 +16,43 @@ class SurveyViewModel: ObservableObject {
     @Published var searchQuery = ""
     @Published var selectedCategoryId: String? = nil
     @Published var selectedTab = "discovery" // Internal keys: discovery, active, completed, my_surveys, archive
+    
     @Published var currentUserId: UUID? = nil
     @Published var totalUserCount: Int = 1
     @Published var participatedSurveyIds: Set<UUID> = []
+    
+    // MARK: - Pagination States
+    private var pages: [String: Int] = ["active": 0, "completed": 0, "my_surveys": 0, "archive": 0]
+    private var canLoadMores: [String: Bool] = ["active": true, "completed": true, "my_surveys": true, "archive": true]
+    @Published var isFetchingMore = false
+    
+    // MARK: - Private Properties
     private var searchSubject = PassthroughSubject<String, Never>()
     private var cancellables = Set<AnyCancellable>()
-    
     private let service = SurveyService.shared
-    private var currentPage = 0
     private let pageSize = 15
-    private var canLoadMore = true
     
     init() {
         setupSearchDebounce()
         fetchInitialData()
     }
     
-    private func fetchInitialData() {
-        Task {
-            // Fetch User ID
-            do {
-                let userId = try await service.fetchCurrentUserId()
-                await MainActor.run { self.currentUserId = userId }
-            } catch {
-                print("Failed to fetch current user ID: \(error)")
-            }
-            
-            // Fetch Participated IDs
-            do {
-                let participatedIds = try await service.fetchParticipatedSurveyIds()
-                await MainActor.run { self.participatedSurveyIds = Set(participatedIds) }
-            } catch {
-                print("Failed to fetch participated IDs: \(error)")
-            }
-            
-            // Fetch Total User Count
-            do {
-                let totalMembers = try await service.fetchTotalUserCount()
-                await MainActor.run { self.totalUserCount = totalMembers }
-            } catch {
-                print("Failed to fetch total user count: \(error)")
-            }
-            
-            // Finally fetch surveys
-            await MainActor.run {
-                self.fetchSurveys(isRefresh: true)
-            }
-        }
-    }
-    
+    // MARK: - Setup
     private func setupSearchDebounce() {
         searchSubject
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .removeDuplicates()
             .sink { [weak self] query in
-                self?.fetchSurveys(isRefresh: true)
+                self?.refreshAll()
             }
             .store(in: &cancellables)
     }
     
+    // MARK: - Actions
     func updateSearchQuery(_ query: String) {
         searchQuery = query
         if query.isEmpty {
-            fetchSurveys(isRefresh: true)
+            refreshAll()
         } else {
             searchSubject.send(query)
         }
@@ -82,121 +60,172 @@ class SurveyViewModel: ObservableObject {
     
     func updateCategoryFilter(_ categoryId: String?) {
         selectedCategoryId = categoryId
-        fetchSurveys(isRefresh: true)
+        refreshAll()
     }
-    
-    private var currentFetchTask: Task<Void, Never>?
     
     func updateSelectedTab(_ tab: String) {
+        // Tab switching is now instant. No data fetching required here.
         selectedTab = tab
-        fetchSurveys(isRefresh: true)
     }
     
-    func fetchSurveys(isRefresh: Bool = true) {
-        // Do not cancel previous tasks to prevent underlying network client hangs.
-        // Instead, we rely on the `capturedTab` check to discard stale data.
-        
-        if isRefresh {
-            currentPage = 0
-            canLoadMore = true
-            isLoading = true
-            self.surveys = []
-        } else {
-            guard canLoadMore && !isFetchingMore else { return }
-            isFetchingMore = true
-        }
-        
-        errorMessage = nil
-        currentFetchTask = Task {
+    func refreshAll() {
+        fetchInitialData(isRefresh: true)
+    }
+    
+    // MARK: - Data Fetching
+    private func fetchInitialData(isRefresh: Bool = false) {
+        Task {
+            await MainActor.run {
+                if isRefresh {
+                    pages = ["active": 0, "completed": 0, "my_surveys": 0, "archive": 0]
+                    canLoadMores = ["active": true, "completed": true, "my_surveys": true, "archive": true]
+                    activeSurveysList = []
+                    completedSurveysList = []
+                    mySurveysList = []
+                    archivedSurveysList = []
+                }
+                isLoading = true
+                errorMessage = nil
+            }
+            
+            // Fetch Base Data Concurrently
             do {
-                let statusFilter: Survey.SurveyStatus?
-                var statusesFilter: [Survey.SurveyStatus]? = nil
-                let capturedTab = selectedTab
+                async let userIdReq = service.fetchCurrentUserId()
+                async let pIdsReq = service.fetchParticipatedSurveyIds()
+                async let countReq = service.fetchTotalUserCount()
                 
-                switch capturedTab {
-                case "discovery":
-                    statusFilter = nil
-                    statusesFilter = [.active, .archived] 
-                case "active": 
-                    statusFilter = .active
-                    statusesFilter = nil
-                case "completed": 
-                    statusFilter = nil
-                    statusesFilter = [.active, .archived]
-                case "my_surveys": 
-                    statusFilter = nil 
-                case "archive": 
-                    statusFilter = .archived
-                default: 
-                    statusFilter = .active
-                }
-                
-                // Fetch participation IDs safely. If it fails, fall back to the existing state instead of clearing it.
-                var participatedIds = Array(self.participatedSurveyIds)
-                do {
-                    participatedIds = try await service.fetchParticipatedSurveyIds()
-                } catch {
-                    print("Failed to fetch participated IDs, using cached state. Error: \(error)")
-                }
-                // Removed early cancellation check to ensure network stability
-                
-                let fetchedSurveys = try await service.fetchSurveys(
-                    query: searchQuery.isEmpty ? nil : searchQuery,
-                    categoryId: selectedCategoryId,
-                    creatorId: capturedTab == "my_surveys" ? currentUserId : nil,
-                    status: statusFilter,
-                    statuses: statusesFilter,
-                    ids: nil,
-                    page: currentPage,
-                    pageSize: pageSize
-                )
-                
-                // Removed early cancellation check
+                let (uId, pIds, count) = try await (userIdReq, pIdsReq, countReq)
                 
                 await MainActor.run {
-                    guard self.selectedTab == capturedTab else { return }
-                    
-                    self.participatedSurveyIds = Set(participatedIds)
-                    
-                    var processedSurveys = fetchedSurveys
-                    
-                    if capturedTab == "active" {
-                        processedSurveys = processedSurveys.filter { !self.participatedSurveyIds.contains($0.id) }
-                    } else if capturedTab == "completed" {
-                        processedSurveys = processedSurveys.filter { self.participatedSurveyIds.contains($0.id) }
-                    } else if capturedTab == "archive" {
-                        let now = Date()
-                        processedSurveys = processedSurveys.filter { $0.status == .archived || ($0.endDate != nil && $0.endDate! < now) }
-                    }
-                    
-                    if isRefresh {
-                        self.surveys = processedSurveys
-                    } else {
-                        self.surveys.append(contentsOf: processedSurveys)
-                    }
-                    
-                    self.canLoadMore = fetchedSurveys.count == pageSize
-                    self.isLoading = false
-                    self.isFetchingMore = false
-                    self.currentPage += 1
-                    
-                    Task {
-                        await self.fetchStats(for: fetchedSurveys)
-                    }
+                    self.currentUserId = uId
+                    self.participatedSurveyIds = Set(pIds)
+                    self.totalUserCount = count
                 }
             } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                    self.isLoading = false
-                    self.isFetchingMore = false
+                print("Failed to fetch base data: \(error)")
+            }
+            
+            // Now fetch the 4 categories concurrently
+            await fetchAllCategoriesConcurrent(isRefresh: isRefresh)
+        }
+    }
+    
+    private func fetchAllCategoriesConcurrent(isRefresh: Bool) async {
+        let uId = await MainActor.run { self.currentUserId }
+        let pIds = await MainActor.run { self.participatedSurveyIds }
+        let query = await MainActor.run { self.searchQuery.isEmpty ? nil : self.searchQuery }
+        let catId = await MainActor.run { self.selectedCategoryId }
+        
+        // Active
+        async let activeReq = service.fetchSurveys(query: query, categoryId: catId, status: .active, statuses: nil, ids: nil, page: 0, pageSize: pageSize)
+        
+        // Archive
+        async let archiveReq = service.fetchSurveys(query: query, categoryId: catId, status: .archived, statuses: nil, ids: nil, page: 0, pageSize: pageSize)
+        
+        // My Surveys
+        async let myReq = uId != nil ? service.fetchSurveys(query: query, categoryId: catId, creatorId: uId, status: nil, statuses: nil, ids: nil, page: 0, pageSize: pageSize) : []
+        
+        // Completed
+        let pIdArray = Array(pIds)
+        let completedReq: [Survey]
+        if pIdArray.isEmpty {
+            completedReq = []
+        } else {
+            completedReq = (try? await service.fetchSurveys(query: query, categoryId: catId, status: nil, statuses: [.active, .archived], ids: pIdArray, page: 0, pageSize: pageSize)) ?? []
+        }
+        
+        let (activeRes, archiveRes, myRes) = await (
+            (try? activeReq) ?? [],
+            (try? archiveReq) ?? [],
+            (try? myReq) ?? []
+        )
+        
+        await MainActor.run {
+            // Filter out participated from active
+            self.activeSurveysList = activeRes.filter { !pIds.contains($0.id) }
+            self.archivedSurveysList = archiveRes
+            self.mySurveysList = myRes
+            self.completedSurveysList = completedReq
+            
+            // Update pagination states
+            self.canLoadMores["active"] = activeRes.count == pageSize
+            self.canLoadMores["archive"] = archiveRes.count == pageSize
+            self.canLoadMores["my_surveys"] = myRes.count == pageSize
+            self.canLoadMores["completed"] = completedReq.count == pageSize
+            
+            self.pages["active"] = 1
+            self.pages["archive"] = 1
+            self.pages["my_surveys"] = 1
+            self.pages["completed"] = 1
+            
+            self.isLoading = false
+            
+            // Fetch stats for all these surveys
+            let allFetched = activeRes + archiveRes + myRes + completedReq
+            Task { await self.fetchStats(for: allFetched) }
+        }
+    }
+    
+    func loadMoreIfNeeded(currentSurvey: Survey, forTab: String) {
+        guard let list = listForTab(forTab), let lastSurvey = list.last, lastSurvey.id == currentSurvey.id else { return }
+        
+        let canLoad = canLoadMores[forTab] ?? false
+        guard canLoad && !isFetchingMore else { return }
+        
+        isFetchingMore = true
+        let pageToLoad = pages[forTab] ?? 1
+        
+        Task {
+            let uId = await MainActor.run { self.currentUserId }
+            let pIds = await MainActor.run { self.participatedSurveyIds }
+            let query = await MainActor.run { self.searchQuery.isEmpty ? nil : self.searchQuery }
+            let catId = await MainActor.run { self.selectedCategoryId }
+            
+            var fetched: [Survey] = []
+            
+            do {
+                if forTab == "active" {
+                    fetched = try await service.fetchSurveys(query: query, categoryId: catId, status: .active, statuses: nil, ids: nil, page: pageToLoad, pageSize: pageSize)
+                } else if forTab == "archive" {
+                    fetched = try await service.fetchSurveys(query: query, categoryId: catId, status: .archived, statuses: nil, ids: nil, page: pageToLoad, pageSize: pageSize)
+                } else if forTab == "my_surveys", let uId = uId {
+                    fetched = try await service.fetchSurveys(query: query, categoryId: catId, creatorId: uId, status: nil, statuses: nil, ids: nil, page: pageToLoad, pageSize: pageSize)
+                } else if forTab == "completed", !pIds.isEmpty {
+                    fetched = try await service.fetchSurveys(query: query, categoryId: catId, status: nil, statuses: [.active, .archived], ids: Array(pIds), page: pageToLoad, pageSize: pageSize)
                 }
+            } catch {
+                print("Failed to load more for \(forTab): \(error)")
+            }
+            
+            await MainActor.run {
+                if forTab == "active" {
+                    let filtered = fetched.filter { !pIds.contains($0.id) }
+                    self.activeSurveysList.append(contentsOf: filtered)
+                } else if forTab == "archive" {
+                    self.archivedSurveysList.append(contentsOf: fetched)
+                } else if forTab == "my_surveys" {
+                    self.mySurveysList.append(contentsOf: fetched)
+                } else if forTab == "completed" {
+                    self.completedSurveysList.append(contentsOf: fetched)
+                }
+                
+                self.canLoadMores[forTab] = fetched.count == pageSize
+                self.pages[forTab] = pageToLoad + 1
+                self.isFetchingMore = false
+                
+                Task { await self.fetchStats(for: fetched) }
             }
         }
     }
     
-    func loadMoreIfNeeded(currentSurvey: Survey) {
-        guard let lastSurvey = surveys.last, lastSurvey.id == currentSurvey.id else { return }
-        fetchSurveys(isRefresh: false)
+    private func listForTab(_ tab: String) -> [Survey]? {
+        switch tab {
+        case "active": return activeSurveysList
+        case "completed": return completedSurveysList
+        case "my_surveys": return mySurveysList
+        case "archive": return archivedSurveysList
+        default: return nil
+        }
     }
     
     func deleteSurvey(_ survey: Survey) {
@@ -204,7 +233,10 @@ class SurveyViewModel: ObservableObject {
             do {
                 try await service.deleteSurvey(surveyId: survey.id)
                 await MainActor.run {
-                    self.surveys.removeAll { $0.id == survey.id }
+                    self.activeSurveysList.removeAll { $0.id == survey.id }
+                    self.completedSurveysList.removeAll { $0.id == survey.id }
+                    self.mySurveysList.removeAll { $0.id == survey.id }
+                    self.archivedSurveysList.removeAll { $0.id == survey.id }
                 }
             } catch {
                 await MainActor.run {
@@ -215,33 +247,7 @@ class SurveyViewModel: ObservableObject {
     }
     
     func generateShareLink(for survey: Survey) -> URL {
-        // Bu link ileride Universal Link (ceopulse.app) olarak yapılandırılacak
         let urlString = "https://ceopulse.app/survey/\(survey.id.uuidString)"
         return URL(string: urlString)!
-    }
-    
-    var activeSurveys: [Survey] {
-        surveys.filter { $0.status == .active }
-    }
-    
-    var completedSurveys: [Survey] {
-        surveys.filter { $0.status == .completed }
-    }
-    
-    var mySurveys: [Survey] {
-        surveys
-    }
-    
-    private func fetchStats(for surveys: [Survey]) async {
-        for survey in surveys {
-            do {
-                let stats = try await service.fetchSurveyStats(surveyId: survey.id)
-                await MainActor.run {
-                    self.surveyStats[survey.id] = stats
-                }
-            } catch {
-                print("Failed to fetch stats for \(survey.id): \(error)")
-            }
-        }
     }
 }
