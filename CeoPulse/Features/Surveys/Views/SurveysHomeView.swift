@@ -398,8 +398,9 @@ struct SurveysHomeView: View {
                 return NSLocalizedString("survey_rejection_default_reason", comment: "")
             }
             
-            // JSON parse denemesi
-            if let data = reason.data(using: .utf8),
+            // Eski JSON formatı için fallback desteği (Opsiyonel)
+            if reason.starts(with: "{"),
+               let data = reason.data(using: .utf8),
                let json = try? JSONSerialization.jsonObject(with: data) as? [String: String] {
                 let languageCode = Locale.current.language.languageCode?.identifier ?? "tr"
                 return json[languageCode] ?? json["en"] ?? json["tr"] ?? reason
