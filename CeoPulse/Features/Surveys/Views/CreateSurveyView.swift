@@ -11,7 +11,7 @@ struct CreateSurveyView: View {
     @State private var title = ""
     @State private var description = ""
     @State private var selectedCategory: SurveyCategory?
-    @State private var targetAudience = "Herkese Açık"
+    @State private var targetAudience = NSLocalizedString("ao_privacy_public", comment: "")
     @State private var hasEndDate = true // Default to true as per new 3-month rule
     @State private var startDate = Date()
     @State private var endDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
@@ -103,7 +103,7 @@ struct CreateSurveyView: View {
     
     // Step 2: Questions
     @State private var questions: [DraftQuestion] = [
-        DraftQuestion(text: "", options: ["Seçenek 1", "Seçenek 2"], type: .singleChoice)
+        DraftQuestion(text: "", options: [NSLocalizedString("ao_field_desc_placeholder", comment: "") + " 1", NSLocalizedString("ao_field_desc_placeholder", comment: "") + " 2"], type: .singleChoice)
     ]
     
     var body: some View {
@@ -414,7 +414,7 @@ struct CreateSurveyView: View {
                 HStack {
                     Image(systemName: "plus.circle.fill")
                         .symbolRenderingMode(.hierarchical)
-                    Text("Soru Ekle")
+                    Text(LocalizedStringKey("survey_add_question"))
                 }
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.white)
@@ -434,36 +434,36 @@ struct CreateSurveyView: View {
                     Image(systemName: "gearshape").foregroundColor(.purple)
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Anket Ayarları").font(.system(size: 16, weight: .bold)).foregroundColor(.white)
-                    Text("Anketinizin davranışını ve görünürlüğünü özelleştirin.").font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
+                    Text(LocalizedStringKey("survey_settings_label")).font(.system(size: 16, weight: .bold)).foregroundColor(.white)
+                    Text(LocalizedStringKey("personalize_subtitle")).font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
                 }
                 Spacer()
             }
             
             // Katılım Hedefi
             VStack(alignment: .leading, spacing: 16) {
-                Text("Katılım Hedefi").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                Text(LocalizedStringKey("ao_target_title")).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
                 HStack(spacing: 12) {
-                    AudienceCard(title: "Herkese Açık", subtitle: "Herkes görebilir ve katılabilir.", icon: "globe", isSelected: targetAudience == "Herkese Açık") { targetAudience = "Herkese Açık" }
-                    AudienceCard(title: "Topluluk İçi", subtitle: "Sadece topluluk üyeleri görebilir.", icon: "person.2", isSelected: targetAudience == "Topluluk İçi") { targetAudience = "Topluluk İçi" }
-                    AudienceCard(title: "Özel", subtitle: "Sadece davet ettiğiniz kişiler görebilir.", icon: "lock", isSelected: targetAudience == "Özel") { targetAudience = "Özel" }
+                    AudienceCard(title: NSLocalizedString("ao_privacy_public", comment: ""), subtitle: NSLocalizedString("ao_privacy_public_desc", comment: ""), icon: "globe", isSelected: targetAudience == NSLocalizedString("ao_privacy_public", comment: "")) { targetAudience = NSLocalizedString("ao_privacy_public", comment: "") }
+                    AudienceCard(title: NSLocalizedString("ao_privacy_community", comment: ""), subtitle: NSLocalizedString("ao_privacy_community_desc", comment: ""), icon: "person.2", isSelected: targetAudience == NSLocalizedString("ao_privacy_community", comment: "")) { targetAudience = NSLocalizedString("ao_privacy_community", comment: "") }
+                    AudienceCard(title: NSLocalizedString("ao_privacy_private", comment: ""), subtitle: NSLocalizedString("ao_privacy_private_desc", comment: ""), icon: "lock", isSelected: targetAudience == NSLocalizedString("ao_privacy_private", comment: "")) { targetAudience = NSLocalizedString("ao_privacy_private", comment: "") }
                 }
             }
             
             // Katılım Limiti
             VStack(alignment: .leading, spacing: 12) {
-                Text("Katılım Limiti (İsteğe bağlı)").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                Text(LocalizedStringKey("survey_setting_participation_limit")).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
                 HStack(spacing: 20) {
-                    RadioButtonField(id: "unlimited", label: "Sınırsız katılım", isSelected: participationLimitType == "unlimited") {
+                    RadioButtonField(id: "unlimited", label: NSLocalizedString("survey_setting_unlimited", comment: ""), isSelected: participationLimitType == "unlimited") {
                         participationLimitType = "unlimited"
                     }
-                    RadioButtonField(id: "limit", label: "Katılım limiti belirle", isSelected: participationLimitType == "limit") {
+                    RadioButtonField(id: "limit", label: NSLocalizedString("survey_setting_limit_define", comment: ""), isSelected: participationLimitType == "limit") {
                         participationLimitType = "limit"
                     }
                 }
                 
                 if participationLimitType == "limit" {
-                    TextField("Katılım limiti", text: $participationLimit)
+                    TextField(LocalizedStringKey("survey_setting_participation_limit"), text: $participationLimit)
                         .keyboardType(.numberPad)
                         .padding()
                         .background(Color.white.opacity(0.05))
@@ -474,15 +474,15 @@ struct CreateSurveyView: View {
             
             // Sonuçların Görünürlüğü
             VStack(alignment: .leading, spacing: 12) {
-                Text("Sonuçların Görünürlüğü").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                Text(LocalizedStringKey("survey_setting_results")).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
                 VStack(alignment: .leading, spacing: 16) {
-                    RadioButtonField(id: "immediate", label: "Kapanır kapanmaz herkese göster", isSelected: resultsVisibility == "immediate", sublabel: "Anket bittiği anda sonuçlar herkes tarafından görülebilir.") {
+                    RadioButtonField(id: "immediate", label: NSLocalizedString("survey_setting_results_immediate", comment: ""), isSelected: resultsVisibility == "immediate", sublabel: NSLocalizedString("ao_privacy_public_desc", comment: "")) {
                         resultsVisibility = "immediate"
                     }
-                    RadioButtonField(id: "closed", label: "Katılımcılara kapandıktan sonra göster", isSelected: resultsVisibility == "closed", sublabel: "Anket bittiğinde yalnızca katılımcılar sonuçları görebilir.") {
+                    RadioButtonField(id: "closed", label: NSLocalizedString("survey_setting_results_closed", comment: ""), isSelected: resultsVisibility == "closed", sublabel: NSLocalizedString("ao_privacy_community_desc", comment: "")) {
                         resultsVisibility = "closed"
                     }
-                    RadioButtonField(id: "never", label: "Hiç sonuç gösterme", isSelected: resultsVisibility == "never", sublabel: "Sonuçlar yalnızca siz tarafınızdan görülebilir.") {
+                    RadioButtonField(id: "never", label: NSLocalizedString("survey_setting_results_never", comment: ""), isSelected: resultsVisibility == "never", sublabel: NSLocalizedString("ao_privacy_private_desc", comment: "")) {
                         resultsVisibility = "never"
                     }
                 }
@@ -490,22 +490,22 @@ struct CreateSurveyView: View {
             
             // Diğer Ayarlar
             VStack(alignment: .leading, spacing: 12) {
-                Text("Gelişmiş Seçenekler").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                Text(LocalizedStringKey("survey_setting_advanced")).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
                 VStack(spacing: 12) {
-                    SettingsToggle(title: "Yanıtları değiştirmeye izin ver", icon: "arrow.left.arrow.right.circle", isOn: $allowChangeResponse)
-                    SettingsToggle(title: "Yanıtlamayı zorunlu tut", icon: "exclamationmark.circle", isOn: $isRequiredToAnswer)
-                    SettingsToggle(title: "Sonuçları anonimleştir", icon: "eye.slash", isOn: $isAnonymous)
+                    SettingsToggle(title: NSLocalizedString("survey_setting_allow_change", comment: ""), icon: "arrow.left.arrow.right.circle", isOn: $allowChangeResponse)
+                    SettingsToggle(title: NSLocalizedString("survey_setting_required", comment: ""), icon: "exclamationmark.circle", isOn: $isRequiredToAnswer)
+                    SettingsToggle(title: NSLocalizedString("survey_setting_anonymous", comment: ""), icon: "eye.slash", isOn: $isAnonymous)
                 }
             }
             
             // Bitiş Tarihi Ayarı
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("Anket Bitiş Tarihi")
+                    Text(LocalizedStringKey("survey_setting_end_date"))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
                     Spacer()
-                    Text("Max 3 Ay")
+                    Text(LocalizedStringKey("survey_setting_max_duration"))
                         .font(.system(size: 10, weight: .bold))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
@@ -528,7 +528,7 @@ struct CreateSurveyView: View {
                     .colorScheme(.dark)
                 }
                 
-                Text("Anketiniz en geç \(maxEndDate.formatted(date: .long, time: .omitted)) tarihinde otomatik olarak kapanacaktır.")
+                Text(String(format: NSLocalizedString("survey_setting_auto_close_info", comment: ""), maxEndDate.formatted(date: .long, time: .omitted)))
                     .font(.system(size: 11))
                     .foregroundColor(AppColors.textSecondary)
             }
@@ -543,8 +543,8 @@ struct CreateSurveyView: View {
                     Image(systemName: "eye.fill").foregroundColor(.green)
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Son Önizleme").font(.system(size: 16, weight: .bold)).foregroundColor(.white)
-                    Text("Anketiniz yayınlandığında böyle görünecek.").font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
+                    Text(LocalizedStringKey("rt_view_summary")).font(.system(size: 16, weight: .bold)).foregroundColor(.white)
+                    Text(LocalizedStringKey("survey_final_ready_desc")).font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
                 }
                 Spacer()
             }
@@ -579,7 +579,7 @@ struct CreateSurveyView: View {
                 Divider().background(Color.white.opacity(0.1))
                 
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Sorular (\(questions.count))")
+                    Text(String(format: NSLocalizedString("survey_field_questions_label", comment: ""), questions.count))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white.opacity(0.6))
                     
@@ -608,11 +608,11 @@ struct CreateSurveyView: View {
                     .foregroundColor(.purple)
                     .symbolEffect(.bounce, options: .repeating)
                 
-                Text("Anketiniz Yayına Hazır!")
+                Text(LocalizedStringKey("survey_final_ready_title"))
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
                 
-                Text("Yayınla butonuna bastığınızda tüm CEO'lar anketinize katılabilecek.")
+                Text(LocalizedStringKey("survey_final_ready_desc"))
                     .font(.system(size: 14))
                     .foregroundColor(AppColors.textSecondary)
                     .multilineTextAlignment(.center)
@@ -631,7 +631,7 @@ struct CreateSurveyView: View {
                     Button(action: { withAnimation { currentStep -= 1 } }) {
                         HStack {
                             Image(systemName: "arrow.left")
-                            Text("Geri")
+                            Text(LocalizedStringKey("button_back"))
                         }
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
@@ -648,12 +648,12 @@ struct CreateSurveyView: View {
                             .filter { !$0.isEmpty }
                         
                         if words.count < 3 {
-                            errorMessage = "Anket başlığı en az 3 kelimeden oluşmalıdır."
+                            errorMessage = NSLocalizedString("survey_error_title_min_words", comment: "")
                             return
                         }
                         
                         if selectedCategory == nil {
-                            errorMessage = "Lütfen devam etmeden önce bir kategori seçin."
+                            errorMessage = NSLocalizedString("survey_error_category_required", comment: "")
                             showingCategoryPicker = true
                             return
                         }
@@ -676,7 +676,7 @@ struct CreateSurveyView: View {
                                 .tint(.white)
                                 .padding(.trailing, 8)
                         }
-                        Text(surveyToEdit != nil ? "Güncelle ve Yayınla" : (currentStep == 4 ? "Yayınla" : "Devam Et"))
+                        Text(surveyToEdit != nil ? LocalizedStringKey("survey_update_publish") : (currentStep == 4 ? LocalizedStringKey("survey_create_publish") : LocalizedStringKey("continue")))
                         if !isPublishing {
                             Image(systemName: surveyToEdit != nil ? "checkmark" : "arrow.right")
                         }
@@ -696,7 +696,7 @@ struct CreateSurveyView: View {
             
             HStack(spacing: 8) {
                 Image(systemName: "lock.fill").font(.system(size: 10))
-                Text("Taslaklarınız sadece sizin tarafınızdan görülebilir.").font(.system(size: 10))
+                Text(LocalizedStringKey("survey_draft_privacy_info")).font(.system(size: 10))
             }
             .foregroundColor(AppColors.textSecondary)
             .padding(.bottom, 10)
@@ -719,11 +719,11 @@ struct CreateSurveyView: View {
             }
             
             VStack(spacing: 8) {
-                Text("Yarım Kalan Anket")
+                Text(LocalizedStringKey("survey_draft_resume_title"))
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(.white)
                 
-                Text("Daha önce başladığınız bir anket taslağı bulundu. Kaldığınız yerden devam etmek ister misiniz?")
+                Text(LocalizedStringKey("survey_draft_resume_desc"))
                     .font(.system(size: 15))
                     .foregroundColor(AppColors.textSecondary)
                     .multilineTextAlignment(.center)
@@ -735,7 +735,7 @@ struct CreateSurveyView: View {
                     resumeDraft()
                     withAnimation { showingResumeOverlay = false }
                 }) {
-                    Text("Taslaktan Devam Et")
+                    Text(LocalizedStringKey("survey_draft_resume_button"))
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -751,7 +751,7 @@ struct CreateSurveyView: View {
                     draftManager.clearDraft()
                     withAnimation { showingResumeOverlay = false }
                 }) {
-                    Text("Yeni Anket Başlat")
+                    Text(LocalizedStringKey("survey_draft_new_button"))
                         .font(.system(size: 15, weight: .medium))
                         .foregroundColor(AppColors.textSecondary)
                         .frame(maxWidth: .infinity)

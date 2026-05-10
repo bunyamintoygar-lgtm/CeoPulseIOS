@@ -176,22 +176,74 @@
 "ai_category_economy" = "Economy";
 "ai_category_talent" = "HR & Talent";
 
-// Surveys Screen
 "survey_title" = "Surveys";
 "survey_subtitle" = "Your opinion shapes the future.";
 "survey_tab_active" = "Active Surveys";
 "survey_tab_completed" = "Completed";
-"survey_tab_drafts" = "Drafts";
+"survey_tab_my_surveys" = "My Surveys";
 "survey_tab_archive" = "Archive";
 "survey_anonymous" = "Anonymous";
 "survey_days_left" = "%d days left";
 "survey_participation_rate" = "Participation Rate";
 "survey_join_button" = "Join Survey";
+"survey_status_rejected" = "Rejected";
 "survey_total_voted" = "Total %d CEOs voted";
 "survey_completed_title" = "Completed Surveys";
 "survey_completed_status" = "Completed";
 "survey_privacy_info" = "You can remain anonymous in surveys, share your views securely.";
 "survey_more_info" = "More Info";
+
+// Survey Moderation
+"survey_rejection_title" = "Community Standards Violation";
+"survey_rejection_desc" = "Your survey content has not been published because it does not comply with community standards.";
+"survey_rejection_reason_label" = "REJECTION REASON";
+"survey_rejection_default_reason" = "Your content was found inappropriate by AI.";
+"survey_rejection_button" = "Got it";
+
+// Create Survey
+"survey_create_nav_title" = "Create New Survey";
+"survey_create_publish" = "Publish";
+"survey_create_cancel" = "Cancel";
+"survey_field_title_label" = "Survey Title";
+"survey_field_title_placeholder" = "e.g., 2026 Strategic Planning";
+"survey_field_desc_label" = "Description";
+"survey_field_desc_placeholder" = "Briefly explain the purpose of the survey...";
+"survey_field_category_label" = "Category";
+"survey_field_questions_label" = "Questions";
+"survey_add_question" = "Add Question";
+"survey_settings_label" = "Survey Settings";
+"survey_setting_anonymous" = "Anonymous Participation";
+"survey_setting_results" = "Results Visibility";
+"survey_setting_results_immediate" = "Immediate";
+"survey_setting_results_closed" = "After Closed";
+"survey_setting_results_never" = "Never";
+"survey_setting_allow_change" = "Allow editing responses";
+"survey_setting_required" = "Mandatory response";
+"survey_setting_participation_limit" = "Participation Limit (Optional)";
+"survey_setting_unlimited" = "Unlimited participation";
+"survey_setting_limit_define" = "Set participation limit";
+"survey_setting_advanced" = "Advanced Options";
+"survey_setting_end_date" = "Survey End Date";
+"survey_setting_max_duration" = "Max 3 Months";
+"survey_setting_auto_close_info" = "Your survey will automatically close on %@ at the latest.";
+
+// Drafts
+"survey_draft_resume_title" = "Unfinished Survey";
+"survey_draft_resume_desc" = "A draft of a survey you started earlier was found. Would you like to continue where you left off?";
+"survey_draft_resume_button" = "Continue from Draft";
+"survey_draft_new_button" = "Start New Survey";
+"survey_draft_privacy_info" = "Your drafts are only visible to you.";
+
+// Final Steps
+"survey_final_ready_title" = "Your Survey is Ready to Publish!";
+"survey_final_ready_desc" = "When you press the Publish button, all CEOs will be able to participate in your survey.";
+"survey_update_publish" = "Update and Publish";
+
+"survey_error_title_min_words" = "Survey title must consist of at least 3 words.";
+"survey_error_category_required" = "Please select a category before continuing.";
+
+"survey_delete_confirm_title" = "Delete Survey";
+"survey_delete_confirm_desc" = "Are you sure you want to delete the survey '%@'? This action cannot be undone.";
 
 // Network Screen
 "net_title" = "Network";

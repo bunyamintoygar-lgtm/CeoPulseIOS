@@ -176,22 +176,74 @@
 "ai_category_economy" = "Ekonomi";
 "ai_category_talent" = "İK & Yetenek";
 
-// Surveys Screen
 "survey_title" = "Anketler";
 "survey_subtitle" = "Görüşünüz, geleceği şekillendirir.";
 "survey_tab_active" = "Aktif Anketler";
 "survey_tab_completed" = "Tamamlananlar";
-"survey_tab_drafts" = "Taslaklarım";
+"survey_tab_my_surveys" = "Oluşturduklarım";
 "survey_tab_archive" = "Arşiv";
 "survey_anonymous" = "Anonim";
 "survey_days_left" = "%d gün kaldı";
 "survey_participation_rate" = "Katılım Oranı";
 "survey_join_button" = "Ankete Katıl";
+"survey_status_rejected" = "Reddedildi";
 "survey_total_voted" = "Toplam %d CEO oy verdi";
 "survey_completed_title" = "Tamamlanan Anketler";
 "survey_completed_status" = "Tamamlandı";
 "survey_privacy_info" = "Anketlerde anonim kalabilir, güvenli bir şekilde görüşlerinizi paylaşabilirsiniz.";
 "survey_more_info" = "Daha Fazla Bilgi";
+
+// Survey Moderation
+"survey_rejection_title" = "Topluluk Kuralları İhlali";
+"survey_rejection_desc" = "Anket içeriğiniz topluluk kurallarına uymadığı için yayınlanmamıştır.";
+"survey_rejection_reason_label" = "REDDEDİLME NEDENİ";
+"survey_rejection_default_reason" = "İçeriğiniz yapay zeka tarafından uygunsuz bulundu.";
+"survey_rejection_button" = "Anladım";
+
+// Create Survey
+"survey_create_nav_title" = "Yeni Anket Oluştur";
+"survey_create_publish" = "Yayınla";
+"survey_create_cancel" = "Vazgeç";
+"survey_field_title_label" = "Anket Başlığı";
+"survey_field_title_placeholder" = "Örn: 2026 Stratejik Planlaması";
+"survey_field_desc_label" = "Açıklama";
+"survey_field_desc_placeholder" = "Anketin amacını kısaca açıklayın...";
+"survey_field_category_label" = "Kategori";
+"survey_field_questions_label" = "Sorular";
+"survey_add_question" = "Soru Ekle";
+"survey_settings_label" = "Anket Ayarları";
+"survey_setting_anonymous" = "Anonim Katılım";
+"survey_setting_results" = "Sonuç Görünürlüğü";
+"survey_setting_results_immediate" = "Anında";
+"survey_setting_results_closed" = "Kapandıktan Sonra";
+"survey_setting_results_never" = "Asla";
+"survey_setting_allow_change" = "Yanıtları değiştirmeye izin ver";
+"survey_setting_required" = "Yanıtlamayı zorunlu tut";
+"survey_setting_participation_limit" = "Katılım Limiti (İsteğe bağlı)";
+"survey_setting_unlimited" = "Sınırsız katılım";
+"survey_setting_limit_define" = "Katılım limiti belirle";
+"survey_setting_advanced" = "Gelişmiş Seçenekler";
+"survey_setting_end_date" = "Anket Bitiş Tarihi";
+"survey_setting_max_duration" = "Max 3 Ay";
+"survey_setting_auto_close_info" = "Anketiniz en geç %@ tarihinde otomatik olarak kapanacaktır.";
+
+// Drafts
+"survey_draft_resume_title" = "Yarım Kalan Anket";
+"survey_draft_resume_desc" = "Daha önce başladığınız bir anket taslağı bulundu. Kaldığınız yerden devam etmek ister misiniz?";
+"survey_draft_resume_button" = "Taslaktan Devam Et";
+"survey_draft_new_button" = "Yeni Anket Başlat";
+"survey_draft_privacy_info" = "Taslaklarınız sadece sizin tarafınızdan görülebilir.";
+
+// Final Steps
+"survey_final_ready_title" = "Anketiniz Yayına Hazır!";
+"survey_final_ready_desc" = "Yayınla butonuna bastığınızda tüm CEO'lar anketinize katılabilecek.";
+"survey_update_publish" = "Güncelle ve Yayınla";
+
+"survey_error_title_min_words" = "Anket başlığı en az 3 kelimeden oluşmalıdır.";
+"survey_error_category_required" = "Lütfen devam etmeden önce bir kategori seçin.";
+
+"survey_delete_confirm_title" = "Anketi Sil";
+"survey_delete_confirm_desc" = "'%@' anketini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.";
 
 // Network Screen
 "net_title" = "Ağ";

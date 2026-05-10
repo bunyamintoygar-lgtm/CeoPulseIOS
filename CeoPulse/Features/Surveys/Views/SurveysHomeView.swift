@@ -21,7 +21,12 @@ struct SurveysHomeView: View {
     @State private var showingRejectionPopup = false
     @State private var surveyWithRejection: Survey?
     
-    let tabs = ["Aktif Anketler", "Tamamlananlar", "Oluşturduklarım", "Arşiv"]
+    let tabs = [
+        NSLocalizedString("survey_tab_active", comment: ""),
+        NSLocalizedString("survey_tab_completed", comment: ""),
+        NSLocalizedString("survey_tab_my_surveys", comment: ""),
+        NSLocalizedString("survey_tab_archive", comment: "")
+    ]
     
     var body: some View {
         NavigationView {
@@ -32,14 +37,14 @@ struct SurveysHomeView: View {
                     // Header
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Anketler")
+                            Text(LocalizedStringKey("survey_title"))
                                 .font(.system(size: 32, weight: .bold))
                                 .foregroundColor(.white)
                             HStack(spacing: 4) {
                                 Image(systemName: "sparkles")
                                     .symbolRenderingMode(.hierarchical)
                                     .foregroundColor(.purple)
-                                Text("Görüşünüz, geleceği şekillendirir.")
+                                Text(LocalizedStringKey("survey_subtitle"))
                                     .font(.system(size: 14))
                                     .foregroundColor(AppColors.textSecondary)
                             }
@@ -75,7 +80,7 @@ struct SurveysHomeView: View {
                                     .foregroundColor(.purple)
                                     .font(.system(size: 14, weight: .bold))
                                 
-                                TextField("Anket ara...", text: Binding(
+                                TextField(LocalizedStringKey("ao_field_title_placeholder"), text: Binding(
                                     get: { viewModel.searchQuery },
                                     set: { viewModel.updateSearchQuery($0) }
                                 ))
@@ -98,7 +103,7 @@ struct SurveysHomeView: View {
                             // Filter Button
                             Menu {
                                 Button(action: { viewModel.updateCategoryFilter(nil) }) {
-                                    Label("Tüm Kategoriler", systemImage: viewModel.selectedCategoryId == nil ? "checkmark.circle.fill" : "circle")
+                                    Label(LocalizedStringKey("events_category_all"), systemImage: viewModel.selectedCategoryId == nil ? "checkmark.circle.fill" : "circle")
                                 }
                                 
                                 Divider()
@@ -158,7 +163,7 @@ struct SurveysHomeView: View {
                                 } else if viewModel.selectedTab == "Oluşturduklarım" {
                                     mySurveysList
                                 } else {
-                                    emptyStateView(title: "\(viewModel.selectedTab) yakında burada olacak")
+                                    emptyStateView(title: String(format: NSLocalizedString("ao_step3", comment: ""), viewModel.selectedTab))
                                 }
                             }
                         }
@@ -222,11 +227,11 @@ struct SurveysHomeView: View {
                             }
                             
                             VStack(spacing: 12) {
-                                Text("Anketi Sil")
+                                Text(LocalizedStringKey("survey_delete_confirm_title"))
                                     .font(.system(size: 22, weight: .bold))
                                     .foregroundColor(.white)
                                 
-                                Text("'\(survey.title)' anketini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")
+                                Text(String(format: NSLocalizedString("survey_delete_confirm_desc", comment: ""), survey.title))
                                     .font(.system(size: 15))
                                     .foregroundColor(AppColors.textSecondary)
                                     .multilineTextAlignment(.center)
@@ -238,7 +243,7 @@ struct SurveysHomeView: View {
                                     viewModel.deleteSurvey(survey)
                                     withAnimation { showingDeleteAlert = false }
                                 }) {
-                                    Text("Anketi Sil")
+                                    Text(LocalizedStringKey("survey_delete_confirm_title"))
                                         .font(.system(size: 16, weight: .bold))
                                         .foregroundColor(.white)
                                         .frame(maxWidth: .infinity)
@@ -251,7 +256,7 @@ struct SurveysHomeView: View {
                                 Button(action: { 
                                     withAnimation { showingDeleteAlert = false }
                                 }) {
-                                    Text("Vazgeç")
+                                    Text(LocalizedStringKey("survey_create_cancel"))
                                         .font(.system(size: 16, weight: .medium))
                                         .foregroundColor(.white)
                                         .frame(maxWidth: .infinity)
@@ -327,7 +332,7 @@ struct SurveysHomeView: View {
                 Button(action: {
                     withAnimation { showingRejectionPopup = false }
                 }) {
-                    Text("Anladım")
+                    Text(LocalizedStringKey("survey_rejection_button"))
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -374,11 +379,11 @@ struct SurveysHomeView: View {
             }
             
             VStack(spacing: 12) {
-                Text("Topluluk Kuralları İhlali")
+                Text(LocalizedStringKey("survey_rejection_title"))
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(.white)
                 
-                Text("Anket içeriğiniz topluluk kurallarına uymadığı için yayınlanmamıştır.")
+                Text(LocalizedStringKey("survey_rejection_desc"))
                     .font(.system(size: 15))
                     .foregroundColor(AppColors.textSecondary)
                     .multilineTextAlignment(.center)
@@ -389,12 +394,12 @@ struct SurveysHomeView: View {
 
     private func rejectionReasonBox(reason: String?) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("REDDEDİLME NEDENİ")
+            Text(LocalizedStringKey("survey_rejection_reason_label"))
                 .font(.system(size: 11, weight: .black))
                 .foregroundColor(.orange.opacity(0.8))
                 .kerning(1.2)
             
-            Text(reason ?? "İçeriğiniz yapay zeka tarafından uygunsuz bulundu.")
+            Text(reason ?? NSLocalizedString("survey_rejection_default_reason", comment: ""))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(.white.opacity(0.9))
                 .lineSpacing(4)
@@ -412,7 +417,7 @@ struct SurveysHomeView: View {
     private var activeSurveysList: some View {
         VStack(spacing: 20) {
             if viewModel.activeSurveys.isEmpty {
-                emptyStateView(title: "Aktif anket bulunamadı")
+                emptyStateView(title: NSLocalizedString("rt_status_upcoming", comment: ""))
             } else {
                 ForEach(viewModel.activeSurveys) { survey in
                     let stats = viewModel.surveyStats[survey.id]
@@ -425,9 +430,9 @@ struct SurveysHomeView: View {
                         survey: survey,
                         totalVotes: totalVotes, 
                         participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
-                        timeRemaining: survey.endDate?.timeRemaining() ?? "Süresiz",
+                        timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
                         isAnonymous: survey.isAnonymous,
-                        buttonTitle: isExpired || hasVoted ? "Sonuçları Gör" : "Ankete Katıl",
+                        buttonTitle: isExpired || hasVoted ? NSLocalizedString("rt_view_summary", comment: "") : NSLocalizedString("survey_join_button", comment: ""),
                         onJoin: {
                             if survey.status == .rejected {
                                 withAnimation(.spring()) {
@@ -475,10 +480,10 @@ struct SurveysHomeView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Güvenli ve Anonim")
+                        Text(LocalizedStringKey("rt_before_2_title"))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
-                    Text("Görüşlerinizi güvenle paylaşabilirsiniz.")
+                        Text(LocalizedStringKey("survey_privacy_info"))
                         .font(.system(size: 12))
                         .foregroundColor(AppColors.textSecondary)
                 }
@@ -498,7 +503,7 @@ struct SurveysHomeView: View {
     private var completedSurveysList: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("Tamamlanan Anketler")
+                Text(LocalizedStringKey("survey_completed_title"))
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
                 Spacer()
@@ -510,7 +515,7 @@ struct SurveysHomeView: View {
             }
             
             if viewModel.completedSurveys.isEmpty && !viewModel.isLoading {
-                Text("Henüz tamamlanmış bir anket bulunmuyor.")
+                    Text(LocalizedStringKey("rt_tab_completed"))
                     .font(.system(size: 14))
                     .foregroundColor(AppColors.textSecondary)
                     .padding(.vertical, 10)
@@ -519,7 +524,7 @@ struct SurveysHomeView: View {
                     NavigationLink(destination: SurveyResultsView(survey: survey)) {
                         SurveyCompletedRow(
                             title: survey.title,
-                            date: survey.endDate?.formatted(date: .abbreviated, time: .omitted) ?? "Tamamlandı",
+                            date: survey.endDate?.formatted(date: .abbreviated, time: .omitted) ?? NSLocalizedString("survey_completed_status", comment: ""),
                             rate: 100,
                             icon: "chart.bar.fill",
                             color: .purple
@@ -546,7 +551,7 @@ struct SurveysHomeView: View {
     private var mySurveysList: some View {
         VStack(spacing: 20) {
             if viewModel.mySurveys.isEmpty {
-                emptyStateView(title: "Henüz bir anket oluşturmadınız")
+                emptyStateView(title: NSLocalizedString("rt_tab_my_discussions", comment: ""))
             } else {
                 ForEach(viewModel.mySurveys) { survey in
                     let stats = viewModel.surveyStats[survey.id]
@@ -557,9 +562,9 @@ struct SurveysHomeView: View {
                         survey: survey,
                         totalVotes: totalVotes,
                         participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
-                        timeRemaining: survey.endDate?.timeRemaining() ?? "Süresiz",
+                        timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
                         isAnonymous: survey.isAnonymous,
-                        buttonTitle: "Detayları Gör",
+                        buttonTitle: NSLocalizedString("events_see_details", comment: ""),
                         onJoin: {
                             if survey.status == .rejected {
                                 withAnimation(.spring()) {
@@ -603,7 +608,7 @@ struct SurveysHomeView: View {
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
             
-            Button("Tekrar Dene") {
+            Button(LocalizedStringKey("rt_join_title")) {
                 viewModel.fetchSurveys()
             }
             .padding(.horizontal, 24)
