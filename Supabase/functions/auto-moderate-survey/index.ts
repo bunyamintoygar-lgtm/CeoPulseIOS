@@ -84,7 +84,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "Sen bir içerik moderatörüsün. Verilen anket içeriğini müstehcenlik, hakaret, küfür, nefret söylemi ve topluluk kuralları açısından incele. Eğer içerik uygunsuzsa 'flagged' değerini true yap ve kısa bir 'reason' (Türkçe) ekle. Uygunsa 'flagged' false olsun. Sadece JSON döndür: {\"flagged\": boolean, \"reason\": string|null}"
+            content: "Sen bir içerik moderatörüsün. Verilen anket içeriğini müstehcenlik, hakaret, küfür, nefret söylemi ve topluluk kuralları açısından incele. Eğer içerik uygunsuzsa 'flagged' değerini true yap ve hem 'reason_tr' (Türkçe) hem de 'reason_en' (İngilizce) alanlarını doldur. Uygunsa 'flagged' false olsun. Sadece JSON döndür: {\"flagged\": boolean, \"reason_tr\": string|null, \"reason_en\": string|null}"
           },
           {
             role: "user",
@@ -100,15 +100,21 @@ serve(async (req) => {
 
     // 5. Uygunsuzsa status'u rejected yap
     if (moderation.flagged) {
+      // rejection_reason alanına JSON olarak iki dili de kaydedelim
+      const reasons = {
+        tr: moderation.reason_tr ?? 'İçerik topluluk kurallarına aykırı bulundu.',
+        en: moderation.reason_en ?? 'Content violated community guidelines.'
+      }
+
       await supabase
         .from('surveys')
         .update({
           status: 'rejected',
-          rejection_reason: moderation.reason ?? 'İçerik topluluk kurallarına aykırı bulundu.'
+          rejection_reason: JSON.stringify(reasons)
         })
         .eq('id', survey_id)
 
-      console.log(`Survey ${survey_id} rejected: ${moderation.reason}`)
+      console.log(`Survey ${survey_id} rejected: ${reasons.tr}`)
     }
 
     return new Response(

@@ -393,13 +393,28 @@ struct SurveysHomeView: View {
     }
 
     private func rejectionReasonBox(reason: String?) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let displayReason: String = {
+            guard let reason = reason else {
+                return NSLocalizedString("survey_rejection_default_reason", comment: "")
+            }
+            
+            // JSON parse denemesi
+            if let data = reason.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: String] {
+                let languageCode = Locale.current.language.languageCode?.identifier ?? "tr"
+                return json[languageCode] ?? json["en"] ?? json["tr"] ?? reason
+            }
+            
+            return reason
+        }()
+        
+        return VStack(alignment: .leading, spacing: 12) {
             Text(LocalizedStringKey("survey_rejection_reason_label"))
                 .font(.system(size: 11, weight: .black))
                 .foregroundColor(.orange.opacity(0.8))
                 .kerning(1.2)
             
-            Text(reason ?? NSLocalizedString("survey_rejection_default_reason", comment: ""))
+            Text(displayReason)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(.white.opacity(0.9))
                 .lineSpacing(4)
