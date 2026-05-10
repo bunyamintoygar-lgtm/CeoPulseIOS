@@ -1159,7 +1159,7 @@ struct QuestionEditCard: View {
                                 .symbolRenderingMode(.hierarchical)
                                 .foregroundColor(.purple)
                             
-                            TextField(String(format: NSLocalizedString("survey_option_placeholder", comment: ""), i + 1), text: $question.options[i])
+                            TextField("", text: $question.options[i])
                                 .font(.system(size: 14))
                                 .foregroundColor(.white)
                             
