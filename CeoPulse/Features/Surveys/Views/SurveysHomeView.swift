@@ -799,101 +799,59 @@ struct SurveysHomeView: View {
             if viewModel.mySurveysList.isEmpty {
                 emptyStateView(title: NSLocalizedString("rt_tab_my_discussions", comment: ""))
             } else {
-                // First Survey as Big Card
-                if let firstSurvey = viewModel.mySurveysList.first {
-                    let stats = viewModel.surveyStats[firstSurvey.id]
-                    let totalVotes = stats?.totalVotes ?? 0
-                    let isCreator = firstSurvey.creatorId == viewModel.currentUserId
-                    
-                    SurveyCard(
-                        survey: firstSurvey,
-                        totalVotes: totalVotes,
-                        participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
-                        timeRemaining: firstSurvey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
-                        isAnonymous: firstSurvey.isAnonymous,
-                        buttonTitle: NSLocalizedString("events_see_details", comment: ""),
-                        onJoin: {
-                            if firstSurvey.status == .rejected {
+                VStack(spacing: 12) {
+                    ForEach(viewModel.mySurveysList) { survey in
+                        let stats = viewModel.surveyStats[survey.id]
+                        let totalVotes = stats?.totalVotes ?? 0
+                        let participationRate = totalVotes > 0 ? Int((Double(totalVotes) / Double(max(viewModel.totalUserCount, 1))) * 100) : 0
+                        let isCreator = survey.creatorId == viewModel.currentUserId
+                        let isExpired = survey.endDate != nil && survey.endDate! < Date()
+                        
+                        let badgeText: String
+                        let badgeColor: Color
+                        if survey.status == .rejected {
+                            badgeText = NSLocalizedString("status_rejected", value: "REDDEDİLDİ", comment: "")
+                            badgeColor = .red
+                        } else if isExpired {
+                            badgeText = NSLocalizedString("status_passive", value: "PASİF", comment: "")
+                            badgeColor = .gray
+                        } else {
+                            badgeText = NSLocalizedString("status_active", value: "AKTİF", comment: "")
+                            badgeColor = .purple
+                        }
+                        
+                        Button(action: { 
+                            if survey.status == .rejected {
                                 withAnimation(.spring()) {
-                                    surveyWithRejection = firstSurvey
+                                    surveyWithRejection = survey
                                     showingRejectionPopup = true
                                 }
                             } else {
-                                selectedResultsSurvey = firstSurvey
+                                selectedResultsSurvey = survey
                             }
-                        },
-                        onEdit: (isCreator && totalVotes == 0) ? {
-                            surveyToEdit = firstSurvey
-                        } : nil,
-                        onDelete: (isCreator && totalVotes == 0) ? {
-                            surveyToDelete = firstSurvey
-                            withAnimation(.spring()) {
-                                showingDeleteAlert = true
-                            }
-                        } : nil
-                    )
-                    .onAppear {
-                        viewModel.loadMoreIfNeeded(currentSurvey: firstSurvey, forTab: "my_surveys")
-                    }
-                }
-                
-                // Remaining Surveys as Lists
-                let remainingSurveys = viewModel.mySurveysList.dropFirst()
-                if !remainingSurveys.isEmpty {
-                    VStack(spacing: 12) {
-                        ForEach(remainingSurveys) { survey in
-                            let stats = viewModel.surveyStats[survey.id]
-                            let totalVotes = stats?.totalVotes ?? 0
-                            let participationRate = totalVotes > 0 ? Int((Double(totalVotes) / Double(max(viewModel.totalUserCount, 1))) * 100) : 0
-                            let isCreator = survey.creatorId == viewModel.currentUserId
-                            let isExpired = survey.endDate != nil && survey.endDate! < Date()
-                            
-                            let badgeText: String
-                            let badgeColor: Color
-                            if survey.status == .rejected {
-                                badgeText = NSLocalizedString("status_rejected", value: "REDDEDİLDİ", comment: "")
-                                badgeColor = .red
-                            } else if isExpired {
-                                badgeText = NSLocalizedString("status_passive", value: "PASİF", comment: "")
-                                badgeColor = .gray
-                            } else {
-                                badgeText = NSLocalizedString("status_active", value: "AKTİF", comment: "")
-                                badgeColor = .purple
-                            }
-                            
-                            Button(action: { 
-                                if survey.status == .rejected {
+                        }) {
+                            SurveyCompletedRow(
+                                title: survey.title,
+                                date: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
+                                rate: participationRate,
+                                icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "person.circle",
+                                color: .blue,
+                                statusBadge: badgeText,
+                                statusColor: badgeColor,
+                                onEdit: (isCreator && totalVotes == 0) ? {
+                                    surveyToEdit = survey
+                                } : nil,
+                                onDelete: (isCreator && totalVotes == 0) ? {
+                                    surveyToDelete = survey
                                     withAnimation(.spring()) {
-                                        surveyWithRejection = survey
-                                        showingRejectionPopup = true
+                                        showingDeleteAlert = true
                                     }
-                                } else {
-                                    selectedResultsSurvey = survey
-                                }
-                            }) {
-                                SurveyCompletedRow(
-                                    title: survey.title,
-                                    date: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
-                                    rate: participationRate,
-                                    icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "person.circle",
-                                    color: .blue,
-                                    statusBadge: badgeText,
-                                    statusColor: badgeColor,
-                                    onEdit: (isCreator && totalVotes == 0) ? {
-                                        surveyToEdit = survey
-                                    } : nil,
-                                    onDelete: (isCreator && totalVotes == 0) ? {
-                                        surveyToDelete = survey
-                                        withAnimation(.spring()) {
-                                            showingDeleteAlert = true
-                                        }
-                                    } : nil
-                                )
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                            .onAppear {
-                                viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "my_surveys")
-                            }
+                                } : nil
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .onAppear {
+                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "my_surveys")
                         }
                     }
                 }
