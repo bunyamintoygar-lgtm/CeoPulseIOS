@@ -106,38 +106,36 @@ class SurveyViewModel: ObservableObject {
                     statusFilter = .active
                 }
                 
-                var fetchedSurveys = try await service.fetchSurveys(
+                let participatedIds = try await service.fetchParticipatedSurveyIds()
+                let fetchedSurveys = try await service.fetchSurveys(
                     query: searchQuery.isEmpty ? nil : searchQuery,
                     categoryId: selectedCategoryId,
                     creatorId: selectedTab == "Oluşturduklarım" ? currentUserId : nil,
                     status: statusFilter,
                     statuses: statusesFilter,
+                    ids: selectedTab == "Tamamlananlar" ? participatedIds : nil,
                     page: currentPage,
                     pageSize: pageSize
                 )
                 
-                // Client-side Filtering based on participation
-                let participatedIds = try await service.fetchParticipatedSurveyIds()
                 await MainActor.run {
                     self.participatedSurveyIds = Set(participatedIds)
                     
+                    var processedSurveys = fetchedSurveys
+                    
                     if selectedTab == "Aktif Anketler" {
                         // Only show active and NOT voted
-                        fetchedSurveys = fetchedSurveys.filter { !self.participatedSurveyIds.contains($0.id) }
-                    } else if selectedTab == "Tamamlananlar" {
-                        // Only show voted ones. Note: We might need a specific service method for this if list is huge.
-                        // For now, we'll fetch all and filter or use the participatedIds to fetch specific surveys.
-                        fetchedSurveys = fetchedSurveys.filter { self.participatedSurveyIds.contains($0.id) }
+                        processedSurveys = processedSurveys.filter { !self.participatedSurveyIds.contains($0.id) }
                     } else if selectedTab == "Arşiv" {
                         // Include expired surveys as well
                         let now = Date()
-                        fetchedSurveys = fetchedSurveys.filter { $0.status == .archived || ($0.endDate != nil && $0.endDate! < now) }
+                        processedSurveys = processedSurveys.filter { $0.status == .archived || ($0.endDate != nil && $0.endDate! < now) }
                     }
                     
                     if isRefresh {
-                        self.surveys = fetchedSurveys
+                        self.surveys = processedSurveys
                     } else {
-                        self.surveys.append(contentsOf: fetchedSurveys)
+                        self.surveys.append(contentsOf: processedSurveys)
                     }
                     
                     self.canLoadMore = fetchedSurveys.count == pageSize

@@ -13,6 +13,7 @@ class SurveyService {
         creatorId: UUID? = nil,
         status: Survey.SurveyStatus? = nil,
         statuses: [Survey.SurveyStatus]? = nil,
+        ids: [UUID]? = nil,
         page: Int = 0,
         pageSize: Int = 15
     ) async throws -> [Survey] {
@@ -31,6 +32,10 @@ class SurveyService {
         
         if let creatorId = creatorId {
             request = request.eq("creator_id", value: creatorId)
+        }
+        
+        if let ids = ids, !ids.isEmpty {
+            request = request.in("id", values: ids)
         }
         
         if let query = query, !query.isEmpty {
