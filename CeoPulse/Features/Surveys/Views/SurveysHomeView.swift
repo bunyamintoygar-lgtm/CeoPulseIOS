@@ -27,13 +27,25 @@ struct SurveysHomeView: View {
     }
     
     var tabs: [TabItem] {
-        [
+        var allTabs = [
             TabItem(id: "discovery", title: NSLocalizedString("survey_tab_discovery", comment: "")),
-            TabItem(id: "active", title: NSLocalizedString("survey_tab_active", comment: "")),
-            TabItem(id: "my_surveys", title: NSLocalizedString("survey_tab_my_surveys", comment: "")),
-            TabItem(id: "completed", title: NSLocalizedString("survey_tab_completed", comment: "")),
-            TabItem(id: "archive", title: NSLocalizedString("survey_tab_archive", comment: ""))
+            TabItem(id: "active", title: NSLocalizedString("survey_tab_active", comment: ""))
         ]
+        
+        // Only show My Surveys, Completed, and Archive if they have records
+        if !viewModel.mySurveysList.isEmpty {
+            allTabs.append(TabItem(id: "my_surveys", title: NSLocalizedString("survey_tab_my_surveys", comment: "")))
+        }
+        
+        if !viewModel.completedSurveysList.isEmpty {
+            allTabs.append(TabItem(id: "completed", title: NSLocalizedString("survey_tab_completed", comment: "")))
+        }
+        
+        if !viewModel.archivedSurveysList.isEmpty {
+            allTabs.append(TabItem(id: "archive", title: NSLocalizedString("survey_tab_archive", comment: "")))
+        }
+        
+        return allTabs
     }
     
     var body: some View {
