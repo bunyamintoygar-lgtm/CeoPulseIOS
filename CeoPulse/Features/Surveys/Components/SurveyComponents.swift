@@ -230,14 +230,6 @@ struct SurveyCompletedRow: View {
                 
                 HStack(spacing: 8) {
                     Text(date)
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(.white, .green)
-                            .symbolEffect(.bounce, value: true)
-                        Text(LocalizedStringKey("survey_completed_status"))
-                    }
-                    .foregroundColor(.green)
                 }
                 .font(.system(size: 11))
                 .foregroundColor(AppColors.textSecondary)
