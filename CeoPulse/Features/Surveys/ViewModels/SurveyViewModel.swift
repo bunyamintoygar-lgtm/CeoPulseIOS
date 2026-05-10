@@ -11,8 +11,9 @@ class SurveyViewModel: ObservableObject {
     
     @Published var searchQuery = ""
     @Published var selectedCategoryId: String? = nil
-    @Published var selectedTab = "Aktif Anketler"
+    @Published var selectedTab = "Keşfet"
     @Published var currentUserId: UUID? = nil
+    @Published var participatedSurveyIds: Set<UUID> = []
     private var searchSubject = PassthroughSubject<String, Never>()
     private var cancellables = Set<AnyCancellable>()
     
@@ -23,18 +24,22 @@ class SurveyViewModel: ObservableObject {
     
     init() {
         setupSearchDebounce()
-        fetchCurrentUserId()
+        fetchInitialData()
     }
     
-    private func fetchCurrentUserId() {
+    private func fetchInitialData() {
         Task {
             do {
                 let userId = try await service.fetchCurrentUserId()
+                let participatedIds = try await service.fetchParticipatedSurveyIds()
                 await MainActor.run {
                     self.currentUserId = userId
+                    self.participatedSurveyIds = Set(participatedIds)
+                    self.fetchSurveys(isRefresh: true)
                 }
             } catch {
-                print("Failed to fetch current user ID: \(error)")
+                print("Failed to fetch initial survey data: \(error)")
+                self.fetchSurveys(isRefresh: true)
             }
         }
     }
@@ -81,26 +86,27 @@ class SurveyViewModel: ObservableObject {
         errorMessage = nil
         Task {
             do {
-                let currentUserId = try? await service.fetchCurrentUserId()
-                
                 let statusFilter: Survey.SurveyStatus?
                 var statusesFilter: [Survey.SurveyStatus]? = nil
                 
                 switch selectedTab {
-                case "Aktif Anketler": 
+                case "Keşfet":
                     statusFilter = nil
-                    statusesFilter = [.active, .rejected]
+                    statusesFilter = [.active] // Fetch active ones to filter later
+                case "Aktif Anketler": 
+                    statusFilter = .active
+                    statusesFilter = nil
                 case "Tamamlananlar": 
-                    statusFilter = .completed
+                    statusFilter = nil // We'll filter by participatedSurveyIds
                 case "Oluşturduklarım": 
-                    statusFilter = nil // All my surveys
+                    statusFilter = nil 
                 case "Arşiv": 
                     statusFilter = .archived
                 default: 
                     statusFilter = .active
                 }
                 
-                let fetchedSurveys = try await service.fetchSurveys(
+                var fetchedSurveys = try await service.fetchSurveys(
                     query: searchQuery.isEmpty ? nil : searchQuery,
                     categoryId: selectedCategoryId,
                     creatorId: selectedTab == "Oluşturduklarım" ? currentUserId : nil,
@@ -110,7 +116,24 @@ class SurveyViewModel: ObservableObject {
                     pageSize: pageSize
                 )
                 
+                // Client-side Filtering based on participation
+                let participatedIds = try await service.fetchParticipatedSurveyIds()
                 await MainActor.run {
+                    self.participatedSurveyIds = Set(participatedIds)
+                    
+                    if selectedTab == "Aktif Anketler" {
+                        // Only show active and NOT voted
+                        fetchedSurveys = fetchedSurveys.filter { !self.participatedSurveyIds.contains($0.id) }
+                    } else if selectedTab == "Tamamlananlar" {
+                        // Only show voted ones. Note: We might need a specific service method for this if list is huge.
+                        // For now, we'll fetch all and filter or use the participatedIds to fetch specific surveys.
+                        fetchedSurveys = fetchedSurveys.filter { self.participatedSurveyIds.contains($0.id) }
+                    } else if selectedTab == "Arşiv" {
+                        // Include expired surveys as well
+                        let now = Date()
+                        fetchedSurveys = fetchedSurveys.filter { $0.status == .archived || ($0.endDate != nil && $0.endDate! < now) }
+                    }
+                    
                     if isRefresh {
                         self.surveys = fetchedSurveys
                     } else {

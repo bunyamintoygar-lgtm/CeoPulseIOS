@@ -99,6 +99,20 @@ class SurveyService {
         
         return (response.count ?? 0) > 0
     }
+
+    func fetchParticipatedSurveyIds() async throws -> [UUID] {
+        guard let userId = try? await getCurrentUserId() else { return [] }
+        
+        struct VoteInfo: Codable { let survey_id: UUID }
+        let votes: [VoteInfo] = try await client
+            .from("survey_responses")
+            .select("survey_id")
+            .eq("user_id", value: userId)
+            .execute()
+            .value
+            
+        return Array(Set(votes.map { $0.survey_id }))
+    }
     
     struct SurveyStats: Codable {
         let totalVotes: Int

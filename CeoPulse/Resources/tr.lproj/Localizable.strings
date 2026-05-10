@@ -178,10 +178,12 @@
 
 "survey_title" = "Anketler";
 "survey_subtitle" = "Görüşünüz, geleceği şekillendirir.";
+"survey_tab_discovery" = "Keşfet";
 "survey_tab_active" = "Aktif Anketler";
 "survey_tab_completed" = "Tamamlananlar";
 "survey_tab_my_surveys" = "Oluşturduklarım";
 "survey_tab_archive" = "Arşiv";
+"survey_see_all" = "Tümünü Gör";
 "survey_anonymous" = "Anonim";
 "survey_days_left" = "%d gün kaldı";
 "survey_participation_rate" = "Katılım Oranı";

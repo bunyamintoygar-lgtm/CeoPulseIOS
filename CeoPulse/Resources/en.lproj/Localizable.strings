@@ -178,10 +178,12 @@
 
 "survey_title" = "Surveys";
 "survey_subtitle" = "Your opinion shapes the future.";
+"survey_tab_discovery" = "Discover";
 "survey_tab_active" = "Active Surveys";
 "survey_tab_completed" = "Completed";
 "survey_tab_my_surveys" = "My Surveys";
 "survey_tab_archive" = "Archive";
+"survey_see_all" = "See All";
 "survey_anonymous" = "Anonymous";
 "survey_days_left" = "%d days left";
 "survey_participation_rate" = "Participation Rate";

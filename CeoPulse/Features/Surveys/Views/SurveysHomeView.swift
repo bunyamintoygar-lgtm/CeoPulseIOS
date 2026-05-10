@@ -22,6 +22,7 @@ struct SurveysHomeView: View {
     @State private var surveyWithRejection: Survey?
     
     let tabs = [
+        NSLocalizedString("survey_tab_discovery", comment: ""),
         NSLocalizedString("survey_tab_active", comment: ""),
         NSLocalizedString("survey_tab_completed", comment: ""),
         NSLocalizedString("survey_tab_my_surveys", comment: ""),
@@ -143,9 +144,15 @@ struct SurveysHomeView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach(tabs, id: \.self) { tab in
-                                SurveyTabButton(title: tab, isSelected: viewModel.selectedTab == tab, animationNamespace: animationNamespace) {
+                                SurveyTabButton(title: tab, isSelected: viewModel.selectedTab == (tab == NSLocalizedString("survey_tab_discovery", comment: "") ? "Keşfet" : tab), animationNamespace: animationNamespace) {
                                     withAnimation {
-                                        viewModel.updateSelectedTab(tab)
+                                        let internalTab: String
+                                        if tab == NSLocalizedString("survey_tab_discovery", comment: "") {
+                                            internalTab = "Keşfet"
+                                        } else {
+                                            internalTab = tab
+                                        }
+                                        viewModel.updateSelectedTab(internalTab)
                                     }
                                 }
                             }
@@ -164,13 +171,18 @@ struct SurveysHomeView: View {
                             } else if let error = viewModel.errorMessage {
                                 errorView(error)
                             } else {
-                                if viewModel.selectedTab == "Aktif Anketler" {
+                                switch viewModel.selectedTab {
+                                case "Keşfet":
+                                    discoveryDashboard
+                                case "Aktif Anketler":
                                     activeSurveysList
-                                } else if viewModel.selectedTab == "Tamamlananlar" {
+                                case "Tamamlananlar":
                                     completedSurveysList
-                                } else if viewModel.selectedTab == "Oluşturduklarım" {
+                                case "Oluşturduklarım":
                                     mySurveysList
-                                } else {
+                                case "Arşiv":
+                                    archiveSurveysList
+                                default:
                                     emptyStateView(title: String(format: NSLocalizedString("ao_step3", comment: ""), viewModel.selectedTab))
                                 }
                             }
@@ -572,12 +584,138 @@ struct SurveysHomeView: View {
         }
     }
     
+    private var discoveryDashboard: some View {
+        VStack(spacing: 32) {
+            // 1. Discovery Section (Not voted, Active)
+            let discoverySurveys = viewModel.activeSurveys.filter { !viewModel.participatedSurveyIds.contains($0.id) }.prefix(2)
+            if !discoverySurveys.isEmpty {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text(LocalizedStringKey("survey_tab_discovery"))
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    ForEach(discoverySurveys) { survey in
+                        let stats = viewModel.surveyStats[survey.id]
+                        let totalVotes = stats?.totalVotes ?? 0
+                        
+                        SurveyCard(
+                            survey: survey,
+                            totalVotes: totalVotes,
+                            participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
+                            timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
+                            isAnonymous: survey.isAnonymous,
+                            buttonTitle: NSLocalizedString("survey_join_button", comment: ""),
+                            onJoin: { selectedSurvey = survey }
+                        )
+                    }
+                }
+            }
+            
+            // 2. Recent My Surveys (Creator is me)
+            let myRecentSurveys = viewModel.surveys.filter { $0.creatorId == viewModel.currentUserId }.prefix(3)
+            if !myRecentSurveys.isEmpty {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Text(LocalizedStringKey("survey_tab_my_surveys"))
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Button(action: { withAnimation { viewModel.updateSelectedTab("Oluşturduklarım") } }) {
+                            Text(LocalizedStringKey("survey_see_all"))
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.purple)
+                        }
+                    }
+                    
+                    ForEach(myRecentSurveys) { survey in
+                        let stats = viewModel.surveyStats[survey.id]
+                        let totalVotes = stats?.totalVotes ?? 0
+                        
+                        SurveyCard(
+                            survey: survey,
+                            totalVotes: totalVotes,
+                            participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
+                            timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
+                            isAnonymous: survey.isAnonymous,
+                            buttonTitle: NSLocalizedString("events_see_details", comment: ""),
+                            onJoin: { selectedResultsSurvey = survey }
+                        )
+                    }
+                }
+            }
+            
+            // 3. Completed Surveys (Voted, List Style)
+            let completedRecent = viewModel.surveys.filter { viewModel.participatedSurveyIds.contains($0.id) }.prefix(5)
+            if !completedRecent.isEmpty {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Text(LocalizedStringKey("survey_tab_completed"))
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Button(action: { withAnimation { viewModel.updateSelectedTab("Tamamlananlar") } }) {
+                            Text(LocalizedStringKey("survey_see_all"))
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.purple)
+                        }
+                    }
+                    
+                    VStack(spacing: 12) {
+                        ForEach(completedRecent) { survey in
+                            let stats = viewModel.surveyStats[survey.id]
+                            let totalVotes = stats?.totalVotes ?? 0
+                            let participationRate = totalVotes > 0 ? min(totalVotes * 7, 100) : 0
+                            
+                            Button(action: { selectedResultsSurvey = survey }) {
+                                SurveyCompletedRow(
+                                    title: survey.title,
+                                    date: survey.endDate?.formatted(.dateTime.month().year()) ?? NSLocalizedString("rt_status_active", comment: ""),
+                                    rate: participationRate,
+                                    icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "chart.bar.fill",
+                                    color: .purple
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                }
+            }
+            
+            if discoverySurveys.isEmpty && myRecentSurveys.isEmpty && completedRecent.isEmpty {
+                emptyStateView(title: NSLocalizedString("rt_status_upcoming", comment: ""))
+            }
+        }
+    }
+    
+    private var archiveSurveysList: some View {
+        VStack(spacing: 20) {
+            if viewModel.surveys.isEmpty {
+                emptyStateView(title: NSLocalizedString("rt_status_archived", comment: ""))
+            } else {
+                ForEach(viewModel.surveys) { survey in
+                    let stats = viewModel.surveyStats[survey.id]
+                    let totalVotes = stats?.totalVotes ?? 0
+                    
+                    SurveyCard(
+                        survey: survey,
+                        totalVotes: totalVotes,
+                        participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
+                        timeRemaining: NSLocalizedString("rt_status_archived", comment: ""),
+                        isAnonymous: survey.isAnonymous,
+                        buttonTitle: NSLocalizedString("rt_view_summary", comment: ""),
+                        onJoin: { selectedResultsSurvey = survey }
+                    )
+                }
+            }
+        }
+    }
+    
     private var mySurveysList: some View {
         VStack(spacing: 20) {
-            if viewModel.mySurveys.isEmpty {
+            if viewModel.surveys.isEmpty {
                 emptyStateView(title: NSLocalizedString("rt_tab_my_discussions", comment: ""))
             } else {
-                ForEach(viewModel.mySurveys) { survey in
+                ForEach(viewModel.surveys) { survey in
                     let stats = viewModel.surveyStats[survey.id]
                     let totalVotes = stats?.totalVotes ?? 0
                     let isCreator = survey.creatorId == viewModel.currentUserId
