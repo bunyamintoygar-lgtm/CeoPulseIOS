@@ -21,13 +21,20 @@ struct SurveysHomeView: View {
     @State private var showingRejectionPopup = false
     @State private var surveyWithRejection: Survey?
     
-    let tabs = [
-        NSLocalizedString("survey_tab_discovery", comment: ""),
-        NSLocalizedString("survey_tab_active", comment: ""),
-        NSLocalizedString("survey_tab_completed", comment: ""),
-        NSLocalizedString("survey_tab_my_surveys", comment: ""),
-        NSLocalizedString("survey_tab_archive", comment: "")
-    ]
+    struct TabItem: Hashable {
+        let id: String
+        let title: String
+    }
+    
+    var tabs: [TabItem] {
+        [
+            TabItem(id: "discovery", title: NSLocalizedString("survey_tab_discovery", comment: "")),
+            TabItem(id: "active", title: NSLocalizedString("survey_tab_active", comment: "")),
+            TabItem(id: "completed", title: NSLocalizedString("survey_tab_completed", comment: "")),
+            TabItem(id: "my_surveys", title: NSLocalizedString("survey_tab_my_surveys", comment: "")),
+            TabItem(id: "archive", title: NSLocalizedString("survey_tab_archive", comment: ""))
+        ]
+    }
     
     var body: some View {
         NavigationView {
@@ -143,16 +150,10 @@ struct SurveysHomeView: View {
                     // Tabs
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            ForEach(tabs, id: \.self) { tab in
-                                SurveyTabButton(title: tab, isSelected: viewModel.selectedTab == (tab == NSLocalizedString("survey_tab_discovery", comment: "") ? "Keşfet" : tab), animationNamespace: animationNamespace) {
+                            ForEach(tabs, id: \.id) { tab in
+                                SurveyTabButton(title: tab.title, isSelected: viewModel.selectedTab == tab.id, animationNamespace: animationNamespace) {
                                     withAnimation {
-                                        let internalTab: String
-                                        if tab == NSLocalizedString("survey_tab_discovery", comment: "") {
-                                            internalTab = "Keşfet"
-                                        } else {
-                                            internalTab = tab
-                                        }
-                                        viewModel.updateSelectedTab(internalTab)
+                                        viewModel.updateSelectedTab(tab.id)
                                     }
                                 }
                             }
@@ -172,15 +173,15 @@ struct SurveysHomeView: View {
                                 errorView(error)
                             } else {
                                 switch viewModel.selectedTab {
-                                case "Keşfet":
+                                case "discovery":
                                     discoveryDashboard
-                                case "Aktif Anketler":
+                                case "active":
                                     activeSurveysList
-                                case "Tamamlananlar":
+                                case "completed":
                                     completedSurveysList
-                                case "Oluşturduklarım":
+                                case "my_surveys":
                                     mySurveysList
-                                case "Arşiv":
+                                case "archive":
                                     archiveSurveysList
                                 default:
                                     emptyStateView(title: String(format: NSLocalizedString("ao_step3", comment: ""), viewModel.selectedTab))
@@ -620,7 +621,7 @@ struct SurveysHomeView: View {
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
-                        Button(action: { withAnimation { viewModel.updateSelectedTab("Oluşturduklarım") } }) {
+                        Button(action: { withAnimation { viewModel.updateSelectedTab("my_surveys") } }) {
                             Text(LocalizedStringKey("survey_see_all"))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(.purple)
@@ -653,7 +654,7 @@ struct SurveysHomeView: View {
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
-                        Button(action: { withAnimation { viewModel.updateSelectedTab("Tamamlananlar") } }) {
+                        Button(action: { withAnimation { viewModel.updateSelectedTab("completed") } }) {
                             Text(LocalizedStringKey("survey_see_all"))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(.purple)

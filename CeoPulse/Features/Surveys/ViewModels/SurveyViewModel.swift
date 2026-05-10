@@ -11,7 +11,7 @@ class SurveyViewModel: ObservableObject {
     
     @Published var searchQuery = ""
     @Published var selectedCategoryId: String? = nil
-    @Published var selectedTab = "Keşfet"
+    @Published var selectedTab = "discovery" // Internal keys: discovery, active, completed, my_surveys, archive
     @Published var currentUserId: UUID? = nil
     @Published var participatedSurveyIds: Set<UUID> = []
     private var searchSubject = PassthroughSubject<String, Never>()
@@ -90,17 +90,17 @@ class SurveyViewModel: ObservableObject {
                 var statusesFilter: [Survey.SurveyStatus]? = nil
                 
                 switch selectedTab {
-                case "Keşfet":
+                case "discovery":
                     statusFilter = nil
-                    statusesFilter = [.active] // Fetch active ones to filter later
-                case "Aktif Anketler": 
+                    statusesFilter = [.active]
+                case "active": 
                     statusFilter = .active
                     statusesFilter = nil
-                case "Tamamlananlar": 
-                    statusFilter = nil // We'll filter by participatedSurveyIds
-                case "Oluşturduklarım": 
+                case "completed": 
+                    statusFilter = nil
+                case "my_surveys": 
                     statusFilter = nil 
-                case "Arşiv": 
+                case "archive": 
                     statusFilter = .archived
                 default: 
                     statusFilter = .active
@@ -110,10 +110,10 @@ class SurveyViewModel: ObservableObject {
                 let fetchedSurveys = try await service.fetchSurveys(
                     query: searchQuery.isEmpty ? nil : searchQuery,
                     categoryId: selectedCategoryId,
-                    creatorId: selectedTab == "Oluşturduklarım" ? currentUserId : nil,
+                    creatorId: selectedTab == "my_surveys" ? currentUserId : nil,
                     status: statusFilter,
                     statuses: statusesFilter,
-                    ids: selectedTab == "Tamamlananlar" ? participatedIds : nil,
+                    ids: selectedTab == "completed" ? participatedIds : nil,
                     page: currentPage,
                     pageSize: pageSize
                 )
@@ -123,10 +123,10 @@ class SurveyViewModel: ObservableObject {
                     
                     var processedSurveys = fetchedSurveys
                     
-                    if selectedTab == "Aktif Anketler" {
+                    if selectedTab == "active" {
                         // Only show active and NOT voted
                         processedSurveys = processedSurveys.filter { !self.participatedSurveyIds.contains($0.id) }
-                    } else if selectedTab == "Arşiv" {
+                    } else if selectedTab == "archive" {
                         // Include expired surveys as well
                         let now = Date()
                         processedSurveys = processedSurveys.filter { $0.status == .archived || ($0.endDate != nil && $0.endDate! < now) }
