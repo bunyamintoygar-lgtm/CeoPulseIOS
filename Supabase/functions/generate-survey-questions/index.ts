@@ -18,10 +18,23 @@ serve(async (req) => {
       throw new Error('OPENAI_API_KEY is not set in Secrets')
     }
 
-    const langName = language === 'tr' ? 'Turkish' : 'English'
-
-    const prompt = `You are a professional survey consultant for elite CEOs. 
-    Create a comprehensive and high-quality survey based on the following:
+    const prompts: Record<string, string> = {
+      tr: `Sen seçkin CEO'lar için profesyonel bir anket danışmanısın. Verilen bilgilere dayanarak kapsamlı ve yüksek kaliteli bir anket oluştur:
+    Başlık: ${title}
+    Açıklama: ${description}
+    
+    Talimatlar:
+    - 5-8 adet derinlemesine soru oluştur.
+    - Her soru için 'single_choice' (tekli seçim) veya 'multiple_choice' (çoklu seçim) türlerinden birine karar ver.
+    - Her soru için 4-6 adet yüksek kaliteli seçenek sun.
+    - Sadece geçerli bir JSON dizisi döndür.
+    - Her nesne şu alanlara sahip olmalıdır: 
+      "text" (soru metni), 
+      "type" ("single_choice" veya "multiple_choice"), 
+      "options" (seçenek dizisi),
+      "isRequired": true,
+      "allowMultiple": (type multiple_choice ise true, değilse false)`,
+      en: `You are a professional survey consultant for elite CEOs. Create a comprehensive and high-quality survey based on the following:
     Title: ${title}
     Description: ${description}
     
@@ -35,8 +48,10 @@ serve(async (req) => {
       "type" (either "single_choice" or "multiple_choice"), 
       "options" (array of strings),
       "isRequired": true,
-      "allowMultiple": (true if type is multiple_choice, else false)
-    - Language: ${langName}.`
+      "allowMultiple": (true if type is multiple_choice, else false)`
+    }
+
+    const activePrompt = prompts[language] || prompts.tr
 
     const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -48,7 +63,7 @@ serve(async (req) => {
         model: "gpt-4o-mini",
         messages: [
           { role: "system", content: "You are a professional survey generator that outputs only JSON." },
-          { role: "user", content: prompt }
+          { role: "user", content: activePrompt }
         ],
         response_format: { type: "json_object" }
       }),
