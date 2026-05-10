@@ -73,8 +73,8 @@ struct CreateSurveyView: View {
                         DraftQuestion(
                             id: UUID(),
                             text: raw.text,
-                            type: raw.type,
                             options: raw.options,
+                            type: raw.type,
                             isRequired: raw.is_required ?? true
                         )
                     }
