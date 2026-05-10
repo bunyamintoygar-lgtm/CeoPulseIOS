@@ -250,4 +250,17 @@ class SurveyViewModel: ObservableObject {
         let urlString = "https://ceopulse.app/survey/\(survey.id.uuidString)"
         return URL(string: urlString)!
     }
+    
+    private func fetchStats(for surveys: [Survey]) async {
+        for survey in surveys {
+            do {
+                let stats = try await service.fetchSurveyStats(surveyId: survey.id)
+                await MainActor.run {
+                    self.surveyStats[survey.id] = stats
+                }
+            } catch {
+                print("Failed to fetch stats for \(survey.id): \(error)")
+            }
+        }
+    }
 }
