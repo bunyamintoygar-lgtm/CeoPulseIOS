@@ -113,7 +113,7 @@ struct CreateSurveyView: View {
     
     // Step 2: Questions
     @State private var questions: [DraftQuestion] = [
-        DraftQuestion(text: "", options: [NSLocalizedString("ao_field_desc_placeholder", comment: "") + " 1", NSLocalizedString("ao_field_desc_placeholder", comment: "") + " 2"], type: .singleChoice)
+        DraftQuestion(text: "", options: ["", ""], type: .singleChoice)
     ]
     
     var body: some View {
@@ -1175,7 +1175,7 @@ struct QuestionEditCard: View {
                                 .symbolRenderingMode(.hierarchical)
                                 .foregroundColor(.purple)
                             
-                            TextField("", text: $question.options[i])
+                            TextField(String(format: NSLocalizedString("survey_option_placeholder", comment: ""), i + 1), text: $question.options[i])
                                 .font(.system(size: 14))
                                 .foregroundColor(.white)
                             
