@@ -588,26 +588,50 @@ struct SurveysHomeView: View {
     private var discoveryDashboard: some View {
         VStack(spacing: 32) {
             // 1. Discovery Section (Not voted, Active)
-            let discoverySurveys = viewModel.activeSurveys.filter { !viewModel.participatedSurveyIds.contains($0.id) }.prefix(2)
+            let discoverySurveys = viewModel.activeSurveys.filter { !viewModel.participatedSurveyIds.contains($0.id) }.prefix(4)
             if !discoverySurveys.isEmpty {
                 VStack(alignment: .leading, spacing: 16) {
                     Text(LocalizedStringKey("survey_tab_discovery"))
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
                     
-                    ForEach(discoverySurveys) { survey in
-                        let stats = viewModel.surveyStats[survey.id]
+                    // The Hero Card (First one)
+                    if let firstSurvey = discoverySurveys.first {
+                        let stats = viewModel.surveyStats[firstSurvey.id]
                         let totalVotes = stats?.totalVotes ?? 0
                         
                         SurveyCard(
-                            survey: survey,
+                            survey: firstSurvey,
                             totalVotes: totalVotes,
                             participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
-                            timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
-                            isAnonymous: survey.isAnonymous,
+                            timeRemaining: firstSurvey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
+                            isAnonymous: firstSurvey.isAnonymous,
                             buttonTitle: NSLocalizedString("survey_join_button", comment: ""),
-                            onJoin: { selectedSurvey = survey }
+                            onJoin: { selectedSurvey = firstSurvey }
                         )
+                    }
+                    
+                    // The List Rows (Next 3)
+                    let remainingSurveys = discoverySurveys.dropFirst()
+                    if !remainingSurveys.isEmpty {
+                        VStack(spacing: 12) {
+                            ForEach(remainingSurveys) { survey in
+                                let stats = viewModel.surveyStats[survey.id]
+                                let totalVotes = stats?.totalVotes ?? 0
+                                let participationRate = totalVotes > 0 ? Int((Double(totalVotes) / Double(max(viewModel.totalUserCount, 1))) * 100) : 0
+                                
+                                Button(action: { selectedSurvey = survey }) {
+                                    SurveyCompletedRow(
+                                        title: survey.title,
+                                        date: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
+                                        rate: participationRate,
+                                        icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "sparkles",
+                                        color: .purple
+                                    )
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
                     }
                 }
             }
