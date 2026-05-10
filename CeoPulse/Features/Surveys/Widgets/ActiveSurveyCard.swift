@@ -59,8 +59,8 @@ struct ActiveSurveyCard: View {
                 // Circular Progress
                 ZStack {
                     Circle()
-                        .stroke(Color.white.opacity(0.05), lineWidth: 6)
-                        .frame(width: 80, height: 80)
+                        .stroke(Color.white.opacity(0.05), lineWidth: 5)
+                        .frame(width: 64, height: 64)
                     
                     Circle()
                         .trim(from: 0, to: participationRate)
@@ -70,20 +70,20 @@ struct ActiveSurveyCard: View {
                                 startPoint: .top,
                                 endPoint: .bottom
                             ),
-                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                            style: StrokeStyle(lineWidth: 5, lineCap: .round)
                         )
-                        .frame(width: 80, height: 80)
+                        .frame(width: 64, height: 64)
                         .rotationEffect(.degrees(-90))
                     
                     VStack(spacing: 0) {
                         Text("%\(Int(participationRate * 100))")
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: 14, weight: .bold))
                             .foregroundColor(.white)
                         Text("survey_participation_rate".localized())
-                            .font(.system(size: 8))
+                            .font(.system(size: 7))
                             .foregroundColor(AppColors.textSecondary)
                             .multilineTextAlignment(.center)
-                            .frame(width: 50)
+                            .frame(width: 45)
                     }
                 }
             }
