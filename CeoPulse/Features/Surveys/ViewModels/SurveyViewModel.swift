@@ -102,8 +102,10 @@ class SurveyViewModel: ObservableObject {
                 case "active": 
                     statusFilter = .active
                     statusesFilter = nil
-                case "completed": 
+                                case "completed": 
+                    // Use broad filter to match dashboard and ensure consistency
                     statusFilter = nil
+                    statusesFilter = [.active, .archived]
                 case "my_surveys": 
                     statusFilter = nil 
                 case "archive": 
@@ -127,10 +129,10 @@ class SurveyViewModel: ObservableObject {
                 let fetchedSurveys = try await service.fetchSurveys(
                     query: searchQuery.isEmpty ? nil : searchQuery,
                     categoryId: selectedCategoryId,
-                    creatorId: selectedTab == "my_surveys" ? currentUserId : nil,
+                    creatorId: capturedTab == "my_surveys" ? currentUserId : nil,
                     status: statusFilter,
                     statuses: statusesFilter,
-                    ids: (selectedTab == "completed" && !participatedIds.isEmpty) ? participatedIds : nil,
+                    ids: nil, // Fetch broad set and filter locally for consistency
                     page: currentPage,
                     pageSize: pageSize
                 )
@@ -144,6 +146,9 @@ class SurveyViewModel: ObservableObject {
                     if capturedTab == "active" {
                         // Only show active and NOT voted
                         processedSurveys = processedSurveys.filter { !self.participatedSurveyIds.contains($0.id) }
+                    } else if capturedTab == "completed" {
+                        // Filter locally based on participation
+                        processedSurveys = processedSurveys.filter { self.participatedSurveyIds.contains($0.id) }
                     } else if capturedTab == "archive" {
                         // Include expired surveys as well
                         let now = Date()
