@@ -597,43 +597,20 @@ struct SurveysHomeView: View {
                     .foregroundColor(AppColors.textSecondary)
                     .padding(.vertical, 10)
             } else {
-                // First Survey as Big Card
-                if let firstSurvey = viewModel.completedSurveysList.first {
-                    let stats = viewModel.surveyStats[firstSurvey.id]
-                    let totalVotes = stats?.totalVotes ?? 0
-                    
-                    SurveyCard(
-                        survey: firstSurvey,
-                        totalVotes: totalVotes,
-                        participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
-                        timeRemaining: firstSurvey.endDate?.formatted(date: .abbreviated, time: .omitted) ?? NSLocalizedString("survey_completed_status", comment: ""),
-                        isAnonymous: firstSurvey.isAnonymous,
-                        buttonTitle: NSLocalizedString("rt_view_summary", comment: ""),
-                        onJoin: { selectedResultsSurvey = firstSurvey }
-                    )
-                    .onAppear {
-                        viewModel.loadMoreIfNeeded(currentSurvey: firstSurvey, forTab: "completed")
-                    }
-                }
-                
-                // Remaining Surveys as Lists
-                let remainingSurveys = viewModel.completedSurveysList.dropFirst()
-                if !remainingSurveys.isEmpty {
-                    VStack(spacing: 12) {
-                        ForEach(remainingSurveys) { survey in
-                            NavigationLink(destination: SurveyResultsView(survey: survey)) {
-                                SurveyCompletedRow(
-                                    title: survey.title,
-                                    date: survey.endDate?.formatted(date: .abbreviated, time: .omitted) ?? NSLocalizedString("survey_completed_status", comment: ""),
-                                    rate: 100,
-                                    icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "chart.bar.fill",
-                                    color: .purple
-                                )
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                            .onAppear {
-                                viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "completed")
-                            }
+                VStack(spacing: 12) {
+                    ForEach(viewModel.completedSurveysList) { survey in
+                        NavigationLink(destination: SurveyResultsView(survey: survey)) {
+                            SurveyCompletedRow(
+                                title: survey.title,
+                                date: survey.endDate?.formatted(date: .abbreviated, time: .omitted) ?? NSLocalizedString("survey_completed_status", comment: ""),
+                                rate: 100,
+                                icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "chart.bar.fill",
+                                color: .purple
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .onAppear {
+                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "completed")
                         }
                     }
                 }
@@ -786,47 +763,24 @@ struct SurveysHomeView: View {
             if viewModel.archivedSurveysList.isEmpty {
                 emptyStateView(title: NSLocalizedString("rt_status_archived", comment: ""))
             } else {
-                // First Survey as Big Card
-                if let firstSurvey = viewModel.archivedSurveysList.first {
-                    let stats = viewModel.surveyStats[firstSurvey.id]
-                    let totalVotes = stats?.totalVotes ?? 0
-                    
-                    SurveyCard(
-                        survey: firstSurvey,
-                        totalVotes: totalVotes,
-                        participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
-                        timeRemaining: NSLocalizedString("rt_status_archived", comment: ""),
-                        isAnonymous: firstSurvey.isAnonymous,
-                        buttonTitle: NSLocalizedString("rt_view_summary", comment: ""),
-                        onJoin: { selectedResultsSurvey = firstSurvey }
-                    )
-                    .onAppear {
-                        viewModel.loadMoreIfNeeded(currentSurvey: firstSurvey, forTab: "archive")
-                    }
-                }
-                
-                // Remaining Surveys as Lists
-                let remainingSurveys = viewModel.archivedSurveysList.dropFirst()
-                if !remainingSurveys.isEmpty {
-                    VStack(spacing: 12) {
-                        ForEach(remainingSurveys) { survey in
-                            let stats = viewModel.surveyStats[survey.id]
-                            let totalVotes = stats?.totalVotes ?? 0
-                            let participationRate = totalVotes > 0 ? Int((Double(totalVotes) / Double(max(viewModel.totalUserCount, 1))) * 100) : 0
-                            
-                            Button(action: { selectedResultsSurvey = survey }) {
-                                SurveyCompletedRow(
-                                    title: survey.title,
-                                    date: survey.endDate?.formatted(.dateTime.month().year()) ?? NSLocalizedString("rt_status_archived", comment: ""),
-                                    rate: participationRate,
-                                    icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "archivebox.fill",
-                                    color: .gray
-                                )
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                            .onAppear {
-                                viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "archive")
-                            }
+                VStack(spacing: 12) {
+                    ForEach(viewModel.archivedSurveysList) { survey in
+                        let stats = viewModel.surveyStats[survey.id]
+                        let totalVotes = stats?.totalVotes ?? 0
+                        let participationRate = totalVotes > 0 ? Int((Double(totalVotes) / Double(max(viewModel.totalUserCount, 1))) * 100) : 0
+                        
+                        Button(action: { selectedResultsSurvey = survey }) {
+                            SurveyCompletedRow(
+                                title: survey.title,
+                                date: survey.endDate?.formatted(.dateTime.month().year()) ?? NSLocalizedString("rt_status_archived", comment: ""),
+                                rate: participationRate,
+                                icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "archivebox.fill",
+                                color: .gray
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .onAppear {
+                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "archive")
                         }
                     }
                 }
