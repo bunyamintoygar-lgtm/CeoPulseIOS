@@ -667,10 +667,7 @@ struct CreateSurveyView: View {
                     
                     errorMessage = nil // Clear error if validated
                     
-                    // Düzenleme modunda her adımdan direkt yayınla
-                    if surveyToEdit != nil {
-                        publishSurvey()
-                    } else if currentStep < 4 { 
+                    if currentStep < 4 { 
                         withAnimation { currentStep += 1 } 
                     } else {
                         publishSurvey()
@@ -682,9 +679,19 @@ struct CreateSurveyView: View {
                                 .tint(.white)
                                 .padding(.trailing, 8)
                         }
-                        Text(surveyToEdit != nil ? NSLocalizedString("survey_update_publish", comment: "") : (currentStep == 4 ? NSLocalizedString("survey_create_publish", comment: "") : NSLocalizedString("continue", comment: "")))
+                        
+                        let buttonText: String = {
+                            if currentStep < 4 {
+                                return NSLocalizedString("continue", comment: "")
+                            } else {
+                                return surveyToEdit != nil ? NSLocalizedString("survey_update_publish", comment: "") : NSLocalizedString("survey_create_publish", comment: "")
+                            }
+                        }()
+                        
+                        Text(buttonText)
+                        
                         if !isPublishing {
-                            Image(systemName: surveyToEdit != nil ? "checkmark" : "arrow.right")
+                            Image(systemName: currentStep < 4 ? "arrow.right" : "checkmark")
                         }
                     }
                     .font(.system(size: 16, weight: .bold))
