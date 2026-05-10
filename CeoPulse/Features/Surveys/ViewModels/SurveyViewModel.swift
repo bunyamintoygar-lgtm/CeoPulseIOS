@@ -107,13 +107,24 @@ class SurveyViewModel: ObservableObject {
                 }
                 
                 let participatedIds = try await service.fetchParticipatedSurveyIds()
+                
+                // Optimization: If completed tab is selected but no participations found, return empty early
+                if selectedTab == "completed" && participatedIds.isEmpty {
+                    await MainActor.run {
+                        self.surveys = []
+                        self.isLoading = false
+                        self.canLoadMore = false
+                    }
+                    return
+                }
+
                 let fetchedSurveys = try await service.fetchSurveys(
                     query: searchQuery.isEmpty ? nil : searchQuery,
                     categoryId: selectedCategoryId,
                     creatorId: selectedTab == "my_surveys" ? currentUserId : nil,
                     status: statusFilter,
                     statuses: statusesFilter,
-                    ids: selectedTab == "completed" ? participatedIds : nil,
+                    ids: (selectedTab == "completed" && !participatedIds.isEmpty) ? participatedIds : nil,
                     page: currentPage,
                     pageSize: pageSize
                 )

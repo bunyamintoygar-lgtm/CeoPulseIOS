@@ -106,17 +106,25 @@ class SurveyService {
     }
 
     func fetchParticipatedSurveyIds() async throws -> [UUID] {
-        guard let userId = try? await getCurrentUserId() else { return [] }
+        let session = try await SupabaseManager.shared.client.auth.session
+        let userId = session.user.id
         
-        struct VoteInfo: Codable { let survey_id: UUID }
-        let votes: [VoteInfo] = try await client
+        struct SurveyResponseId: Codable {
+            let surveyId: UUID
+            
+            enum CodingKeys: String, CodingKey {
+                case surveyId = "survey_id"
+            }
+        }
+        
+        let responses: [SurveyResponseId] = try await SupabaseManager.shared.client.database
             .from("survey_responses")
             .select("survey_id")
             .eq("user_id", value: userId)
             .execute()
             .value
             
-        return Array(Set(votes.map { $0.survey_id }))
+        return Array(Set(responses.map { $0.surveyId }))
     }
     
     struct SurveyStats: Codable {
