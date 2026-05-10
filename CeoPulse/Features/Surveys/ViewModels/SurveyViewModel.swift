@@ -68,12 +68,16 @@ class SurveyViewModel: ObservableObject {
         fetchSurveys(isRefresh: true)
     }
     
+    private var currentFetchTask: Task<Void, Never>?
+    
     func updateSelectedTab(_ tab: String) {
         selectedTab = tab
         fetchSurveys(isRefresh: true)
     }
     
     func fetchSurveys(isRefresh: Bool = true) {
+        currentFetchTask?.cancel()
+        
         if isRefresh {
             currentPage = 0
             canLoadMore = true
@@ -84,12 +88,13 @@ class SurveyViewModel: ObservableObject {
         }
         
         errorMessage = nil
-        Task {
+        currentFetchTask = Task {
             do {
                 let statusFilter: Survey.SurveyStatus?
                 var statusesFilter: [Survey.SurveyStatus]? = nil
+                let capturedTab = selectedTab
                 
-                switch selectedTab {
+                switch capturedTab {
                 case "discovery":
                     statusFilter = nil
                     statusesFilter = [.active]
@@ -130,14 +135,15 @@ class SurveyViewModel: ObservableObject {
                 )
                 
                 await MainActor.run {
+                    if Task.isCancelled || self.selectedTab != capturedTab { return }
                     self.participatedSurveyIds = Set(participatedIds)
                     
                     var processedSurveys = fetchedSurveys
                     
-                    if selectedTab == "active" {
+                    if capturedTab == "active" {
                         // Only show active and NOT voted
                         processedSurveys = processedSurveys.filter { !self.participatedSurveyIds.contains($0.id) }
-                    } else if selectedTab == "archive" {
+                    } else if capturedTab == "archive" {
                         // Include expired surveys as well
                         let now = Date()
                         processedSurveys = processedSurveys.filter { $0.status == .archived || ($0.endDate != nil && $0.endDate! < now) }
