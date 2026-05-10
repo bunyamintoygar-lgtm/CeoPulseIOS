@@ -56,8 +56,11 @@ class SurveyDraftManager: ObservableObject {
             isAnonymous: isAnonymous
         )
         
-        if let encoded = try? JSONEncoder().encode(draft) {
+        do {
+            let encoded = try JSONEncoder().encode(draft)
             UserDefaults.standard.set(encoded, forKey: draftKey)
+        } catch {
+            print("❌ Failed to save survey draft: \(error)")
         }
     }
     

@@ -59,10 +59,29 @@ struct CreateSurveyView: View {
                 }
                 
                 do {
-                    let response = try decoder.decode([DraftQuestion].self, from: responseData)
+                    let decoder = JSONDecoder()
+                    // AI response might not have IDs, so we handle it gracefully
+                    struct AIRawQuestion: Codable {
+                        var text: String
+                        var type: String
+                        var options: [String]
+                        var is_required: Bool?
+                    }
+                    
+                    let rawResponse = try decoder.decode([AIRawQuestion].self, from: responseData)
+                    let mappedQuestions = rawResponse.map { raw in
+                        DraftQuestion(
+                            id: UUID(),
+                            text: raw.text,
+                            type: raw.type,
+                            options: raw.options,
+                            isRequired: raw.is_required ?? true
+                        )
+                    }
+                    
                     await MainActor.run {
                         withAnimation(.spring()) {
-                            self.questions = response
+                            self.questions = mappedQuestions
                             self.isGeneratingAI = false
                             saveDraftSilently() // Save immediately after AI generation
                         }
