@@ -47,36 +47,40 @@ serve(async (req) => {
       })
     }
 
-    const languageMap: Record<string, string> = {
-      tr: "Turkish",
-      en: "English",
-      de: "German",
-      fr: "French",
-      es: "Spanish"
+    const prompts: Record<string, { system: string, title: string, desc: string, quest: string, opt: string }> = {
+      tr: {
+        system: `Sen profesyonel bir içerik moderatörüsün. Verilen anket içeriğini müstehcenlik, hakaret, küfür, nefret söylemi ve topluluk kuralları açısından incele. Eğer içerik uygunsuzsa 'flagged' değerini true yap ve kısa bir 'reason' (Türkçe) ekle. Uygunsa 'flagged' false olsun. Sadece JSON döndür: {"flagged": boolean, "reason": string|null}`,
+        title: "Başlık",
+        desc: "Açıklama",
+        quest: "Soru",
+        opt: "Seçenek"
+      },
+      en: {
+        system: `You are a professional content moderator. Review the provided survey content for obscenity, insults, profanity, hate speech, and community guidelines. If the content is inappropriate, set 'flagged' to true and provide a short 'reason' in English. If it is appropriate, 'flagged' should be false. Return ONLY JSON: {"flagged": boolean, "reason": string|null}`,
+        title: "Title",
+        desc: "Description",
+        quest: "Question",
+        opt: "Option"
+      }
     }
     
-    const targetLanguage = languageMap[survey.language] || "Turkish"
+    const activePrompt = prompts[survey.language] || prompts.tr
     
-    const systemPrompt = `You are a professional content moderator. Review the provided survey content for obscenity, insults, profanity, hate speech, and community guidelines. 
-    If the content is inappropriate, set 'flagged' to true and provide a short 'reason' in ${targetLanguage}. 
-    If it is appropriate, 'flagged' should be false. 
-    Return ONLY JSON: {"flagged": boolean, "reason": string|null}`
-
     // 2. Soruları ve seçenekleri çek
     const { data: questions } = await supabase
       .from('survey_questions')
       .select('question_text, survey_options(option_text)')
       .eq('survey_id', survey_id)
 
-    // 3. Tüm metni birleştir
-    let textToModerate = `Başlık: ${survey.title}\n`
+    // 3. Tüm metni birleştir (Yerelleştirilmiş etiketlerle)
+    let textToModerate = `${activePrompt.title}: ${survey.title}\n`
     if (survey.description) {
-      textToModerate += `Açıklama: ${survey.description}\n`
+      textToModerate += `${activePrompt.desc}: ${survey.description}\n`
     }
     for (const q of (questions || [])) {
-      textToModerate += `Soru: ${q.question_text}\n`
+      textToModerate += `${activePrompt.quest}: ${q.question_text}\n`
       for (const opt of (q.survey_options || [])) {
-        textToModerate += `Seçenek: ${opt.option_text}\n`
+        textToModerate += `${activePrompt.opt}: ${opt.option_text}\n`
       }
     }
 
@@ -92,7 +96,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: systemPrompt
+            content: activePrompt.system
           },
           {
             role: "user",
