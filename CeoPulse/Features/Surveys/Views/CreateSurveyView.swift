@@ -398,7 +398,8 @@ struct CreateSurveyView: View {
             ForEach(questions) { question in
                 QuestionEditCard(
                     question: binding(for: question.id),
-                    number: (questions.firstIndex(where: { $0.id == question.id }) ?? 0) + 1
+                    number: (questions.firstIndex(where: { $0.id == question.id }) ?? 0) + 1,
+                    showDelete: questions.count > 1
                 ) {
                     withAnimation(.spring()) {
                         if questions.count > 1 {
@@ -1105,6 +1106,7 @@ struct DraftQuestion: Codable, Equatable, Identifiable {
 struct QuestionEditCard: View {
     @Binding var question: DraftQuestion
     let number: Int
+    let showDelete: Bool
     let onDelete: () -> Void
     
     @State private var showingDeleteConfirm = false
@@ -1127,15 +1129,17 @@ struct QuestionEditCard: View {
                     
                     Spacer() // Pushes delete button to the far right
                     
-                    Button(action: {
-                        hideKeyboard()
-                        withAnimation(.spring()) { showingDeleteConfirm = true }
-                    }) {
-                        Image(systemName: "trash.fill")
-                            .font(.system(size: 14))
-                            .foregroundColor(.red.opacity(0.8))
-                            .padding(8)
-                            .background(Circle().fill(Color.red.opacity(0.1)))
+                    if showDelete {
+                        Button(action: {
+                            hideKeyboard()
+                            withAnimation(.spring()) { showingDeleteConfirm = true }
+                        }) {
+                            Image(systemName: "trash.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(.red.opacity(0.8))
+                                .padding(8)
+                                .background(Circle().fill(Color.red.opacity(0.1)))
+                        }
                     }
                 }
                 
