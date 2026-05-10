@@ -256,6 +256,13 @@
 "survey_setting_max_duration" = "Max 3 Months";
 "survey_setting_auto_close_info" = "Your survey will automatically close on %@ at the latest.";
 
+// Results View
+"survey_results_title" = "Survey Results";
+"survey_results_error" = "An error occurred while loading results";
+"survey_report_title" = "Survey Report";
+"survey_votes_label" = "Vote";
+"rt_field_status" = "Status";
+
 // Join Survey
 "survey_join_live" = "Live Session";
 "survey_join_default_desc" = "Global CEO Pulse Survey";

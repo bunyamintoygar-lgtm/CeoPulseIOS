@@ -247,6 +247,13 @@
 "survey_setting_max_duration" = "Max 3 Ay";
 "survey_setting_auto_close_info" = "Anketiniz en geç %@ tarihinde otomatik olarak kapanacaktır.";
 
+// Results View
+"survey_results_title" = "Anket Sonuçları";
+"survey_results_error" = "Sonuçlar yüklenirken bir hata oluştu";
+"survey_report_title" = "Anket Raporu";
+"survey_votes_label" = "Oy";
+"rt_field_status" = "Durum";
+
 // Join Survey
 "survey_join_live" = "Canlı Oturum";
 "survey_join_default_desc" = "Küresel CEO Pulse Anketi";
