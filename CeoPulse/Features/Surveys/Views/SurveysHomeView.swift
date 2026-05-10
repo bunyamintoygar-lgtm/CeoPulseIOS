@@ -119,7 +119,8 @@ struct SurveysHomeView: View {
                                         .fill(viewModel.selectedCategoryId != nil ? Color.purple.opacity(0.2) : Color.white.opacity(0.05))
                                         .frame(width: 48, height: 48)
                                     
-                                    Image(systemName: "line.3.horizontal.decrease.circle")
+                                    let selectedCategory = ConfigManager.shared.surveyCategories.first(where: { $0.id == viewModel.selectedCategoryId })
+                                    Image(systemName: selectedCategory?.iconName ?? "line.3.horizontal.decrease.circle")
                                         .font(.system(size: 20))
                                         .foregroundColor(viewModel.selectedCategoryId != nil ? .purple : .white)
                                 }
