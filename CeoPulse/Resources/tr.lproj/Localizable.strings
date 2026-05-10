@@ -201,14 +201,34 @@
 "survey_rejection_button" = "Anladım";
 
 // Create Survey
-"survey_create_nav_title" = "Yeni Anket Oluştur";
-"survey_create_publish" = "Yayınla";
-"survey_create_cancel" = "Vazgeç";
+"survey_create_subtitle" = "Anketinizi oluşturun ve paylaşın.";
+"survey_edit_title" = "Anketi Düzenle";
+"survey_edit_subtitle" = "Anketinizi güncelleyin.";
+"survey_details_section" = "Anket Detayları";
 "survey_field_title_label" = "Anket Başlığı";
 "survey_field_title_placeholder" = "Örn: 2026 Stratejik Planlaması";
 "survey_field_desc_label" = "Açıklama";
 "survey_field_desc_placeholder" = "Anketin amacını kısaca açıklayın...";
 "survey_field_category_label" = "Kategori";
+"survey_field_category_placeholder" = "Kategori seçin";
+"survey_field_questions_label" = "Sorular";
+"survey_questions_subtitle" = "Anketinize sorular ekleyin ve yanıt seçeneklerini düzenleyin.";
+"survey_question_count" = "Soru: %d";
+"survey_ai_generating" = "Sorular Hazırlanıyor...";
+"survey_ai_wizard" = "AI Soru Sihirbazı";
+"survey_ai_wizard_desc" = "Anket adına göre soruları otomatik oluştur";
+"survey_final_ready_desc" = "Anketiniz yayınlanmaya hazır. Lütfen son kez kontrol edin.";
+"survey_field_question" = "Soru";
+"survey_required_label" = "Zorunlu";
+"survey_optional_label" = "İsteğe Bağlı";
+"survey_question_placeholder" = "Sorunuzu buraya yazın...";
+"survey_options_label" = "Yanıt Seçenekleri";
+"survey_add_option" = "Seçenek Ekle";
+"survey_option_placeholder" = "Seçenek %d";
+"survey_allow_multiple" = "Çoklu yanıt";
+"survey_delete_question_title" = "Soruyu Sil";
+"survey_delete_question_desc" = "Bu işlem geri alınamaz.";
+"survey_delete_confirm" = "Sil";
 "survey_field_questions_label" = "Sorular";
 "survey_add_question" = "Soru Ekle";
 "survey_settings_label" = "Anket Ayarları";

@@ -219,11 +219,11 @@ struct CreateSurveyView: View {
                         .symbolRenderingMode(.hierarchical)
                         .foregroundColor(.purple)
                         .symbolEffect(.bounce, value: currentStep)
-                    Text(surveyToEdit == nil ? "Yeni Anket Ekle" : "Anketi Düzenle")
+                    Text(surveyToEdit == nil ? LocalizedStringKey("survey_create_nav_title") : LocalizedStringKey("survey_edit_title"))
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
                 }
-                Text(surveyToEdit == nil ? "Anketinizi oluşturun ve paylaşın." : "Anketinizi güncelleyin.")
+                Text(surveyToEdit == nil ? LocalizedStringKey("survey_create_subtitle") : LocalizedStringKey("survey_edit_subtitle"))
                     .font(.system(size: 12))
                     .foregroundColor(AppColors.textSecondary)
             }
@@ -240,13 +240,13 @@ struct CreateSurveyView: View {
     
     private var surveyStepper: some View {
         HStack {
-            StepperItem(number: 1, title: "Detay", isCurrent: currentStep == 1, isCompleted: currentStep > 1)
+            StepperItem(number: 1, title: NSLocalizedString("survey_step_details", comment: ""), isCurrent: currentStep == 1, isCompleted: currentStep > 1)
             line
-            StepperItem(number: 2, title: "Sorular", isCurrent: currentStep == 2, isCompleted: currentStep > 2)
+            StepperItem(number: 2, title: NSLocalizedString("survey_step_questions", comment: ""), isCurrent: currentStep == 2, isCompleted: currentStep > 2)
             line
-            StepperItem(number: 3, title: "Ayarlar", isCurrent: currentStep == 3, isCompleted: currentStep > 3)
+            StepperItem(number: 3, title: NSLocalizedString("survey_step_settings", comment: ""), isCurrent: currentStep == 3, isCompleted: currentStep > 3)
             line
-            StepperItem(number: 4, title: "Yayınla", isCurrent: currentStep == 4, isCompleted: currentStep > 4)
+            StepperItem(number: 4, title: NSLocalizedString("survey_create_publish", comment: ""), isCurrent: currentStep == 4, isCompleted: currentStep > 4)
         }
         .padding(.horizontal, 30)
         .padding(.vertical, 20)
@@ -264,14 +264,14 @@ struct CreateSurveyView: View {
         VStack(alignment: .leading, spacing: 24) {
             // Title & Description
             VStack(alignment: .leading, spacing: 16) {
-                Text("Anket Detayları")
+                Text(LocalizedStringKey("survey_details_section"))
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Anket Başlığı *").font(.system(size: 13, weight: .medium)).foregroundColor(.white)
+                    Text("\(NSLocalizedString("survey_field_title_label", comment: "")) *").font(.system(size: 13, weight: .medium)).foregroundColor(.white)
                     ZStack(alignment: .trailing) {
-                        TextField("Anket başlığını girin...", text: $title)
+                        TextField(LocalizedStringKey("survey_field_title_placeholder"), text: $title)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 16)
                             .background(Color.black)
@@ -287,7 +287,7 @@ struct CreateSurveyView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Anket Açıklaması").font(.system(size: 13, weight: .medium)).foregroundColor(.white)
+                    Text(LocalizedStringKey("survey_field_desc_label")).font(.system(size: 13, weight: .medium)).foregroundColor(.white)
                     ZStack(alignment: .bottomTrailing) {
                         TextEditor(text: $description)
                             .frame(height: 120)
@@ -308,12 +308,12 @@ struct CreateSurveyView: View {
             
             // Category
             VStack(alignment: .leading, spacing: 8) {
-                Text("Kategori").font(.system(size: 13, weight: .medium)).foregroundColor(.white)
+                Text(LocalizedStringKey("survey_field_category_label")).font(.system(size: 13, weight: .medium)).foregroundColor(.white)
                 
                 Button(action: { showingCategoryPicker = true }) {
                     HStack {
                         Image(systemName: selectedCategory?.icon ?? "square.grid.2x2")
-                        Text(selectedCategory?.name ?? "Kategori seçin")
+                        Text(selectedCategory?.name ?? NSLocalizedString("survey_field_category_placeholder", comment: ""))
                         Spacer()
                         Image(systemName: "chevron.down")
                     }
@@ -343,11 +343,11 @@ struct CreateSurveyView: View {
                     Image(systemName: "questionmark.circle").foregroundColor(.purple)
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Anket Soruları").font(.system(size: 16, weight: .bold)).foregroundColor(.white)
-                    Text("Anketinize sorular ekleyin ve yanıt seçeneklerini düzenleyin.").font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
+                    Text(LocalizedStringKey("survey_field_questions_label")).font(.system(size: 16, weight: .bold)).foregroundColor(.white)
+                    Text(LocalizedStringKey("survey_questions_subtitle")).font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
                 }
                 Spacer()
-                Text("Soru: \(questions.count)").font(.system(size: 11)).padding(.horizontal, 10).padding(.vertical, 5).background(Color.white.opacity(0.05)).cornerRadius(8)
+                Text(String(format: NSLocalizedString("survey_question_count", comment: ""), questions.count)).font(.system(size: 11)).padding(.horizontal, 10).padding(.vertical, 5).background(Color.white.opacity(0.05)).cornerRadius(8)
             }
             
             // AI Wizard Button
@@ -362,9 +362,9 @@ struct CreateSurveyView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(isGeneratingAI ? "Sorular Hazırlanıyor..." : "AI Soru Sihirbazı")
+                        Text(isGeneratingAI ? LocalizedStringKey("survey_ai_generating") : LocalizedStringKey("survey_ai_wizard"))
                             .font(.system(size: 14, weight: .bold))
-                        Text("Anket adına göre soruları otomatik oluştur")
+                        Text(LocalizedStringKey("survey_ai_wizard_desc"))
                             .font(.system(size: 10))
                             .opacity(0.8)
                     }
@@ -444,6 +444,12 @@ struct CreateSurveyView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text(LocalizedStringKey("ao_target_title")).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
                 HStack(spacing: 12) {
+                    let steps = [
+                        NSLocalizedString("survey_step_details", comment: ""),
+                        NSLocalizedString("survey_step_questions", comment: ""),
+                        NSLocalizedString("survey_step_settings", comment: ""),
+                        NSLocalizedString("survey_step_preview", comment: "")
+                    ]
                     AudienceCard(title: NSLocalizedString("ao_privacy_public", comment: ""), subtitle: NSLocalizedString("ao_privacy_public_desc", comment: ""), icon: "globe", isSelected: targetAudience == NSLocalizedString("ao_privacy_public", comment: "")) { targetAudience = NSLocalizedString("ao_privacy_public", comment: "") }
                     AudienceCard(title: NSLocalizedString("ao_privacy_community", comment: ""), subtitle: NSLocalizedString("ao_privacy_community_desc", comment: ""), icon: "person.2", isSelected: targetAudience == NSLocalizedString("ao_privacy_community", comment: "")) { targetAudience = NSLocalizedString("ao_privacy_community", comment: "") }
                     AudienceCard(title: NSLocalizedString("ao_privacy_private", comment: ""), subtitle: NSLocalizedString("ao_privacy_private_desc", comment: ""), icon: "lock", isSelected: targetAudience == NSLocalizedString("ao_privacy_private", comment: "")) { targetAudience = NSLocalizedString("ao_privacy_private", comment: "") }
@@ -516,7 +522,7 @@ struct CreateSurveyView: View {
                 
                 VStack(spacing: 12) {
                     DatePicker(
-                        "Bitiş Tarihi",
+                        NSLocalizedString("survey_setting_end_date", comment: ""),
                         selection: $endDate,
                         in: startDate...maxEndDate,
                         displayedComponents: [.date]
@@ -565,7 +571,7 @@ struct CreateSurveyView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(title.isEmpty ? "Anket Başlığı" : title)
+                    Text(title.isEmpty ? LocalizedStringKey("survey_field_title_label") : LocalizedStringKey(title))
                         .font(.system(size: 22, weight: .bold))
                         .foregroundColor(.white)
                     
@@ -1101,9 +1107,9 @@ struct QuestionEditCard: View {
                             .foregroundColor(.white)
                             .frame(width: 20, height: 20)
                             .background(Circle().fill(Color.purple))
-                        Text("Soru").font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                        Text(LocalizedStringKey("survey_field_question")).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
                     }
-                    Text((question.isRequired ?? true) ? "(Zorunlu)" : "(İsteğe Bağlı)")
+                    Text((question.isRequired ?? true) ? "(\(NSLocalizedString("survey_required_label", comment: "")))" : "(\(NSLocalizedString("survey_optional_label", comment: "")))")
                         .font(.system(size: 12))
                         .foregroundColor(AppColors.textSecondary)
                     
@@ -1121,7 +1127,7 @@ struct QuestionEditCard: View {
                     }
                 }
                 
-                TextField("Sorunuzu buraya yazın...", text: $question.text, axis: .vertical)
+                TextField(LocalizedStringKey("survey_question_placeholder"), text: $question.text, axis: .vertical)
                     .font(.system(size: 14, weight: .medium)) // Reduced font size
                     .padding()
                     .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.05)))
@@ -1130,14 +1136,14 @@ struct QuestionEditCard: View {
                 
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text("Yanıt Seçenekleri").font(.system(size: 13, weight: .medium)).foregroundColor(.white)
+                        Text(LocalizedStringKey("survey_options_label")).font(.system(size: 13, weight: .medium)).foregroundColor(.white)
                         Spacer()
                         Button(action: {
                             withAnimation { question.options.append("") }
                         }) {
                             HStack(spacing: 4) {
                                 Image(systemName: "plus")
-                                Text("Seçenek Ekle")
+                                Text(LocalizedStringKey("survey_add_option"))
                             }
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(.purple)
@@ -1153,7 +1159,7 @@ struct QuestionEditCard: View {
                                 .symbolRenderingMode(.hierarchical)
                                 .foregroundColor(.purple)
                             
-                            TextField("Seçenek \(i + 1)", text: $question.options[i])
+                            TextField(String(format: NSLocalizedString("survey_option_placeholder", comment: ""), i + 1), text: $question.options[i])
                                 .font(.system(size: 14))
                                 .foregroundColor(.white)
                             
@@ -1184,7 +1190,7 @@ struct QuestionEditCard: View {
                         HStack(spacing: 6) {
                             Image(systemName: "checklist")
                                 .symbolRenderingMode(.hierarchical)
-                            Text("Çoklu yanıt").font(.system(size: 13))
+                            Text(LocalizedStringKey("survey_allow_multiple")).font(.system(size: 13))
                         }
                     }
                     .tint(.purple)
@@ -1196,7 +1202,7 @@ struct QuestionEditCard: View {
                         HStack(spacing: 6) {
                             Image(systemName: "asterisk.circle.fill")
                                 .symbolRenderingMode(.hierarchical)
-                            Text("Zorunlu").font(.system(size: 13))
+                            Text(LocalizedStringKey("survey_required_label")).font(.system(size: 13))
                         }
                     }
                     .tint(.purple)
@@ -1220,10 +1226,10 @@ struct QuestionEditCard: View {
                         .symbolEffect(.bounce, value: showingDeleteConfirm)
                     
                     VStack(spacing: 4) {
-                        Text("Soruyu Sil")
+                        Text(LocalizedStringKey("survey_delete_question_title"))
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.white)
-                        Text("Bu işlem geri alınamaz.")
+                        Text(LocalizedStringKey("survey_delete_question_desc"))
                             .font(.system(size: 12))
                             .foregroundColor(AppColors.textSecondary)
                     }
@@ -1232,7 +1238,7 @@ struct QuestionEditCard: View {
                         Button(action: {
                             withAnimation(.spring()) { showingDeleteConfirm = false }
                         }) {
-                            Text("İptal")
+                            Text(LocalizedStringKey("survey_create_cancel"))
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
@@ -1246,7 +1252,7 @@ struct QuestionEditCard: View {
                                 onDelete()
                             }
                         }) {
-                            Text("Sil")
+                            Text(LocalizedStringKey("survey_delete_confirm"))
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
@@ -1360,7 +1366,7 @@ struct CategoryPickerSheet: View {
             VStack(spacing: 20) {
                 // Header
                 HStack {
-                    Text("Kategori Seçin")
+                    Text(LocalizedStringKey("survey_field_category_placeholder"))
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
                     Spacer()
