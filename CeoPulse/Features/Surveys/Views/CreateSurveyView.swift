@@ -357,7 +357,6 @@ struct CreateSurveyView: View {
                     Text(LocalizedStringKey("survey_questions_subtitle")).font(.system(size: 12)).foregroundColor(AppColors.textSecondary)
                 }
                 Spacer()
-                Text(String(format: NSLocalizedString("survey_question_count", comment: ""), questions.count)).font(.system(size: 11)).padding(.horizontal, 10).padding(.vertical, 5).background(Color.white.opacity(0.05)).cornerRadius(8)
             }
             
             // AI Wizard Button
