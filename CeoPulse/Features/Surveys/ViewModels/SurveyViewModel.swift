@@ -30,18 +30,32 @@ class SurveyViewModel: ObservableObject {
     
     private func fetchInitialData() {
         Task {
+            // Fetch User ID
             do {
                 let userId = try await service.fetchCurrentUserId()
-                let participatedIds = try await service.fetchParticipatedSurveyIds()
-                let totalMembers = try await service.fetchTotalUserCount()
-                await MainActor.run {
-                    self.currentUserId = userId
-                    self.participatedSurveyIds = Set(participatedIds)
-                    self.totalUserCount = totalMembers
-                    self.fetchSurveys(isRefresh: true)
-                }
+                await MainActor.run { self.currentUserId = userId }
             } catch {
-                print("Failed to fetch initial survey data: \(error)")
+                print("Failed to fetch current user ID: \(error)")
+            }
+            
+            // Fetch Participated IDs
+            do {
+                let participatedIds = try await service.fetchParticipatedSurveyIds()
+                await MainActor.run { self.participatedSurveyIds = Set(participatedIds) }
+            } catch {
+                print("Failed to fetch participated IDs: \(error)")
+            }
+            
+            // Fetch Total User Count
+            do {
+                let totalMembers = try await service.fetchTotalUserCount()
+                await MainActor.run { self.totalUserCount = totalMembers }
+            } catch {
+                print("Failed to fetch total user count: \(error)")
+            }
+            
+            // Finally fetch surveys
+            await MainActor.run {
                 self.fetchSurveys(isRefresh: true)
             }
         }
@@ -79,7 +93,8 @@ class SurveyViewModel: ObservableObject {
     }
     
     func fetchSurveys(isRefresh: Bool = true) {
-        currentFetchTask?.cancel()
+        // Do not cancel previous tasks to prevent underlying network client hangs.
+        // Instead, we rely on the `capturedTab` check to discard stale data.
         
         if isRefresh {
             currentPage = 0
@@ -116,9 +131,14 @@ class SurveyViewModel: ObservableObject {
                     statusFilter = .active
                 }
                 
-                // Fetch participation IDs without blocking the UI if it fails
-                let participatedIds = (try? await service.fetchParticipatedSurveyIds()) ?? []
-                if Task.isCancelled { return }
+                // Fetch participation IDs safely. If it fails, fall back to the existing state instead of clearing it.
+                var participatedIds = Array(self.participatedSurveyIds)
+                do {
+                    participatedIds = try await service.fetchParticipatedSurveyIds()
+                } catch {
+                    print("Failed to fetch participated IDs, using cached state. Error: \(error)")
+                }
+                // Removed early cancellation check to ensure network stability
                 
                 let fetchedSurveys = try await service.fetchSurveys(
                     query: searchQuery.isEmpty ? nil : searchQuery,
@@ -131,7 +151,7 @@ class SurveyViewModel: ObservableObject {
                     pageSize: pageSize
                 )
                 
-                if Task.isCancelled { return }
+                // Removed early cancellation check
                 
                 await MainActor.run {
                     guard self.selectedTab == capturedTab else { return }
@@ -165,12 +185,10 @@ class SurveyViewModel: ObservableObject {
                     }
                 }
             } catch {
-                if !Task.isCancelled {
-                    await MainActor.run {
-                        self.errorMessage = error.localizedDescription
-                        self.isLoading = false
-                        self.isFetchingMore = false
-                    }
+                await MainActor.run {
+                    self.errorMessage = error.localizedDescription
+                    self.isLoading = false
+                    self.isFetchingMore = false
                 }
             }
         }
