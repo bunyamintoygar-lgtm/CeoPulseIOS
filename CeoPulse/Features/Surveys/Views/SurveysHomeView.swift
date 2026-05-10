@@ -652,19 +652,23 @@ struct SurveysHomeView: View {
                         }
                     }
                     
-                    ForEach(myRecentSurveys) { survey in
-                        let stats = viewModel.surveyStats[survey.id]
-                        let totalVotes = stats?.totalVotes ?? 0
-                        
-                        SurveyCard(
-                            survey: survey,
-                            totalVotes: totalVotes,
-                            participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
-                            timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
-                            isAnonymous: survey.isAnonymous,
-                            buttonTitle: NSLocalizedString("events_see_details", comment: ""),
-                            onJoin: { selectedResultsSurvey = survey }
-                        )
+                    VStack(spacing: 12) {
+                        ForEach(myRecentSurveys) { survey in
+                            let stats = viewModel.surveyStats[survey.id]
+                            let totalVotes = stats?.totalVotes ?? 0
+                            let participationRate = totalVotes > 0 ? Int((Double(totalVotes) / Double(max(viewModel.totalUserCount, 1))) * 100) : 0
+                            
+                            Button(action: { selectedResultsSurvey = survey }) {
+                                SurveyCompletedRow(
+                                    title: survey.title,
+                                    date: survey.createdAt.timeAgoDisplay(),
+                                    rate: participationRate,
+                                    icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "person.circle",
+                                    color: .blue
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
                     }
                 }
             }
