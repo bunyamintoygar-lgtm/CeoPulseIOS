@@ -113,7 +113,7 @@ class SurveyService {
             let survey_id: UUID
         }
         
-        let responses: [SurveyResponseId] = try await SupabaseManager.shared.client.database
+        let responses: [SurveyResponseId] = try await SupabaseManager.shared.client
             .from("survey_responses")
             .select("survey_id")
             .eq("user_id", value: userId)
