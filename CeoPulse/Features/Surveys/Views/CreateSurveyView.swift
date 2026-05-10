@@ -1147,23 +1147,7 @@ struct QuestionEditCard: View {
                     .lineLimit(1...4)
                 
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text(LocalizedStringKey("survey_options_label")).font(.system(size: 13, weight: .medium)).foregroundColor(.white)
-                        Spacer()
-                        Button(action: {
-                            withAnimation { question.options.append("") }
-                        }) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "plus")
-                                Text(LocalizedStringKey("survey_add_option"))
-                            }
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(.purple)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(Capsule().fill(Color.purple.opacity(0.1)))
-                        }
-                    }
+                    Text(LocalizedStringKey("survey_options_label")).font(.system(size: 13, weight: .medium)).foregroundColor(.white)
                     
                     ForEach(0..<question.options.count, id: \.self) { i in
                         HStack {
@@ -1171,7 +1155,7 @@ struct QuestionEditCard: View {
                                 .symbolRenderingMode(.hierarchical)
                                 .foregroundColor(.purple)
                             
-                            TextField(String(format: NSLocalizedString("survey_option_placeholder", comment: ""), i + 1), text: $question.options[i])
+                            TextField("\(NSLocalizedString("survey_option_placeholder_base", comment: "")) \(i + 1)", text: $question.options[i])
                                 .font(.system(size: 14))
                                 .foregroundColor(.white)
                             
@@ -1190,6 +1174,23 @@ struct QuestionEditCard: View {
                         .padding()
                         .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.03)))
                     }
+                    
+                    // Moved Add Option button here
+                    Button(action: {
+                        withAnimation { question.options.append("") }
+                    }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus.circle.fill")
+                            Text(LocalizedStringKey("survey_add_option"))
+                        }
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.purple)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.purple.opacity(0.05)))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.purple.opacity(0.1), lineWidth: 1))
+                    }
+                    .padding(.top, 4)
                 }
                 
                 Divider().background(Color.white.opacity(0.1))

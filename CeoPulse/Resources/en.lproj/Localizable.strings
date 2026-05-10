@@ -267,6 +267,8 @@
 "survey_create_publish" = "Publish";
 "survey_update_publish" = "Update";
 "survey_create_cancel" = "Cancel";
+"survey_option_placeholder" = "Option %d";
+"survey_option_placeholder_base" = "Option";
 
 // Results View
 "survey_results_title" = "Survey Results";

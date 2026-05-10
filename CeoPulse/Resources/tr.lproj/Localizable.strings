@@ -227,6 +227,7 @@
 "survey_options_label" = "Yanıt Seçenekleri";
 "survey_add_option" = "Seçenek Ekle";
 "survey_option_placeholder" = "Seçenek %d";
+"survey_option_placeholder_base" = "Seçenek";
 "survey_allow_multiple" = "Çoklu yanıt";
 "survey_delete_question_title" = "Soruyu Sil";
 "survey_delete_question_desc" = "Bu işlem geri alınamaz.";
