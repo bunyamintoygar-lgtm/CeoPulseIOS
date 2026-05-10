@@ -689,7 +689,7 @@ struct SurveysHomeView: View {
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
-                        Button(action: { withAnimation { viewModel.updateSelectedTab("my_surveys") } }) {
+                        Button(action: { viewModel.updateSelectedTab("my_surveys") }) {
                             Text(LocalizedStringKey("survey_see_all"))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(.purple)
@@ -726,7 +726,7 @@ struct SurveysHomeView: View {
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
-                        Button(action: { withAnimation { viewModel.updateSelectedTab("completed") } }) {
+                        Button(action: { viewModel.updateSelectedTab("completed") }) {
                             Text(LocalizedStringKey("survey_see_all"))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(.purple)
