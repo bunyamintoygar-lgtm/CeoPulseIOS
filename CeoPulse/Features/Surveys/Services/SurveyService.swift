@@ -26,8 +26,7 @@ class SurveyService {
         if let status = status {
             request = request.eq("status", value: status.rawValue)
         } else if let statuses = statuses {
-            let statusValues = statuses.map { "'\($0.rawValue)'" }.joined(separator: ",")
-            request = request.filter("status", operator: .in, value: "(\(statusValues))")
+            request = request.in("status", value: statuses.map { $0.rawValue })
         }
         
         if let creatorId = creatorId {
