@@ -51,7 +51,11 @@ class SurveyViewModel: ObservableObject {
     
     func updateSearchQuery(_ query: String) {
         searchQuery = query
-        searchSubject.send(query)
+        if query.isEmpty {
+            fetchSurveys(isRefresh: true)
+        } else {
+            searchSubject.send(query)
+        }
     }
     
     func updateCategoryFilter(_ categoryId: String?) {

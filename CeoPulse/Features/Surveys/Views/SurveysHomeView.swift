@@ -52,7 +52,14 @@ struct SurveysHomeView: View {
                         Spacer()
                         
                         HStack(spacing: 12) {
-                            Button(action: { withAnimation(.spring()) { isSearchVisible.toggle() } }) {
+                            Button(action: { 
+                                withAnimation(.spring()) { 
+                                    isSearchVisible.toggle()
+                                    if !isSearchVisible {
+                                        viewModel.updateSearchQuery("")
+                                    }
+                                } 
+                            }) {
                                 ZStack {
                                     Circle().fill(Color.white.opacity(0.05)).frame(width: 44, height: 44)
                                     Image(systemName: isSearchVisible ? "xmark" : "magnifyingglass")
