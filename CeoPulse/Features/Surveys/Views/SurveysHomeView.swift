@@ -601,7 +601,7 @@ struct SurveysHomeView: View {
             } else {
                 VStack(spacing: 12) {
                     ForEach(viewModel.completedSurveysList) { survey in
-                        NavigationLink(destination: SurveyResultsView(survey: survey)) {
+                        Button(action: { selectedResultsSurvey = survey }) {
                             SurveyCompletedRow(
                                 title: survey.title,
                                 date: survey.endDate?.formatted(date: .abbreviated, time: .omitted) ?? NSLocalizedString("survey_completed_status", comment: ""),
