@@ -255,6 +255,11 @@
 "survey_step_settings" = "Ayarlar";
 "survey_create_publish" = "Yayınla";
 "survey_update_publish" = "Güncelle";
+"survey_create_cancel" = "İptal";
+
+// Delete Confirmation
+"survey_delete_confirm_title" = "Anketi Sil";
+"survey_delete_confirm_desc" = "'%@' anketini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.";
 
 // Results View
 "survey_results_title" = "Anket Sonuçları";
