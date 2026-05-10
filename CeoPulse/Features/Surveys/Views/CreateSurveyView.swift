@@ -455,12 +455,6 @@ struct CreateSurveyView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text(LocalizedStringKey("ao_target_title")).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
                 HStack(spacing: 12) {
-                    let steps = [
-                        NSLocalizedString("survey_step_details", comment: ""),
-                        NSLocalizedString("survey_step_questions", comment: ""),
-                        NSLocalizedString("survey_step_settings", comment: ""),
-                        NSLocalizedString("survey_step_preview", comment: "")
-                    ]
                     AudienceCard(title: NSLocalizedString("ao_privacy_public", comment: ""), subtitle: NSLocalizedString("ao_privacy_public_desc", comment: ""), icon: "globe", isSelected: targetAudience == NSLocalizedString("ao_privacy_public", comment: "")) { targetAudience = NSLocalizedString("ao_privacy_public", comment: "") }
                     AudienceCard(title: NSLocalizedString("ao_privacy_community", comment: ""), subtitle: NSLocalizedString("ao_privacy_community_desc", comment: ""), icon: "person.2", isSelected: targetAudience == NSLocalizedString("ao_privacy_community", comment: "")) { targetAudience = NSLocalizedString("ao_privacy_community", comment: "") }
                     AudienceCard(title: NSLocalizedString("ao_privacy_private", comment: ""), subtitle: NSLocalizedString("ao_privacy_private_desc", comment: ""), icon: "lock", isSelected: targetAudience == NSLocalizedString("ao_privacy_private", comment: "")) { targetAudience = NSLocalizedString("ao_privacy_private", comment: "") }
