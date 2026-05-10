@@ -162,35 +162,45 @@ struct SurveysHomeView: View {
                     
                     // Content
                     ScrollView {
-                        LazyVStack(spacing: 24) {
-                            if viewModel.isLoading {
-                                ProgressView()
-                                    .tint(.purple)
-                                    .padding(.top, 40)
-                            } else if let error = viewModel.errorMessage {
-                                errorView(error)
-                            } else {
-                                Group {
-                                    switch viewModel.selectedTab {
-                                    case "discovery":
-                                        discoveryDashboard
-                                    case "active":
-                                        activeSurveysList
-                                    case "completed":
-                                        completedSurveysList
-                                    case "my_surveys":
-                                        mySurveysList
-                                    case "archive":
-                                        archiveSurveysList
-                                    default:
-                                        emptyStateView(title: String(format: NSLocalizedString("ao_step3", comment: ""), viewModel.selectedTab))
+                        ScrollViewReader { proxy in
+                            LazyVStack(spacing: 24) {
+                                // Top Anchor for ScrollViewReader
+                                Color.clear.frame(height: 1).id("topAnchor")
+                                
+                                if viewModel.isLoading {
+                                    ProgressView()
+                                        .tint(.purple)
+                                        .padding(.top, 40)
+                                } else if let error = viewModel.errorMessage {
+                                    errorView(error)
+                                } else {
+                                    Group {
+                                        switch viewModel.selectedTab {
+                                        case "discovery":
+                                            discoveryDashboard
+                                        case "active":
+                                            activeSurveysList
+                                        case "completed":
+                                            completedSurveysList
+                                        case "my_surveys":
+                                            mySurveysList
+                                        case "archive":
+                                            archiveSurveysList
+                                        default:
+                                            emptyStateView(title: String(format: NSLocalizedString("ao_step3", comment: ""), viewModel.selectedTab))
+                                        }
                                     }
+                                    .id(viewModel.selectedTab)
                                 }
-                                .id(viewModel.selectedTab)
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 100)
+                            .onChange(of: viewModel.selectedTab) { _ in
+                                withAnimation {
+                                    proxy.scrollTo("topAnchor", anchor: .top)
+                                }
                             }
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 100)
                     }
                     .onAppear {
                         if ConfigManager.shared.surveyCategories.isEmpty {
@@ -689,7 +699,11 @@ struct SurveysHomeView: View {
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
-                        Button(action: { viewModel.updateSelectedTab("my_surveys") }) {
+                        Button(action: { 
+                            DispatchQueue.main.async {
+                                viewModel.updateSelectedTab("my_surveys") 
+                            }
+                        }) {
                             Text(LocalizedStringKey("survey_see_all"))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(.purple)
@@ -726,7 +740,11 @@ struct SurveysHomeView: View {
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
-                        Button(action: { viewModel.updateSelectedTab("completed") }) {
+                        Button(action: { 
+                            DispatchQueue.main.async {
+                                viewModel.updateSelectedTab("completed") 
+                            }
+                        }) {
                             Text(LocalizedStringKey("survey_see_all"))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(.purple)
