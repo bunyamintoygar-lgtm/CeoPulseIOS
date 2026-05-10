@@ -152,9 +152,7 @@ struct SurveysHomeView: View {
                         HStack(spacing: 12) {
                             ForEach(tabs, id: \.id) { tab in
                                 SurveyTabButton(title: tab.title, isSelected: viewModel.selectedTab == tab.id, animationNamespace: animationNamespace) {
-                                    withAnimation {
-                                        viewModel.updateSelectedTab(tab.id)
-                                    }
+                                    viewModel.updateSelectedTab(tab.id)
                                 }
                             }
                         }
@@ -172,20 +170,23 @@ struct SurveysHomeView: View {
                             } else if let error = viewModel.errorMessage {
                                 errorView(error)
                             } else {
-                                switch viewModel.selectedTab {
-                                case "discovery":
-                                    discoveryDashboard
-                                case "active":
-                                    activeSurveysList
-                                case "completed":
-                                    completedSurveysList
-                                case "my_surveys":
-                                    mySurveysList
-                                case "archive":
-                                    archiveSurveysList
-                                default:
-                                    emptyStateView(title: String(format: NSLocalizedString("ao_step3", comment: ""), viewModel.selectedTab))
+                                Group {
+                                    switch viewModel.selectedTab {
+                                    case "discovery":
+                                        discoveryDashboard
+                                    case "active":
+                                        activeSurveysList
+                                    case "completed":
+                                        completedSurveysList
+                                    case "my_surveys":
+                                        mySurveysList
+                                    case "archive":
+                                        archiveSurveysList
+                                    default:
+                                        emptyStateView(title: String(format: NSLocalizedString("ao_step3", comment: ""), viewModel.selectedTab))
+                                    }
                                 }
+                                .id(viewModel.selectedTab)
                             }
                         }
                         .padding(.horizontal, 20)
