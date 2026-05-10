@@ -51,6 +51,7 @@
 "rt_status_active" = "AKTİF";
 "rt_status_upcoming" = "YAKINDA";
 "rt_status_completed" = "TAMAMLANDI";
+"rt_status_archived" = "ARŞİVLENDİ";
 "rt_participants" = "Katılımcı";
 "rt_last_activity" = "Son Aktivite %@ önce";
 "rt_starts_in" = "Başlamasına %@ kaldı";

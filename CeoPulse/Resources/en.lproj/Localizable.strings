@@ -51,6 +51,7 @@
 "rt_status_active" = "ACTIVE";
 "rt_status_upcoming" = "UPCOMING";
 "rt_status_completed" = "COMPLETED";
+"rt_status_archived" = "ARCHIVED";
 "rt_participants" = "Participants";
 "rt_last_activity" = "Last activity %@ ago";
 "rt_starts_in" = "Starts in %@";
