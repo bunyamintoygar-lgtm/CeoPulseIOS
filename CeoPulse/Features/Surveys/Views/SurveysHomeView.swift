@@ -587,8 +587,8 @@ struct SurveysHomeView: View {
     
     private var discoveryDashboard: some View {
         VStack(spacing: 32) {
-            // 1. Discovery Section (Not voted, Active)
-            let discoverySurveys = viewModel.activeSurveys.filter { !viewModel.participatedSurveyIds.contains($0.id) }.prefix(4)
+            // 1. Discovery Section (Not voted, Active/Archived mix)
+            let discoverySurveys = viewModel.surveys.filter { !viewModel.participatedSurveyIds.contains($0.id) }.prefix(4)
             if !discoverySurveys.isEmpty {
                 VStack(alignment: .leading, spacing: 16) {
                     Text(LocalizedStringKey("survey_tab_discovery"))

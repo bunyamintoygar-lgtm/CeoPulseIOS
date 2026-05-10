@@ -85,6 +85,7 @@ class SurveyViewModel: ObservableObject {
             currentPage = 0
             canLoadMore = true
             isLoading = true
+            self.surveys = []
         } else {
             guard canLoadMore && !isFetchingMore else { return }
             isFetchingMore = true
@@ -99,14 +100,12 @@ class SurveyViewModel: ObservableObject {
                 
                 switch capturedTab {
                 case "discovery":
-                    // For dashboard, we need a mix of statuses to show My Surveys and Completed ones
                     statusFilter = nil
                     statusesFilter = [.active, .archived] 
                 case "active": 
                     statusFilter = .active
                     statusesFilter = nil
-                                case "completed": 
-                    // Use broad filter to match dashboard and ensure consistency
+                case "completed": 
                     statusFilter = nil
                     statusesFilter = [.active, .archived]
                 case "my_surveys": 
@@ -117,43 +116,35 @@ class SurveyViewModel: ObservableObject {
                     statusFilter = .active
                 }
                 
-                let participatedIds = try await service.fetchParticipatedSurveyIds()
+                // Fetch participation IDs without blocking the UI if it fails
+                let participatedIds = (try? await service.fetchParticipatedSurveyIds()) ?? []
+                if Task.isCancelled { return }
                 
-                // Optimization: If completed tab is selected but no participations found, return empty early
-                if selectedTab == "completed" && participatedIds.isEmpty {
-                    await MainActor.run {
-                        self.surveys = []
-                        self.isLoading = false
-                        self.canLoadMore = false
-                    }
-                    return
-                }
-
                 let fetchedSurveys = try await service.fetchSurveys(
                     query: searchQuery.isEmpty ? nil : searchQuery,
                     categoryId: selectedCategoryId,
                     creatorId: capturedTab == "my_surveys" ? currentUserId : nil,
                     status: statusFilter,
                     statuses: statusesFilter,
-                    ids: nil, // Fetch broad set and filter locally for consistency
+                    ids: nil,
                     page: currentPage,
                     pageSize: pageSize
                 )
                 
+                if Task.isCancelled { return }
+                
                 await MainActor.run {
-                    if Task.isCancelled || self.selectedTab != capturedTab { return }
+                    guard self.selectedTab == capturedTab else { return }
+                    
                     self.participatedSurveyIds = Set(participatedIds)
                     
                     var processedSurveys = fetchedSurveys
                     
                     if capturedTab == "active" {
-                        // Only show active and NOT voted
                         processedSurveys = processedSurveys.filter { !self.participatedSurveyIds.contains($0.id) }
                     } else if capturedTab == "completed" {
-                        // Filter locally based on participation
                         processedSurveys = processedSurveys.filter { self.participatedSurveyIds.contains($0.id) }
                     } else if capturedTab == "archive" {
-                        // Include expired surveys as well
                         let now = Date()
                         processedSurveys = processedSurveys.filter { $0.status == .archived || ($0.endDate != nil && $0.endDate! < now) }
                     }
@@ -165,20 +156,18 @@ class SurveyViewModel: ObservableObject {
                     }
                     
                     self.canLoadMore = fetchedSurveys.count == pageSize
-                    self.currentPage += 1
                     self.isLoading = false
                     self.isFetchingMore = false
+                    self.currentPage += 1
                     
-                    // Fetch stats for these surveys
                     Task {
                         await self.fetchStats(for: fetchedSurveys)
                     }
                 }
             } catch {
-                // Ignore cancellation errors as they are intentional
-                if !(error is CancellationError) && !Task.isCancelled {
+                if !Task.isCancelled {
                     await MainActor.run {
-                        self.errorMessage = "Anketler yüklenirken bir hata oluştu: \(error.localizedDescription)"
+                        self.errorMessage = error.localizedDescription
                         self.isLoading = false
                         self.isFetchingMore = false
                     }
@@ -222,8 +211,6 @@ class SurveyViewModel: ObservableObject {
     }
     
     var mySurveys: [Survey] {
-        // When in "Oluşturduklarım" tab, we already filtered by creatorId in the fetchSurveys call
-        // but let's be double sure and handle it if we ever use this list elsewhere.
         surveys
     }
     
