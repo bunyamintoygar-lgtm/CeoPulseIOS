@@ -456,47 +456,83 @@ struct SurveysHomeView: View {
             if viewModel.activeSurveysList.isEmpty {
                 emptyStateView(title: NSLocalizedString("rt_status_upcoming", comment: ""))
             } else {
-                ForEach(viewModel.activeSurveysList) { survey in
-                    let stats = viewModel.surveyStats[survey.id]
+                // First Survey as Big Card
+                if let firstSurvey = viewModel.activeSurveysList.first {
+                    let stats = viewModel.surveyStats[firstSurvey.id]
                     let hasVoted = stats?.hasVoted ?? false
                     let totalVotes = stats?.totalVotes ?? 0
-                    let isExpired = survey.endDate != nil && survey.endDate! < Date()
-                    let isCreator = survey.creatorId == viewModel.currentUserId
+                    let isExpired = firstSurvey.endDate != nil && firstSurvey.endDate! < Date()
+                    let isCreator = firstSurvey.creatorId == viewModel.currentUserId
                     
                     SurveyCard(
-                        survey: survey,
+                        survey: firstSurvey,
                         totalVotes: totalVotes, 
                         participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
-                        timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
-                        isAnonymous: survey.isAnonymous,
+                        timeRemaining: firstSurvey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
+                        isAnonymous: firstSurvey.isAnonymous,
                         buttonTitle: isExpired || hasVoted ? NSLocalizedString("rt_view_summary", comment: "") : NSLocalizedString("survey_join_button", comment: ""),
                         onJoin: {
-                            if survey.status == .rejected {
+                            if firstSurvey.status == .rejected {
                                 withAnimation(.spring()) {
-                                    surveyWithRejection = survey
+                                    surveyWithRejection = firstSurvey
                                     showingRejectionPopup = true
                                 }
                             } else if isExpired || hasVoted {
-                                selectedResultsSurvey = survey
+                                selectedResultsSurvey = firstSurvey
                             } else {
-                                selectedSurvey = survey
+                                selectedSurvey = firstSurvey
                             }
                         },
                         onEdit: (isCreator && totalVotes == 0) ? {
-                            surveyToEdit = survey
+                            surveyToEdit = firstSurvey
                         } : nil,
                         onDelete: (isCreator && totalVotes == 0) ? {
-                            surveyToDelete = survey
+                            surveyToDelete = firstSurvey
                             withAnimation(.spring()) {
                                 showingDeleteAlert = true
                             }
                         } : nil
                     )
                     .onAppear {
-                        if let tabKey = ["active", "completed", "my_surveys", "archive"].first(where: { viewModel.selectedTab == $0 }) {
-                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: tabKey)
-                        } else {
-                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "discovery") // fallback
+                        viewModel.loadMoreIfNeeded(currentSurvey: firstSurvey, forTab: "active")
+                    }
+                }
+                
+                // Remaining Surveys as Lists
+                let remainingSurveys = viewModel.activeSurveysList.dropFirst()
+                if !remainingSurveys.isEmpty {
+                    VStack(spacing: 12) {
+                        ForEach(remainingSurveys) { survey in
+                            let stats = viewModel.surveyStats[survey.id]
+                            let totalVotes = stats?.totalVotes ?? 0
+                            let participationRate = totalVotes > 0 ? Int((Double(totalVotes) / Double(max(viewModel.totalUserCount, 1))) * 100) : 0
+                            let hasVoted = stats?.hasVoted ?? false
+                            let isExpired = survey.endDate != nil && survey.endDate! < Date()
+                            
+                            Button(action: { 
+                                if survey.status == .rejected {
+                                    withAnimation(.spring()) {
+                                        surveyWithRejection = survey
+                                        showingRejectionPopup = true
+                                    }
+                                } else if isExpired || hasVoted {
+                                    selectedResultsSurvey = survey
+                                } else {
+                                    selectedSurvey = survey
+                                }
+                            }) {
+                                SurveyCompletedRow(
+                                    title: survey.title,
+                                    date: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
+                                    rate: participationRate,
+                                    icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "sparkles",
+                                    color: .purple
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .onAppear {
+                                viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "active")
+                            }
                         }
                     }
                 }
@@ -561,22 +597,43 @@ struct SurveysHomeView: View {
                     .foregroundColor(AppColors.textSecondary)
                     .padding(.vertical, 10)
             } else {
-                ForEach(viewModel.completedSurveysList) { survey in
-                    NavigationLink(destination: SurveyResultsView(survey: survey)) {
-                        SurveyCompletedRow(
-                            title: survey.title,
-                            date: survey.endDate?.formatted(date: .abbreviated, time: .omitted) ?? NSLocalizedString("survey_completed_status", comment: ""),
-                            rate: 100,
-                            icon: "chart.bar.fill",
-                            color: .purple
-                        )
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                // First Survey as Big Card
+                if let firstSurvey = viewModel.completedSurveysList.first {
+                    let stats = viewModel.surveyStats[firstSurvey.id]
+                    let totalVotes = stats?.totalVotes ?? 0
+                    
+                    SurveyCard(
+                        survey: firstSurvey,
+                        totalVotes: totalVotes,
+                        participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
+                        timeRemaining: firstSurvey.endDate?.formatted(date: .abbreviated, time: .omitted) ?? NSLocalizedString("survey_completed_status", comment: ""),
+                        isAnonymous: firstSurvey.isAnonymous,
+                        buttonTitle: NSLocalizedString("rt_view_summary", comment: ""),
+                        onJoin: { selectedResultsSurvey = firstSurvey }
+                    )
                     .onAppear {
-                        if let tabKey = ["active", "completed", "my_surveys", "archive"].first(where: { viewModel.selectedTab == $0 }) {
-                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: tabKey)
-                        } else {
-                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "discovery") // fallback
+                        viewModel.loadMoreIfNeeded(currentSurvey: firstSurvey, forTab: "completed")
+                    }
+                }
+                
+                // Remaining Surveys as Lists
+                let remainingSurveys = viewModel.completedSurveysList.dropFirst()
+                if !remainingSurveys.isEmpty {
+                    VStack(spacing: 12) {
+                        ForEach(remainingSurveys) { survey in
+                            NavigationLink(destination: SurveyResultsView(survey: survey)) {
+                                SurveyCompletedRow(
+                                    title: survey.title,
+                                    date: survey.endDate?.formatted(date: .abbreviated, time: .omitted) ?? NSLocalizedString("survey_completed_status", comment: ""),
+                                    rate: 100,
+                                    icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "chart.bar.fill",
+                                    color: .purple
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .onAppear {
+                                viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "completed")
+                            }
                         }
                     }
                 }
@@ -729,19 +786,55 @@ struct SurveysHomeView: View {
             if viewModel.archivedSurveysList.isEmpty {
                 emptyStateView(title: NSLocalizedString("rt_status_archived", comment: ""))
             } else {
-                ForEach(viewModel.archivedSurveysList) { survey in
-                    let stats = viewModel.surveyStats[survey.id]
+                // First Survey as Big Card
+                if let firstSurvey = viewModel.archivedSurveysList.first {
+                    let stats = viewModel.surveyStats[firstSurvey.id]
                     let totalVotes = stats?.totalVotes ?? 0
                     
                     SurveyCard(
-                        survey: survey,
+                        survey: firstSurvey,
                         totalVotes: totalVotes,
                         participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
                         timeRemaining: NSLocalizedString("rt_status_archived", comment: ""),
-                        isAnonymous: survey.isAnonymous,
+                        isAnonymous: firstSurvey.isAnonymous,
                         buttonTitle: NSLocalizedString("rt_view_summary", comment: ""),
-                        onJoin: { selectedResultsSurvey = survey }
+                        onJoin: { selectedResultsSurvey = firstSurvey }
                     )
+                    .onAppear {
+                        viewModel.loadMoreIfNeeded(currentSurvey: firstSurvey, forTab: "archive")
+                    }
+                }
+                
+                // Remaining Surveys as Lists
+                let remainingSurveys = viewModel.archivedSurveysList.dropFirst()
+                if !remainingSurveys.isEmpty {
+                    VStack(spacing: 12) {
+                        ForEach(remainingSurveys) { survey in
+                            let stats = viewModel.surveyStats[survey.id]
+                            let totalVotes = stats?.totalVotes ?? 0
+                            let participationRate = totalVotes > 0 ? Int((Double(totalVotes) / Double(max(viewModel.totalUserCount, 1))) * 100) : 0
+                            
+                            Button(action: { selectedResultsSurvey = survey }) {
+                                SurveyCompletedRow(
+                                    title: survey.title,
+                                    date: survey.endDate?.formatted(.dateTime.month().year()) ?? NSLocalizedString("rt_status_archived", comment: ""),
+                                    rate: participationRate,
+                                    icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "archivebox.fill",
+                                    color: .gray
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .onAppear {
+                                viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "archive")
+                            }
+                        }
+                    }
+                }
+                
+                if viewModel.isFetchingMore {
+                    ProgressView()
+                        .tint(.purple)
+                        .padding(.vertical, 10)
                 }
             }
         }
@@ -752,49 +845,83 @@ struct SurveysHomeView: View {
             if viewModel.mySurveysList.isEmpty {
                 emptyStateView(title: NSLocalizedString("rt_tab_my_discussions", comment: ""))
             } else {
-                ForEach(viewModel.mySurveysList) { survey in
-                    let stats = viewModel.surveyStats[survey.id]
+                // First Survey as Big Card
+                if let firstSurvey = viewModel.mySurveysList.first {
+                    let stats = viewModel.surveyStats[firstSurvey.id]
                     let totalVotes = stats?.totalVotes ?? 0
-                    let isCreator = survey.creatorId == viewModel.currentUserId
+                    let isCreator = firstSurvey.creatorId == viewModel.currentUserId
                     
                     SurveyCard(
-                        survey: survey,
+                        survey: firstSurvey,
                         totalVotes: totalVotes,
                         participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
-                        timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
-                        isAnonymous: survey.isAnonymous,
+                        timeRemaining: firstSurvey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
+                        isAnonymous: firstSurvey.isAnonymous,
                         buttonTitle: NSLocalizedString("events_see_details", comment: ""),
                         onJoin: {
-                            if survey.status == .rejected {
+                            if firstSurvey.status == .rejected {
                                 withAnimation(.spring()) {
-                                    surveyWithRejection = survey
+                                    surveyWithRejection = firstSurvey
                                     showingRejectionPopup = true
                                 }
                             } else {
-                                selectedResultsSurvey = survey
+                                selectedResultsSurvey = firstSurvey
                             }
                         },
                         onEdit: (isCreator && totalVotes == 0) ? {
-                            surveyToEdit = survey
+                            surveyToEdit = firstSurvey
                         } : nil,
                         onDelete: (isCreator && totalVotes == 0) ? {
-                            surveyToDelete = survey
+                            surveyToDelete = firstSurvey
                             withAnimation(.spring()) {
                                 showingDeleteAlert = true
                             }
                         } : nil
                     )
                     .onAppear {
-                        if let tabKey = ["active", "completed", "my_surveys", "archive"].first(where: { viewModel.selectedTab == $0 }) {
-                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: tabKey)
-                        } else {
-                            viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "discovery") // fallback
+                        viewModel.loadMoreIfNeeded(currentSurvey: firstSurvey, forTab: "my_surveys")
+                    }
+                }
+                
+                // Remaining Surveys as Lists
+                let remainingSurveys = viewModel.mySurveysList.dropFirst()
+                if !remainingSurveys.isEmpty {
+                    VStack(spacing: 12) {
+                        ForEach(remainingSurveys) { survey in
+                            let stats = viewModel.surveyStats[survey.id]
+                            let totalVotes = stats?.totalVotes ?? 0
+                            let participationRate = totalVotes > 0 ? Int((Double(totalVotes) / Double(max(viewModel.totalUserCount, 1))) * 100) : 0
+                            
+                            Button(action: { 
+                                if survey.status == .rejected {
+                                    withAnimation(.spring()) {
+                                        surveyWithRejection = survey
+                                        showingRejectionPopup = true
+                                    }
+                                } else {
+                                    selectedResultsSurvey = survey
+                                }
+                            }) {
+                                SurveyCompletedRow(
+                                    title: survey.title,
+                                    date: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
+                                    rate: participationRate,
+                                    icon: ConfigManager.shared.surveyCategories.first(where: { $0.id == survey.categoryId })?.icon ?? "person.circle",
+                                    color: .blue
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .onAppear {
+                                viewModel.loadMoreIfNeeded(currentSurvey: survey, forTab: "my_surveys")
+                            }
                         }
                     }
                 }
                 
                 if viewModel.isFetchingMore {
-                    ProgressView().tint(.purple).padding(.vertical, 10)
+                    ProgressView()
+                        .tint(.purple)
+                        .padding(.vertical, 10)
                 }
             }
         }
