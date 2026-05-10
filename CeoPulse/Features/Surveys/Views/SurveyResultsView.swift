@@ -31,7 +31,7 @@ struct SurveyResultsView: View {
                         Text(error)
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
-                        Button("Tekrar Dene") {
+                        Button(LocalizedStringKey("rt_join_title")) {
                             viewModel.fetchData()
                         }
                         .padding()
@@ -76,7 +76,7 @@ struct SurveyResultsView: View {
             
             Spacer()
             
-            Text("Anket Sonuçları")
+            Text(LocalizedStringKey("survey_results_title"))
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.white)
             
@@ -98,10 +98,10 @@ struct SurveyResultsView: View {
                 .font(.title)
                 .bold()
             
-            Text("CEO Pulse Anket Raporu")
+            Text(NSLocalizedString("survey_report_title", comment: ""))
                 .font(.headline)
             
-            Text("Toplam Katılım: \(viewModel.participationCount)")
+            Text("\(NSLocalizedString("survey_total_participation", comment: "")): \(viewModel.participationCount)")
             
             ForEach(viewModel.questions) { question in
                 VStack(alignment: .leading, spacing: 10) {
@@ -111,7 +111,7 @@ struct SurveyResultsView: View {
                         HStack {
                             Text(option.optionText)
                             Spacer()
-                            Text("\(votes) oy")
+                            Text("\(votes) \(NSLocalizedString("survey_votes_label", comment: ""))")
                         }
                     }
                 }
@@ -133,7 +133,7 @@ struct SurveyResultsView: View {
     private var participationStats: some View {
         HStack(spacing: 20) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Toplam Katılım")
+                Text(LocalizedStringKey("survey_total_participation"))
                     .font(.system(size: 12))
                     .foregroundColor(AppColors.textSecondary)
                 Text("\(viewModel.participationCount)")
@@ -144,10 +144,10 @@ struct SurveyResultsView: View {
             Spacer()
             
             VStack(alignment: .trailing, spacing: 4) {
-                Text("Durum")
+                Text(LocalizedStringKey("rt_field_status"))
                     .font(.system(size: 12))
                     .foregroundColor(AppColors.textSecondary)
-                Text(viewModel.survey.endDate != nil && viewModel.survey.endDate! < Date() ? "Tamamlandı" : "Aktif")
+                Text(viewModel.survey.endDate != nil && viewModel.survey.endDate! < Date() ? NSLocalizedString("survey_completed_status", comment: "") : NSLocalizedString("rt_status_active", comment: ""))
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(viewModel.survey.endDate != nil && viewModel.survey.endDate! < Date() ? .green : .orange)
             }
@@ -198,7 +198,7 @@ class SurveyResultsViewModel: ObservableObject {
                 }
             } catch {
                 DispatchQueue.main.async {
-                    self.errorMessage = "Sonuçlar yüklenirken hata oluştu: \(error.localizedDescription)"
+                    self.errorMessage = "\(NSLocalizedString("survey_results_error", comment: "")): \(error.localizedDescription)"
                     self.isLoading = false
                 }
             }
@@ -270,7 +270,7 @@ struct OptionResultRow: View {
             }
             .frame(height: 8)
             
-            Text("\(votes) oy")
+            Text("\(votes) \(NSLocalizedString("survey_votes_label", comment: ""))")
                 .font(.system(size: 10))
                 .foregroundColor(AppColors.textSecondary)
         }

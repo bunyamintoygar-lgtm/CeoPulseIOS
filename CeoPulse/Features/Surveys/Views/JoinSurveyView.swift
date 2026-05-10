@@ -50,7 +50,7 @@ struct JoinSurveyView: View {
                                 .font(.system(size: 14))
                                 .foregroundColor(.white)
                                 .multilineTextAlignment(.center)
-                            Button("Tekrar Dene") {
+                            Button(LocalizedStringKey("rt_join_title")) {
                                 viewModel.fetchQuestions()
                             }
                             .padding(.horizontal, 20)
@@ -110,7 +110,7 @@ struct JoinSurveyView: View {
             Spacer()
             
             VStack(spacing: 4) {
-                Text("Ankete Katıl")
+                Text(LocalizedStringKey("survey_join_button"))
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
                 
@@ -119,7 +119,7 @@ struct JoinSurveyView: View {
                         .fill(Color.green)
                         .frame(width: 6, height: 6)
                         .symbolEffect(.pulse, options: .repeating)
-                    Text("Canlı Oturum")
+                    Text(LocalizedStringKey("survey_join_live"))
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.green)
                 }
@@ -160,7 +160,7 @@ struct JoinSurveyView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "person.2.fill")
                         .symbolRenderingMode(.hierarchical)
-                    Text("Canlı")
+                    Text(LocalizedStringKey("rt_live"))
                 }
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(AppColors.textSecondary)
@@ -172,7 +172,7 @@ struct JoinSurveyView: View {
                     .foregroundColor(.white)
                     .lineLimit(3)
                 
-                Text(viewModel.survey.description ?? "Küresel CEO Pulse Anketi")
+                Text(viewModel.survey.description ?? NSLocalizedString("survey_join_default_desc", comment: ""))
                     .font(.system(size: 14))
                     .foregroundColor(AppColors.textSecondary)
             }
@@ -180,12 +180,12 @@ struct JoinSurveyView: View {
             Divider().background(Color.white.opacity(0.1))
             
             HStack {
-                Label(viewModel.survey.isAnonymous ? "Anonim Katılım" : "İsimli Katılım", systemImage: viewModel.survey.isAnonymous ? "eye.slash.fill" : "eye.fill")
+                Label(viewModel.survey.isAnonymous ? NSLocalizedString("survey_anonymous", comment: "") : NSLocalizedString("survey_join_named", comment: ""), systemImage: viewModel.survey.isAnonymous ? "eye.slash.fill" : "eye.fill")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(viewModel.survey.isAnonymous ? .green : .blue)
                 Spacer()
                 if let endDate = viewModel.survey.endDate {
-                    Text("\(endDate.daysFromNow()) gün kaldı")
+                    Text(String(format: NSLocalizedString("survey_days_left", comment: ""), endDate.daysFromNow()))
                         .font(.system(size: 12))
                         .foregroundColor(AppColors.textSecondary)
                 }
@@ -208,10 +208,10 @@ struct JoinSurveyView: View {
                 .symbolEffect(.pulse, options: .repeating)
             
             VStack(alignment: .leading, spacing: 2) {
-                Text("Gizlilik Koruması")
+                Text(LocalizedStringKey("survey_join_privacy_title"))
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.white)
-                Text("Yanıtlarınız şifrelenir ve güvenle saklanır.")
+                Text(LocalizedStringKey("survey_join_privacy_desc"))
                     .font(.system(size: 12))
                     .foregroundColor(AppColors.textSecondary)
             }
@@ -230,7 +230,7 @@ struct JoinSurveyView: View {
             
             HStack(spacing: 12) {
                 Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                    Text("Daha Sonra")
+                    Text(LocalizedStringKey("survey_join_later"))
                         .font(.system(size: 15, weight: .bold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -257,7 +257,7 @@ struct JoinSurveyView: View {
                         if viewModel.isLoading {
                             ProgressView().tint(.white)
                         } else {
-                            Text(viewModel.currentQuestionIndex == viewModel.questions.count - 1 ? "Anketi Bitir" : "Sıradaki Soru")
+                            Text(viewModel.currentQuestionIndex == viewModel.questions.count - 1 ? LocalizedStringKey("survey_join_finish") : LocalizedStringKey("survey_join_next"))
                             Image(systemName: viewModel.currentQuestionIndex == viewModel.questions.count - 1 ? "checkmark.circle.fill" : "arrow.right")
                         }
                     }
@@ -278,7 +278,7 @@ struct JoinSurveyView: View {
             HStack(spacing: 4) {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 10))
-                Text("Yanıtlarınız güvenli protokoller ile korunmaktadır.")
+                Text(LocalizedStringKey("survey_join_security_note"))
                     .font(.system(size: 10, weight: .medium))
             }
             .foregroundColor(AppColors.textSecondary)
@@ -311,7 +311,7 @@ struct QuestionActionCard: View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("SORU \(number)")
+                    Text(String(format: NSLocalizedString("survey_join_question_label", comment: ""), number))
                         .font(.system(size: 12, weight: .black))
                         .foregroundColor(.purple)
                     
@@ -332,7 +332,7 @@ struct QuestionActionCard: View {
             if question.questionType == .multipleChoice {
                 HStack(spacing: 4) {
                     Image(systemName: "checklist")
-                    Text("Birden fazla seçim yapabilirsiniz (Maks: \(question.maxSelections))")
+                    Text(String(format: NSLocalizedString("survey_join_multiple_choice_hint", comment: ""), question.maxSelections))
                 }
                 .font(.system(size: 11))
                 .foregroundColor(AppColors.textSecondary)

@@ -30,7 +30,7 @@ struct SurveyCard: View {
                             Image(systemName: "eye.slash.fill")
                                 .font(.system(size: 10))
                                 .symbolRenderingMode(.hierarchical)
-                            Text("Anonim")
+                            Text(LocalizedStringKey("survey_anonymous"))
                                 .font(.system(size: 10, weight: .bold))
                         }
                         .padding(.horizontal, 10)
@@ -94,7 +94,7 @@ struct SurveyCard: View {
                         Text("%\(Int(participationRate * 100))")
                             .font(.system(size: 20, weight: .black))
                             .foregroundColor(.white)
-                        Text("Katılım")
+                        Text(LocalizedStringKey("survey_total_participation"))
                             .font(.system(size: 8, weight: .bold))
                             .foregroundColor(AppColors.textSecondary)
                     }
@@ -143,7 +143,7 @@ struct SurveyCard: View {
                 // Main Action (Join/Results)
                 Button(action: onJoin) {
                     HStack {
-                        Text(survey.status == .rejected ? "Reddedildi" : buttonTitle)
+                        Text(survey.status == .rejected ? NSLocalizedString("survey_status_rejected", comment: "") : buttonTitle)
                             .font(.system(size: 16, weight: .bold))
                         if survey.status != .rejected {
                             Image(systemName: "chevron.right")
@@ -235,7 +235,7 @@ struct SurveyCompletedRow: View {
                             .symbolRenderingMode(.palette)
                             .foregroundStyle(.white, .green)
                             .symbolEffect(.bounce, value: true)
-                        Text("Tamamlandı")
+                        Text(LocalizedStringKey("survey_completed_status"))
                     }
                     .foregroundColor(.green)
                 }
@@ -249,7 +249,7 @@ struct SurveyCompletedRow: View {
                 Text("%\(rate)")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.green)
-                Text("Katılım Oranı")
+                Text(LocalizedStringKey("survey_participation_rate_label"))
                     .font(.system(size: 8))
                     .foregroundColor(AppColors.textSecondary)
             }

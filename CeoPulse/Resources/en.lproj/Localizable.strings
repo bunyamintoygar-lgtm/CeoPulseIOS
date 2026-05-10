@@ -227,6 +227,30 @@
 "survey_setting_max_duration" = "Max 3 Months";
 "survey_setting_auto_close_info" = "Your survey will automatically close on %@ at the latest.";
 
+// Join Survey
+"survey_join_live" = "Live Session";
+"survey_join_default_desc" = "Global CEO Pulse Survey";
+"survey_join_named" = "Named Participation";
+"survey_join_privacy_title" = "Privacy Protection";
+"survey_join_privacy_desc" = "Your responses are encrypted and stored securely.";
+"survey_join_later" = "Later";
+"survey_join_finish" = "Finish Survey";
+"survey_join_next" = "Next Question";
+"survey_join_question_label" = "QUESTION %d";
+"survey_join_multiple_choice_hint" = "You can select multiple options (Max: %d)";
+"survey_join_security_note" = "Your responses are protected by secure protocols.";
+"survey_participation_rate_label" = "Participation Rate";
+"survey_total_participation" = "Total Participation";
+"survey_setting_allow_change" = "Allow editing responses";
+"survey_setting_required" = "Mandatory response";
+"survey_setting_participation_limit" = "Participation Limit (Optional)";
+"survey_setting_unlimited" = "Unlimited participation";
+"survey_setting_limit_define" = "Set participation limit";
+"survey_setting_advanced" = "Advanced Options";
+"survey_setting_end_date" = "Survey End Date";
+"survey_setting_max_duration" = "Max 3 Months";
+"survey_setting_auto_close_info" = "Your survey will automatically close on %@ at the latest.";
+
 // Drafts
 "survey_draft_resume_title" = "Unfinished Survey";
 "survey_draft_resume_desc" = "A draft of a survey you started earlier was found. Would you like to continue where you left off?";

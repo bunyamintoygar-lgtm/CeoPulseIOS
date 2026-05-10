@@ -227,6 +227,30 @@
 "survey_setting_max_duration" = "Max 3 Ay";
 "survey_setting_auto_close_info" = "Anketiniz en geç %@ tarihinde otomatik olarak kapanacaktır.";
 
+// Join Survey
+"survey_join_live" = "Canlı Oturum";
+"survey_join_default_desc" = "Küresel CEO Pulse Anketi";
+"survey_join_named" = "İsimli Katılım";
+"survey_join_privacy_title" = "Gizlilik Koruması";
+"survey_join_privacy_desc" = "Yanıtlarınız şifrelenir ve güvenle saklanır.";
+"survey_join_later" = "Daha Sonra";
+"survey_join_finish" = "Anketi Bitir";
+"survey_join_next" = "Sıradaki Soru";
+"survey_join_question_label" = "SORU %d";
+"survey_join_multiple_choice_hint" = "Birden fazla seçim yapabilirsiniz (Maks: %d)";
+"survey_join_security_note" = "Yanıtlarınız güvenli protokoller ile korunmaktadır.";
+"survey_participation_rate_label" = "Katılım Oranı";
+"survey_total_participation" = "Toplam Katılım";
+"survey_setting_allow_change" = "Yanıtları değiştirmeye izin ver";
+"survey_setting_required" = "Yanıtlamayı zorunlu tut";
+"survey_setting_participation_limit" = "Katılım Limiti (İsteğe bağlı)";
+"survey_setting_unlimited" = "Sınırsız katılım";
+"survey_setting_limit_define" = "Katılım limiti belirle";
+"survey_setting_advanced" = "Gelişmiş Seçenekler";
+"survey_setting_end_date" = "Anket Bitiş Tarihi";
+"survey_setting_max_duration" = "Max 3 Ay";
+"survey_setting_auto_close_info" = "Anketiniz en geç %@ tarihinde otomatik olarak kapanacaktır.";
+
 // Drafts
 "survey_draft_resume_title" = "Yarım Kalan Anket";
 "survey_draft_resume_desc" = "Daha önce başladığınız bir anket taslağı bulundu. Kaldığınız yerden devam etmek ister misiniz?";
