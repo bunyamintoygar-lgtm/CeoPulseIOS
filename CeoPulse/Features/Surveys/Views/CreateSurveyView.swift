@@ -74,7 +74,7 @@ struct CreateSurveyView: View {
                             id: UUID(),
                             text: raw.text,
                             options: raw.options,
-                            type: raw.type,
+                            type: SurveyQuestion.QuestionType(rawValue: raw.type) ?? .singleChoice,
                             isRequired: raw.is_required ?? true
                         )
                     }
