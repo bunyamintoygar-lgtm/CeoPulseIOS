@@ -265,6 +265,8 @@
 "survey_step_questions" = "Questions";
 "survey_step_settings" = "Settings";
 "survey_create_publish" = "Publish";
+"survey_update_publish" = "Update";
+"survey_create_cancel" = "Cancel";
 
 // Results View
 "survey_results_title" = "Survey Results";
