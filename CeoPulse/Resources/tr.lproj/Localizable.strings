@@ -247,6 +247,14 @@
 "survey_setting_max_duration" = "Max 3 Ay";
 "survey_setting_auto_close_info" = "Anketiniz en geç %@ tarihinde otomatik olarak kapanacaktır.";
 
+// Create Survey Flow
+"survey_create_nav_title" = "Anket Oluştur";
+"survey_create_subtitle" = "Anketinizi oluşturun ve paylaşın.";
+"survey_step_details" = "Detaylar";
+"survey_step_questions" = "Sorular";
+"survey_step_settings" = "Ayarlar";
+"survey_create_publish" = "Yayınla";
+
 // Results View
 "survey_results_title" = "Anket Sonuçları";
 "survey_results_error" = "Sonuçlar yüklenirken bir hata oluştu";

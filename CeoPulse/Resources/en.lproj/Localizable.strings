@@ -256,6 +256,14 @@
 "survey_setting_max_duration" = "Max 3 Months";
 "survey_setting_auto_close_info" = "Your survey will automatically close on %@ at the latest.";
 
+// Create Survey Flow
+"survey_create_nav_title" = "Create Survey";
+"survey_create_subtitle" = "Create and share your survey.";
+"survey_step_details" = "Details";
+"survey_step_questions" = "Questions";
+"survey_step_settings" = "Settings";
+"survey_create_publish" = "Publish";
+
 // Results View
 "survey_results_title" = "Survey Results";
 "survey_results_error" = "An error occurred while loading results";
