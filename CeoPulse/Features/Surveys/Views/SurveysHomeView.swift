@@ -466,7 +466,7 @@ struct SurveysHomeView: View {
                     SurveyCard(
                         survey: survey,
                         totalVotes: totalVotes, 
-                        participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
+                        participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
                         timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
                         isAnonymous: survey.isAnonymous,
                         buttonTitle: isExpired || hasVoted ? NSLocalizedString("rt_view_summary", comment: "") : NSLocalizedString("survey_join_button", comment: ""),
@@ -602,7 +602,7 @@ struct SurveysHomeView: View {
                         SurveyCard(
                             survey: survey,
                             totalVotes: totalVotes,
-                            participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
+                            participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
                             timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
                             isAnonymous: survey.isAnonymous,
                             buttonTitle: NSLocalizedString("survey_join_button", comment: ""),
@@ -635,7 +635,7 @@ struct SurveysHomeView: View {
                         SurveyCard(
                             survey: survey,
                             totalVotes: totalVotes,
-                            participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
+                            participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
                             timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
                             isAnonymous: survey.isAnonymous,
                             buttonTitle: NSLocalizedString("events_see_details", comment: ""),
@@ -665,7 +665,7 @@ struct SurveysHomeView: View {
                         ForEach(completedRecent) { survey in
                             let stats = viewModel.surveyStats[survey.id]
                             let totalVotes = stats?.totalVotes ?? 0
-                            let participationRate = totalVotes > 0 ? min(totalVotes * 7, 100) : 0
+                            let participationRate = totalVotes > 0 ? Int((Double(totalVotes) / Double(max(viewModel.totalUserCount, 1))) * 100) : 0
                             
                             Button(action: { selectedResultsSurvey = survey }) {
                                 SurveyCompletedRow(
@@ -700,7 +700,7 @@ struct SurveysHomeView: View {
                     SurveyCard(
                         survey: survey,
                         totalVotes: totalVotes,
-                        participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
+                        participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
                         timeRemaining: NSLocalizedString("rt_status_archived", comment: ""),
                         isAnonymous: survey.isAnonymous,
                         buttonTitle: NSLocalizedString("rt_view_summary", comment: ""),
@@ -724,7 +724,7 @@ struct SurveysHomeView: View {
                     SurveyCard(
                         survey: survey,
                         totalVotes: totalVotes,
-                        participationRate: totalVotes > 0 ? Double(min(totalVotes * 7, 100)) / 100.0 : 0.0,
+                        participationRate: Double(totalVotes) / Double(max(viewModel.totalUserCount, 1)),
                         timeRemaining: survey.endDate?.timeRemaining() ?? NSLocalizedString("rt_status_active", comment: ""),
                         isAnonymous: survey.isAnonymous,
                         buttonTitle: NSLocalizedString("events_see_details", comment: ""),

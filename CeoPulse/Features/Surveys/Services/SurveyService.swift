@@ -123,6 +123,16 @@ class SurveyService {
         return Array(Set(responses.map { $0.survey_id }))
     }
     
+    func fetchTotalUserCount() async throws -> Int {
+        // Count total registered profiles to calculate real participation rates
+        let response = try await SupabaseManager.shared.client
+            .from("profiles")
+            .select("id", head: true, count: .exact)
+            .execute()
+        
+        return response.count ?? 1
+    }
+    
     struct SurveyStats: Codable {
         let totalVotes: Int
         let hasVoted: Bool

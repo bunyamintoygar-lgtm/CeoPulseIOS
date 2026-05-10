@@ -13,6 +13,7 @@ class SurveyViewModel: ObservableObject {
     @Published var selectedCategoryId: String? = nil
     @Published var selectedTab = "discovery" // Internal keys: discovery, active, completed, my_surveys, archive
     @Published var currentUserId: UUID? = nil
+    @Published var totalUserCount: Int = 1
     @Published var participatedSurveyIds: Set<UUID> = []
     private var searchSubject = PassthroughSubject<String, Never>()
     private var cancellables = Set<AnyCancellable>()
@@ -32,9 +33,11 @@ class SurveyViewModel: ObservableObject {
             do {
                 let userId = try await service.fetchCurrentUserId()
                 let participatedIds = try await service.fetchParticipatedSurveyIds()
+                let totalMembers = try await service.fetchTotalUserCount()
                 await MainActor.run {
                     self.currentUserId = userId
                     self.participatedSurveyIds = Set(participatedIds)
+                    self.totalUserCount = totalMembers
                     self.fetchSurveys(isRefresh: true)
                 }
             } catch {
