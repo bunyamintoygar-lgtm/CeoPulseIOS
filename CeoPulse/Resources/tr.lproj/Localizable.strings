@@ -254,6 +254,7 @@
 "survey_step_questions" = "Sorular";
 "survey_step_settings" = "Ayarlar";
 "survey_create_publish" = "Yayınla";
+"survey_update_publish" = "Güncelle";
 
 // Results View
 "survey_results_title" = "Anket Sonuçları";

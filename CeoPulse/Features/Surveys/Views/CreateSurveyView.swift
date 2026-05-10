@@ -682,7 +682,7 @@ struct CreateSurveyView: View {
                                 .tint(.white)
                                 .padding(.trailing, 8)
                         }
-                        Text(surveyToEdit != nil ? LocalizedStringKey("survey_update_publish") : (currentStep == 4 ? LocalizedStringKey("survey_create_publish") : LocalizedStringKey("continue")))
+                        Text(surveyToEdit != nil ? NSLocalizedString("survey_update_publish", comment: "") : (currentStep == 4 ? NSLocalizedString("survey_create_publish", comment: "") : NSLocalizedString("continue", comment: "")))
                         if !isPublishing {
                             Image(systemName: surveyToEdit != nil ? "checkmark" : "arrow.right")
                         }
