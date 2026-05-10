@@ -110,11 +110,7 @@ class SurveyService {
         let userId = session.user.id
         
         struct SurveyResponseId: Codable {
-            let surveyId: UUID
-            
-            enum CodingKeys: String, CodingKey {
-                case surveyId = "survey_id"
-            }
+            let survey_id: UUID
         }
         
         let responses: [SurveyResponseId] = try await SupabaseManager.shared.client.database
@@ -124,7 +120,7 @@ class SurveyService {
             .execute()
             .value
             
-        return Array(Set(responses.map { $0.surveyId }))
+        return Array(Set(responses.map { $0.survey_id }))
     }
     
     struct SurveyStats: Codable {

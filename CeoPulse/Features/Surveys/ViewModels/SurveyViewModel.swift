@@ -96,8 +96,9 @@ class SurveyViewModel: ObservableObject {
                 
                 switch capturedTab {
                 case "discovery":
+                    // For dashboard, we need a mix of statuses to show My Surveys and Completed ones
                     statusFilter = nil
-                    statusesFilter = [.active]
+                    statusesFilter = [.active, .archived] 
                 case "active": 
                     statusFilter = .active
                     statusesFilter = nil
