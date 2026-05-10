@@ -167,10 +167,13 @@ class SurveyViewModel: ObservableObject {
                     }
                 }
             } catch {
-                await MainActor.run {
-                    self.errorMessage = "Anketler yüklenirken bir hata oluştu: \(error.localizedDescription)"
-                    self.isLoading = false
-                    self.isFetchingMore = false
+                // Ignore cancellation errors as they are intentional
+                if !(error is CancellationError) && !Task.isCancelled {
+                    await MainActor.run {
+                        self.errorMessage = "Anketler yüklenirken bir hata oluştu: \(error.localizedDescription)"
+                        self.isLoading = false
+                        self.isFetchingMore = false
+                    }
                 }
             }
         }

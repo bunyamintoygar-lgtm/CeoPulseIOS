@@ -771,13 +771,14 @@ struct SurveysHomeView: View {
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
             
-            Button(LocalizedStringKey("rt_join_title")) {
-                viewModel.fetchSurveys()
+            Button(action: { viewModel.fetchSurveys() }) {
+                Text(LocalizedStringKey("common_retry"))
+                    .font(.system(size: 15, weight: .bold))
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(Capsule().fill(Color.purple))
+                    .foregroundColor(.white)
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 12)
-            .background(Capsule().fill(Color.purple))
-            .foregroundColor(.white)
         }
         .padding(.top, 60)
     }
