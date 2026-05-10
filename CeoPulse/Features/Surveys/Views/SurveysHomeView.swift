@@ -807,18 +807,8 @@ struct SurveysHomeView: View {
                         let isCreator = survey.creatorId == viewModel.currentUserId
                         let isExpired = survey.endDate != nil && survey.endDate! < Date()
                         
-                        let badgeText: String
-                        let badgeColor: Color
-                        if survey.status == .rejected {
-                            badgeText = NSLocalizedString("status_rejected", value: "REDDEDİLDİ", comment: "")
-                            badgeColor = .red
-                        } else if isExpired {
-                            badgeText = NSLocalizedString("status_passive", value: "PASİF", comment: "")
-                            badgeColor = .gray
-                        } else {
-                            badgeText = NSLocalizedString("status_active", value: "AKTİF", comment: "")
-                            badgeColor = .purple
-                        }
+                        let badgeText = survey.status == .rejected ? NSLocalizedString("status_rejected", value: "REDDEDİLDİ", comment: "") : (isExpired ? NSLocalizedString("status_passive", value: "PASİF", comment: "") : NSLocalizedString("status_active", value: "AKTİF", comment: ""))
+                        let badgeColor: Color = survey.status == .rejected ? .red : (isExpired ? .gray : .purple)
                         
                         Button(action: { 
                             if survey.status == .rejected {
