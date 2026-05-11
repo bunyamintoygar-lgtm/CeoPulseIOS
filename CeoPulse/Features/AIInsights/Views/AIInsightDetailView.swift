@@ -151,7 +151,7 @@ struct AIInsightDetailView: View {
             }
             
             Text(insight.title)
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: 16, weight: .bold)) // 18 -> 16
                 .foregroundColor(.white)
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
@@ -244,7 +244,7 @@ struct AIInsightDetailView: View {
             ForEach(insight.content.findingsTab) { finding in
                 VStack(alignment: .leading, spacing: 8) {
                     Text(finding.title)
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.system(size: 14, weight: .bold)) // 15 -> 14
                         .foregroundColor(.white)
                     
                     Text(finding.desc)
@@ -326,7 +326,7 @@ struct AIInsightDetailView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Text(rec.title)
-                            .font(.system(size: 15, weight: .bold))
+                            .font(.system(size: 14, weight: .bold)) // 15 -> 14
                             .foregroundColor(.white)
                         Spacer()
                         
