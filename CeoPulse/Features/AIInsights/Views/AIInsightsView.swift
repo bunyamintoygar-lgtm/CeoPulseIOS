@@ -71,7 +71,8 @@ struct AIInsightsView: View {
                             title: featured.title,
                             description: featured.subtitle ?? "",
                             readTime: featured.readTime,
-                            date: "Bugün" // Format date if needed
+                            date: "Bugün",
+                            imageUrl: featured.imageUrl
                         )
                     }
                     .padding(.horizontal, 20)

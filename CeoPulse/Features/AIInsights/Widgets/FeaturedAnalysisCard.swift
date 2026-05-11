@@ -5,10 +5,11 @@ struct FeaturedAnalysisCard: View {
     let description: String
     let readTime: Int
     let date: String
+    let imageUrl: String?
     
     var body: some View {
         ZStack(alignment: .leading) {
-            // Background with Gradient and AI Brain Mesh
+            // Background with Gradient
             RoundedRectangle(cornerRadius: 24)
                 .fill(
                     LinearGradient(
@@ -18,21 +19,37 @@ struct FeaturedAnalysisCard: View {
                     )
                 )
             
-            // AI Brain mesh placeholder (Simplified with icons)
-            HStack {
-                Spacer()
-                Image(systemName: "brain.head.profile")
-                    .font(.system(size: 140))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [AppColors.primaryAccent.opacity(0.3), .clear],
-                            startPoint: .top,
-                            endPoint: .bottom
+            // Image or Brain Mesh
+            if let urlString = imageUrl, let url = URL(string: urlString) {
+                AsyncImage(url: url) { image in
+                    image.resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Color.clear
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .overlay(
+                    LinearGradient(colors: [Color(hex: "1A1B2E").opacity(0.8), .clear], startPoint: .leading, endPoint: .trailing)
+                )
+                .cornerRadius(24)
+                .clipped()
+            } else {
+                // AI Brain mesh placeholder (Simplified with icons)
+                HStack {
+                    Spacer()
+                    Image(systemName: "brain.head.profile")
+                        .font(.system(size: 140))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [AppColors.primaryAccent.opacity(0.3), .clear],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
                         )
-                    )
-                    .offset(x: 20)
+                        .offset(x: 20)
+                }
+                .clipped()
             }
-            .clipped()
             
             VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 6) {
