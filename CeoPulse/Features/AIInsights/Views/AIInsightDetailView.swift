@@ -102,7 +102,7 @@ struct AIInsightDetailView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 20)
-        .padding(.top, 10) // Boşluğu azalttım
+        .padding(.top, 0) // Boşluğu tamamen kaldırdım
     }
     
     private var tabPicker: some View {
