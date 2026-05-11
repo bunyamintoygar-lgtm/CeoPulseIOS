@@ -273,13 +273,15 @@ struct AIInsightDetailView: View {
             ForEach(insight.content.recommendationsTab) { rec in
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Image(systemName: rec.icon)
-                            .foregroundColor(.indigo)
                         Text(rec.title)
                             .font(.system(size: 15, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
-                        Text(rec.impact)
+                        
+                        // Yerelleştirilmiş Rozet
+                        let impactText = rec.impact == "High" ? "Yüksek" : (rec.impact == "Medium" ? "Orta" : rec.impact)
+                        
+                        Text(impactText)
                             .font(.system(size: 10, weight: .bold))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
