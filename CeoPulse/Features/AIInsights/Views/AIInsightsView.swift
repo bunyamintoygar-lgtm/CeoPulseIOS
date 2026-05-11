@@ -2,7 +2,7 @@ import SwiftUI
 
 struct AIInsightsView: View {
     @Environment(\.presentationMode) var presentationMode
-    @State private var selectedCategory = "Tümü"
+    @StateObject private var viewModel = AIInsightsViewModel()
     
     let categories = [
         ("Tümü", "square.grid.2x2.fill"),
@@ -55,9 +55,9 @@ struct AIInsightsView: View {
                             EventCategoryChip(
                                 title: cat.0,
                                 iconName: cat.1,
-                                isSelected: selectedCategory == cat.0
+                                isSelected: viewModel.selectedCategory == cat.0
                             ) {
-                                selectedCategory = cat.0
+                                viewModel.selectedCategory = cat.0
                             }
                         }
                     }
@@ -65,13 +65,17 @@ struct AIInsightsView: View {
                 }
                 
                 // Featured
-                FeaturedAnalysisCard(
-                    title: "2026'da CEO'ların önceliği: Yapay Zeka ve Yetenek Yönetimi",
-                    description: "Küresel CEO Pulse verilerine göre 2026'da yatırım öncelikleri değişiyor.",
-                    readTime: 5,
-                    date: "18 May 2025"
-                )
-                .padding(.horizontal, 20)
+                if let featured = viewModel.featuredInsight {
+                    NavigationLink(destination: AIInsightDetailView(insight: featured)) {
+                        FeaturedAnalysisCard(
+                            title: featured.title,
+                            description: featured.subtitle ?? "",
+                            readTime: featured.readTime,
+                            date: "Bugün" // Format date if needed
+                        )
+                    }
+                    .padding(.horizontal, 20)
+                }
                 
                 // Trend Analyses Section
                 VStack(alignment: .leading, spacing: 16) {
@@ -88,38 +92,20 @@ struct AIInsightsView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 16) {
-                            TrendAnalysisCard(
-                                title: "Yapay Zeka Yatırımları",
-                                description: "CEO'ların %68'i 2026'da AI yatırımlarını artırmayı planlıyor.",
-                                chartType: .line,
-                                date: "18 May 2025",
-                                readTime: 4,
-                                iconName: "cpu",
-                                iconColor: .purple,
-                                isPremium: true
-                            )
-                            
-                            TrendAnalysisCard(
-                                title: "Küresel Ekonomik Görünüm",
-                                description: "Büyüme beklentileri zayıflarken, riskler artıyor.",
-                                chartType: .bar,
-                                date: "17 May 2025",
-                                readTime: 6,
-                                iconName: "globe",
-                                iconColor: .green,
-                                isPremium: false
-                            )
-                            
-                            TrendAnalysisCard(
-                                title: "Yetenek Yönetimi",
-                                description: "En büyük zorluk: Yetenek elde tutma ve geliştirme.",
-                                chartType: .circular(progress: 0.74),
-                                date: "16 May 2025",
-                                readTime: 3,
-                                iconName: "person.3.fill",
-                                iconColor: .orange,
-                                isPremium: true
-                            )
+                            ForEach(viewModel.filteredInsights.prefix(3)) { insight in
+                                NavigationLink(destination: AIInsightDetailView(insight: insight)) {
+                                    TrendAnalysisCard(
+                                        title: insight.title,
+                                        description: insight.subtitle ?? "",
+                                        chartType: .line, // Default to line for AI
+                                        date: "Yeni",
+                                        readTime: insight.readTime,
+                                        iconName: "cpu",
+                                        iconColor: .purple,
+                                        isPremium: insight.isPremium
+                                    )
+                                }
+                            }
                         }
                         .padding(.horizontal, 20)
                     }
@@ -133,21 +119,18 @@ struct AIInsightsView: View {
                         .padding(.horizontal, 20)
                     
                     VStack(spacing: 16) {
-                        RecommendationRow(
-                            title: "Dijital Dönüşümde Yeni Dalga",
-                            description: "Şirketlerin %61'i dijital dönüşüm süreçlerini hızlandırırken...",
-                            category: "ai_category_tech".localized(),
-                            date: "15 May 2025",
-                            readTime: 4
-                        )
-                        
-                        RecommendationRow(
-                            title: "Faiz, Enflasyon ve Piyasalar",
-                            description: "Küresel piyasaları etkileyen makro gelişmeler ve CEO'lar için etkileri.",
-                            category: "ai_category_economy".localized(),
-                            date: "14 May 2025",
-                            readTime: 4
-                        )
+                        ForEach(viewModel.filteredInsights.dropFirst(3)) { insight in
+                            NavigationLink(destination: AIInsightDetailView(insight: insight)) {
+                                RecommendationRow(
+                                    title: insight.title,
+                                    description: insight.subtitle ?? "",
+                                    category: insight.category,
+                                    date: "Bugün",
+                                    readTime: insight.readTime,
+                                    imageUrl: insight.imageUrl
+                                )
+                            }
+                        }
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 100)
@@ -156,6 +139,11 @@ struct AIInsightsView: View {
         }
         .background(AppColors.background.ignoresSafeArea())
         .navigationBarHidden(true)
+        .onAppear {
+            Task {
+                await viewModel.fetchInsights()
+            }
+        }
     }
 }
 
@@ -165,14 +153,22 @@ struct RecommendationRow: View {
     let category: String
     let date: String
     let readTime: Int
+    let imageUrl: String?
     
     var body: some View {
         HStack(spacing: 16) {
-            // Image Placeholder
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.1))
-                .frame(width: 80, height: 80)
-                .overlay(Image(systemName: "photo").foregroundColor(.white.opacity(0.2)))
+            // Image
+            AsyncImage(url: URL(string: imageUrl ?? "")) { image in
+                image.resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white.opacity(0.1))
+                    .overlay(Image(systemName: "photo").foregroundColor(.white.opacity(0.2)))
+            }
+            .frame(width: 80, height: 80)
+            .cornerRadius(12)
+            .clipped()
             
             VStack(alignment: .leading, spacing: 6) {
                 HStack {

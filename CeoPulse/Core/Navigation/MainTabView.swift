@@ -18,8 +18,10 @@ struct MainTabView: View {
                 SurveysHomeView()
                     .tag(2)
                 
-                NotificationsView()
-                    .tag(3)
+                NavigationView {
+                    AIInsightsView()
+                }
+                .tag(3)
                 
                 ProfileView()
                     .tag(4)
@@ -33,7 +35,7 @@ struct MainTabView: View {
                 
                 HStack(alignment: .bottom) {
                     TabItem(icon: "house.fill", label: "nav_home".localized(), isSelected: selectedTab == 0) { selectedTab = 0 }
-                    TabItem(icon: "person.2.fill", label: "nav_network".localized(), isSelected: selectedTab == 1) { selectedTab = 1 }
+                    TabItem(icon: "chart.bar.fill", label: "Anketler", isSelected: selectedTab == 2) { selectedTab = 2 }
                     
                     // Center Floating Action Button
                     Button(action: { showCreateSurvey = true }) {
@@ -50,7 +52,7 @@ struct MainTabView: View {
                     }
                     .offset(y: -15)
                     
-                    TabItem(icon: "chart.bar.fill", label: "Anketler", isSelected: selectedTab == 2) { selectedTab = 2 }
+                    TabItem(icon: "sparkles", label: "AI Insights", isSelected: selectedTab == 3) { selectedTab = 3 }
                     TabItem(icon: "person.fill", label: "nav_profile".localized(), isSelected: selectedTab == 4) { selectedTab = 4 }
                 }
                 .padding(.top, 12)
