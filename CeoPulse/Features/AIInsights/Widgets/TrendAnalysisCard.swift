@@ -19,46 +19,19 @@ struct TrendAnalysisCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(iconColor.opacity(0.1))
-                        .frame(width: 36, height: 36)
-                    Image(systemName: iconName)
-                        .foregroundColor(iconColor)
-                        .font(.system(size: 16))
-                }
-                
-                Spacer()
-                
-                if isPremium {
-                    HStack(spacing: 4) {
-                        Image(systemName: "lock.fill")
-                        Text("PREMIUM")
-                    }
-                    .font(.system(size: 8, weight: .bold))
-                    .foregroundColor(.orange)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 4)
-                    .background(Color.orange.opacity(0.1))
-                    .cornerRadius(4)
-                }
-            }
-            
             Text(title)
-                .font(.system(size: 14, weight: .bold))
+                .font(.system(size: 13, weight: .bold)) // 14 -> 13
                 .foregroundColor(.white)
                 .lineLimit(2)
             
             Text(description)
-                .font(.system(size: 11))
+                .font(.system(size: 10)) // 11 -> 10
                 .foregroundColor(AppColors.textSecondary)
                 .lineLimit(2)
-                .frame(height: 32, alignment: .top)
+                .frame(height: 30, alignment: .top)
             
-            // Chart Area with Background Image (Bottom)
+            // Chart Area - Now just a clean Cover Image
             ZStack {
-                // Background Image if available
                 if let urlString = imageUrl, let url = URL(string: urlString) {
                     AsyncImage(url: url) { image in
                         image.resizable()
@@ -68,38 +41,7 @@ struct TrendAnalysisCard: View {
                     }
                     .frame(height: 60)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .opacity(0.3) // Subtle background effect
-                }
-                
-                switch chartType {
-                case .line:
-                    LineChartShape()
-                        .stroke(
-                            LinearGradient(colors: [iconColor, iconColor.opacity(0.2)], startPoint: .leading, endPoint: .trailing),
-                            lineWidth: 2
-                        )
-                case .bar:
-                    BarChartShape()
-                        .fill(
-                            LinearGradient(colors: [iconColor, iconColor.opacity(0.3)], startPoint: .top, endPoint: .bottom)
-                        )
-                case .circular(let progress):
-                    ZStack {
-                        Circle()
-                            .stroke(Color.white.opacity(0.05), lineWidth: 8)
-                        Circle()
-                            .trim(from: 0, to: progress)
-                            .stroke(
-                                LinearGradient(colors: [iconColor, iconColor.opacity(0.5)], startPoint: .top, endPoint: .bottom),
-                                style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                            )
-                            .rotationEffect(.degrees(-90))
-                        
-                        Text("%\(Int(progress * 100))")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
-                    }
-                    .padding(10)
+                    .opacity(0.7) // Higher opacity for a cleaner look
                 }
             }
             .frame(height: 60)

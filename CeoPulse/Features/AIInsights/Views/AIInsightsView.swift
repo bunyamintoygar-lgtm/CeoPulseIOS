@@ -24,10 +24,10 @@ struct AIInsightsView: View {
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text("ai_insights_title".localized())
-                            .font(.system(size: 24, weight: .bold))
+                            .font(.system(size: 22, weight: .bold)) // 24 -> 22
                             .foregroundColor(.white)
                         Text("ai_insights_subtitle".localized())
-                            .font(.system(size: 12))
+                            .font(.system(size: 11)) // 12 -> 11
                             .foregroundColor(AppColors.textSecondary)
                     }
                     .padding(.leading, 12)
@@ -82,7 +82,7 @@ struct AIInsightsView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
                         Text("ai_trend_analyses".localized())
-                            .font(.system(size: 18, weight: .bold))
+                            .font(.system(size: 17, weight: .bold)) // 18 -> 17
                             .foregroundColor(.white)
                         Spacer()
                         Text("see_all".localized())
@@ -116,7 +116,7 @@ struct AIInsightsView: View {
                 // Recommended Section
                 VStack(alignment: .leading, spacing: 16) {
                     Text("ai_recommended_for_you".localized())
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 17, weight: .bold)) // 18 -> 17
                         .foregroundColor(.white)
                         .padding(.horizontal, 20)
                     
@@ -173,34 +173,31 @@ struct RecommendationRow: View {
             .clipped()
             
             VStack(alignment: .leading, spacing: 6) {
-                HStack {
+                Text(title)
+                    .font(.system(size: 13, weight: .bold)) // 14 -> 13
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                
+                Text(description)
+                    .font(.system(size: 10)) // 11 -> 10
+                    .foregroundColor(AppColors.textSecondary)
+                    .lineLimit(2)
+                
+                HStack(spacing: 8) {
+                    Text(date)
+                    Text("•")
+                    Text(String(format: "ai_read_time".localized(), readTime))
+                    
+                    Spacer()
+                    
+                    // Kategori artık burada, en sağda
                     Text(category)
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: 9, weight: .bold))
                         .foregroundColor(.purple)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
                         .background(Color.purple.opacity(0.1))
                         .cornerRadius(4)
-                    Spacer()
-                    Image(systemName: "bookmark")
-                        .font(.system(size: 14))
-                        .foregroundColor(.white.opacity(0.4))
-                }
-                
-                Text(title)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
-                    .lineLimit(1)
-                
-                Text(description)
-                    .font(.system(size: 11))
-                    .foregroundColor(AppColors.textSecondary)
-                    .lineLimit(2)
-                
-                HStack(spacing: 12) {
-                    Text(date)
-                    Text("•")
-                    Text(String(format: "ai_read_time".localized(), readTime))
                 }
                 .font(.system(size: 10))
                 .foregroundColor(AppColors.textSecondary)
