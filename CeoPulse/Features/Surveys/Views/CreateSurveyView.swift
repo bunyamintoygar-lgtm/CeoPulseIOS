@@ -491,15 +491,23 @@ struct CreateSurveyView: View {
             
             // Sonuçların Görünürlüğü
             VStack(alignment: .leading, spacing: 12) {
-                Text(LocalizedStringKey("survey_setting_results")).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(LocalizedStringKey("survey_setting_results"))
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                    Text(LocalizedStringKey("survey_setting_results_subtitle"))
+                        .font(.system(size: 12))
+                        .foregroundColor(AppColors.textSecondary)
+                }
+                
                 VStack(alignment: .leading, spacing: 16) {
-                    RadioButtonField(id: "immediate", label: NSLocalizedString("survey_setting_results_immediate", comment: ""), isSelected: resultsVisibility == "immediate", sublabel: NSLocalizedString("ao_privacy_public_desc", comment: "")) {
+                    RadioButtonField(id: "immediate", label: NSLocalizedString("survey_setting_results_immediate", comment: ""), isSelected: resultsVisibility == "immediate", sublabel: NSLocalizedString("survey_setting_results_immediate_desc", comment: "")) {
                         resultsVisibility = "immediate"
                     }
-                    RadioButtonField(id: "closed", label: NSLocalizedString("survey_setting_results_closed", comment: ""), isSelected: resultsVisibility == "closed", sublabel: NSLocalizedString("ao_privacy_community_desc", comment: "")) {
+                    RadioButtonField(id: "closed", label: NSLocalizedString("survey_setting_results_closed", comment: ""), isSelected: resultsVisibility == "closed", sublabel: NSLocalizedString("survey_setting_results_closed_desc", comment: "")) {
                         resultsVisibility = "closed"
                     }
-                    RadioButtonField(id: "never", label: NSLocalizedString("survey_setting_results_never", comment: ""), isSelected: resultsVisibility == "never", sublabel: NSLocalizedString("ao_privacy_private_desc", comment: "")) {
+                    RadioButtonField(id: "never", label: NSLocalizedString("survey_setting_results_never", comment: ""), isSelected: resultsVisibility == "never", sublabel: NSLocalizedString("survey_setting_results_never_desc", comment: "")) {
                         resultsVisibility = "never"
                     }
                 }
