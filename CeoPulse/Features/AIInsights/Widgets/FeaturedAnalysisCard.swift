@@ -8,110 +8,109 @@ struct FeaturedAnalysisCard: View {
     let imageUrl: String?
     
     var body: some View {
-        ZStack(alignment: .leading) {
-            // Background with Gradient
-            RoundedRectangle(cornerRadius: 24)
-                .fill(
+        ZStack(alignment: .bottom) {
+            // Image or Brain Mesh Background
+            Group {
+                if let urlString = imageUrl, let url = URL(string: urlString) {
+                    AsyncImage(url: url) { image in
+                        image.resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Color.gray.opacity(0.1)
+                    }
+                } else {
                     LinearGradient(
                         colors: [Color(hex: "1A1B2E"), Color(hex: "2D2E4A")],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
-                )
-            
-            // Image or Brain Mesh
-            if let urlString = imageUrl, let url = URL(string: urlString) {
-                AsyncImage(url: url) { image in
-                    image.resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Color.clear
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .overlay(
-                    LinearGradient(
-                        colors: [.black.opacity(0.9), .black.opacity(0.4), .clear],
-                        startPoint: .bottom,
-                        endPoint: .top
+                    .overlay(
+                        Image(systemName: "brain.head.profile")
+                            .font(.system(size: 100))
+                            .foregroundColor(.white.opacity(0.1))
                     )
-                )
-                .cornerRadius(24)
-                .clipped()
-            } else {
-                // AI Brain mesh placeholder (Simplified with icons)
-                HStack {
-                    Spacer()
-                    Image(systemName: "brain.head.profile")
-                        .font(.system(size: 140))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [AppColors.primaryAccent.opacity(0.3), .clear],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .offset(x: 20)
                 }
-                .clipped()
             }
+            .frame(height: 240)
+            .clipped()
+            .cornerRadius(24)
             
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(spacing: 6) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 10))
-                        .foregroundColor(.orange)
-                    Text("ai_featured_analysis".localized())
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.orange)
+            // Bottom Information Panel (Protects text from image content)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 10))
+                        Text("ai_featured_analysis".localized().uppercased())
+                            .font(.system(size: 10, weight: .black))
+                    }
+                    .foregroundColor(.orange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.orange.opacity(0.15))
+                    .cornerRadius(6)
+                    
+                    Spacer()
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                        Text(String(format: "ai_read_time".localized(), readTime))
+                    }
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white.opacity(0.6))
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Color.orange.opacity(0.1))
-                .cornerRadius(8)
                 
                 Text(title)
-                    .font(.system(size: 20, weight: .bold))
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
-                    .lineLimit(3)
-                    .frame(maxWidth: 220, alignment: .leading)
-                
-                Text(description)
-                    .font(.system(size: 13))
-                    .foregroundColor(.white.opacity(0.7))
-                    .lineLimit(2)
-                    .frame(maxWidth: 220, alignment: .leading)
+                    .lineLimit(1)
                 
                 HStack {
-                    Button(action: {}) {
-                        HStack(spacing: 6) {
-                            Text("ai_read_analysis".localized())
-                            Image(systemName: "chevron.right")
-                        }
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.indigo)
-                        .cornerRadius(20)
-                    }
+                    Text(description)
+                        .font(.system(size: 12))
+                        .foregroundColor(.white.opacity(0.7))
+                        .lineLimit(1)
                     
                     Spacer()
                     
-                    HStack(spacing: 12) {
-                        Label(String(format: "ai_read_time".localized(), readTime), systemImage: "clock")
-                        Text(date)
+                    HStack(spacing: 4) {
+                        Text("ai_read_analysis".localized())
+                            .font(.system(size: 12, weight: .bold))
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 10, weight: .bold))
                     }
-                    .font(.system(size: 10))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.indigo)
                 }
             }
-            .padding(24)
+            .padding(16)
+            .background(
+                Color.black.opacity(0.85)
+                    .background(.ultraThinMaterial)
+            )
+            .cornerRadius(24, corners: [.bottomLeft, .bottomRight])
         }
-        .frame(height: 220)
+        .frame(height: 240)
         .overlay(
             RoundedRectangle(cornerRadius: 24)
-                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                .stroke(Color.white.opacity(0.1), lineWidth: 1)
         )
+    }
+}
+
+// Corner helper for partial radius
+extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape( RoundedCorner(radius: radius, corners: corners) )
+    }
+}
+
+struct RoundedCorner: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
     }
 }
 
