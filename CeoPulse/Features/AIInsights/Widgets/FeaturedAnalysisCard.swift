@@ -59,28 +59,18 @@ struct FeaturedAnalysisCard: View {
                 }
                 
                 Text(title)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 16, weight: .bold)) // 18 -> 16
                     .foregroundColor(.white)
-                    .lineLimit(1)
+                    .lineLimit(2)
                 
-                HStack {
-                    Text(description)
-                        .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.7))
-                        .lineLimit(1)
-                    
-                    Spacer()
-                    
-                    HStack(spacing: 4) {
-                        Text("ai_read_analysis".localized())
-                            .font(.system(size: 12, weight: .bold))
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 10, weight: .bold))
-                    }
-                    .foregroundColor(.indigo)
-                }
+                Text(description)
+                    .font(.system(size: 11)) // 12 -> 11
+                    .foregroundColor(.white.opacity(0.7))
+                    .lineLimit(2) // 1 -> 2
+                    .lineSpacing(2)
             }
             .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 Color.black.opacity(0.85)
                     .background(.ultraThinMaterial)
