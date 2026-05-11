@@ -74,25 +74,29 @@ serve(async (req) => {
         input: `
           Sen profesyonel bir iş analisti ve stratejistsin. Görevin CEO'lar için internette derinlemesine araştırma yaparak taze ve stratejik içgörüler üretmektir.
           
-          Lütfen şu çerçevede bir analiz hazırla:
+          TALİMAT: Aşağıdaki çerçevede bir analiz hazırla. Çıktıyı MUTLAKA SADECE JSON formatında ver. Hiçbir açıklama veya ekstra metin ekleme.
+          
           ${prompt}
-        `,
-        text: {
-          format: {
-            type: "json_object"
-          }
-        }
+        `
       }),
     })
 
     const aiResult = await response.json()
     
+    if (aiResult.error) {
+      console.error("OpenAI API Error:", JSON.stringify(aiResult.error))
+      throw new Error(`OpenAI API Error: ${aiResult.error.message}`)
+    }
+
     // v1/responses yapısında içerik genellikle output.text içinde gelir
-    const rawContent = aiResult.output?.text || aiResult.choices?.[0]?.message?.content
+    let rawContent = aiResult.output?.text || aiResult.choices?.[0]?.message?.content
     if (!rawContent) {
       console.error("AI Result Structure:", JSON.stringify(aiResult))
       throw new Error("AI response structure unexpected or empty.")
     }
+
+    // Markdown bloklarını temizle (```json ... ``` gibi)
+    rawContent = rawContent.replace(/```json\n?/, "").replace(/```\n?$/, "").trim()
 
     const insightData = JSON.parse(rawContent)
 
