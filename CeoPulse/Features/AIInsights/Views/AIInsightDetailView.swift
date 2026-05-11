@@ -64,10 +64,17 @@ struct AIInsightDetailView: View {
                 let textToRead = insight.content.summaryTab.description
                 let utterance = AVSpeechUtterance(string: textToRead)
                 
-                // Türkçe ses seçimi (varsayılan Siri sesi kalitesinde)
-                utterance.voice = AVSpeechSynthesisVoice(language: "tr-TR")
-                utterance.rate = 0.52 // İdeal konuşma hızı
-                utterance.pitchMultiplier = 1.0
+                // Sistemdeki en kaliteli Türkçe sesi bulma (Enhanced/Premium öncelikli)
+                let voices = AVSpeechSynthesisVoice.speechVoices()
+                let highQualityTurkishVoice = voices.first(where: { 
+                    $0.language == "tr-TR" && $0.quality == .enhanced 
+                }) ?? AVSpeechSynthesisVoice(language: "tr-TR")
+                
+                utterance.voice = highQualityTurkishVoice
+                
+                // Yönetici Sunumu Ayarları: Daha oturaklı ve net bir ton
+                utterance.rate = 0.50 // Biraz daha sakin ve anlaşılır
+                utterance.pitchMultiplier = 0.95 // Hafifçe daha tok bir ses
                 utterance.volume = 1.0
                 
                 speechSynthesizer.speak(utterance)
