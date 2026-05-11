@@ -190,35 +190,17 @@ struct AIInsightDetailView: View {
     private var findingsTabView: some View {
         VStack(spacing: 16) {
             ForEach(insight.content.findingsTab) { finding in
-                HStack(spacing: 16) {
-                    ZStack {
-                        Circle()
-                            .stroke(Color.gray.opacity(0.2), lineWidth: 4)
-                        Circle()
-                            .trim(from: 0, to: finding.percentage / 100)
-                            .stroke(Color.indigo, style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                            .rotationEffect(.degrees(-90))
-                        
-                        Text("%\(Int(finding.percentage))")
-                            .font(.system(size: 12, weight: .black))
-                            .foregroundColor(.white)
-                    }
-                    .frame(width: 44, height: 44)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(finding.title)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(.white)
                     
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(finding.title)
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.white)
-                        Text(finding.desc)
-                            .font(.system(size: 13))
-                            .foregroundColor(.gray.opacity(0.8))
-                    }
-                    
-                    Spacer()
-                    
-                    Image(systemName: finding.icon)
-                        .foregroundColor(.indigo.opacity(0.6))
+                    Text(finding.desc)
+                        .font(.system(size: 13))
+                        .foregroundColor(.gray.opacity(0.8))
+                        .lineSpacing(4)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
                 .background(Color.white.opacity(0.07))
                 .cornerRadius(16)
