@@ -121,7 +121,7 @@ struct AIInsightsView: View {
                         .padding(.horizontal, 20)
                     
                     VStack(spacing: 16) {
-                        ForEach(viewModel.filteredInsights.dropFirst(3)) { insight in
+                        ForEach(viewModel.filteredInsights.dropFirst(1)) { insight in
                             NavigationLink(destination: AIInsightDetailView(insight: insight)) {
                                 RecommendationRow(
                                     title: insight.title,
