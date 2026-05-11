@@ -138,16 +138,6 @@ struct AIInsightDetailView: View {
                     .background(isSpeaking ? Color.red.opacity(0.2) : Color.white.opacity(0.1))
                     .cornerRadius(20)
                 }
-                
-                if insight.isPremium {
-                    HStack(spacing: 4) {
-                        Image(systemName: "crown.fill")
-                        Text("PREMIUM")
-                    }
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.orange)
-                    .padding(.leading, 8)
-                }
             }
             
             Text(insight.title)
