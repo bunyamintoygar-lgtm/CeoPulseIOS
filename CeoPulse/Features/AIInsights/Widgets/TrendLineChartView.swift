@@ -13,12 +13,6 @@ struct TrendLineChartView: View {
     
     @State private var animationProgress: CGFloat = 0
     
-    private var maxValue: Double {
-        let allPoints = series.flatMap { $0.points }
-        let max = allPoints.max() ?? 10.0
-        return max == 0 ? 10.0 : max * 1.2 // %20 üst boşluk
-    }
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Grafik Alanı
@@ -33,18 +27,21 @@ struct TrendLineChartView: View {
                     }
                 }
                 
-                // Çizgiler
+                // Çizgiler (Her seriyi kendi max değerine göre normalize ederek çiziyoruz)
                 ForEach(series) { item in
-                    LineShape(points: item.points, maxValue: maxValue)
+                    let seriesMax = item.points.max() ?? 1.0
+                    let normalizedMax = seriesMax == 0 ? 1.0 : seriesMax * 1.1
+                    
+                    LineShape(points: item.points, maxValue: normalizedMax)
                         .trim(from: 0, to: animationProgress)
                         .stroke(
-                            LinearGradient(colors: [item.color, item.color.opacity(0.7)], startPoint: .leading, endPoint: .trailing),
+                            LinearGradient(colors: [item.color, item.color.opacity(0.6)], startPoint: .leading, endPoint: .trailing),
                             style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
                         )
-                        .shadow(color: item.color.opacity(0.3), radius: 8, x: 0, y: 4)
+                        .shadow(color: item.color.opacity(0.4), radius: 6, x: 0, y: 4)
                 }
             }
-            .frame(height: 220) // Biraz daha yüksek
+            .frame(height: 220)
             
             // Legend (Açıklama)
             ScrollView(.horizontal, showsIndicators: false) {

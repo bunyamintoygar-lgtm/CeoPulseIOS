@@ -29,7 +29,11 @@ struct FeaturedAnalysisCard: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .overlay(
-                    LinearGradient(colors: [Color(hex: "1A1B2E").opacity(0.8), .clear], startPoint: .leading, endPoint: .trailing)
+                    LinearGradient(
+                        colors: [.black.opacity(0.9), .black.opacity(0.4), .clear],
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
                 )
                 .cornerRadius(24)
                 .clipped()

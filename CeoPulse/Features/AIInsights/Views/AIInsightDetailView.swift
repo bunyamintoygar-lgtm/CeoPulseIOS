@@ -12,26 +12,30 @@ struct AIInsightDetailView: View {
             Color.black.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header (Resim ve Başlık)
+                // Header (Resim)
                 headerSection
                 
-                // Tab Seçici
-                tabPicker
-                
-                // İçerik
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
-                        if selectedTab == 0 {
-                            summaryTabView
-                        } else if selectedTab == 1 {
-                            findingsTabView
-                        } else if selectedTab == 2 {
-                            analysisTabView
-                        } else {
-                            recommendationsTabView
+                    VStack(alignment: .leading, spacing: 24) {
+                        // Başlık ve Kategori Alanı (Görselin hemen altında)
+                        titleSection
+                        
+                        // Tab Seçici (Kaydırılabilir içerik içinde daha akıcı)
+                        tabPicker
+                        
+                        // Sekme İçerikleri
+                        Group {
+                            if selectedTab == 0 {
+                                summaryTabView
+                            } else if selectedTab == 1 {
+                                findingsTabView
+                            } else if selectedTab == 2 {
+                                analysisTabView
+                            } else {
+                                recommendationsTabView
+                            }
                         }
                     }
-                    .padding(.top, 24)
                     .padding(.bottom, 40)
                 }
             }
@@ -42,72 +46,99 @@ struct AIInsightDetailView: View {
     // MARK: - Sections
     
     private var headerSection: some View {
-        ZStack(alignment: .bottomLeading) {
+        ZStack(alignment: .topLeading) {
             // Arka Plan Resmi
             AsyncImage(url: URL(string: insight.imageUrl ?? "")) { image in
                 image.resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                Color.gray.opacity(0.2)
+                Color.gray.opacity(0.1)
             }
-            .frame(height: 250)
+            .frame(height: 280)
             .clipped()
-            .overlay(
-                LinearGradient(colors: [.black, .clear], startPoint: .bottom, endPoint: .top)
-            )
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text(insight.category.uppercased())
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.indigo)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.indigo.opacity(0.2))
-                    .cornerRadius(4)
-                
-                Text(insight.title)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
-            }
-            .padding(20)
+            .ignoresSafeArea(.all, edges: .top)
             
             // Geri Butonu
             Button(action: { dismiss() }) {
                 Image(systemName: "chevron.left")
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
                     .padding(12)
-                    .background(Circle().fill(.black.opacity(0.5)))
+                    .background(Circle().fill(.black.opacity(0.4)))
+                    .blur(radius: 0)
             }
-            .padding(.top, 50)
+            .padding(.top, 10) // Safe area zaten ignore edildiği için sadece küçük bir offset
             .padding(.leading, 20)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+    }
+    
+    private var titleSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(insight.category.uppercased())
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.indigo)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.indigo.opacity(0.15))
+                    .cornerRadius(6)
+                
+                Spacer()
+                
+                if insight.isPremium {
+                    HStack(spacing: 4) {
+                        Image(systemName: "crown.fill")
+                        Text("PREMIUM")
+                    }
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.orange)
+                }
+            }
+            
+            Text(insight.title)
+                .font(.system(size: 26, weight: .black))
+                .foregroundColor(.white)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 20)
     }
     
     private var tabPicker: some View {
         HStack(spacing: 0) {
             ForEach(0..<tabs.count, id: \.self) { index in
                 Button(action: {
-                    withAnimation(.spring()) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         selectedTab = index
                     }
                 }) {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 12) {
                         Text(tabs[index])
                             .font(.system(size: 14, weight: selectedTab == index ? .bold : .medium))
-                            .foregroundColor(selectedTab == index ? .white : .gray)
+                            .foregroundColor(selectedTab == index ? .white : .gray.opacity(0.7))
                         
-                        Rectangle()
-                            .fill(selectedTab == index ? Color.indigo : Color.clear)
-                            .frame(height: 2)
+                        ZStack {
+                            Rectangle()
+                                .fill(Color.white.opacity(0.05))
+                                .frame(height: 2)
+                            
+                            if selectedTab == index {
+                                Rectangle()
+                                    .fill(Color.indigo)
+                                    .frame(height: 2)
+                                    .matchedGeometryEffect(id: "activeTab", in: tabAnimation)
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
             }
         }
-        .padding(.top, 16)
-        .background(Color.black)
+        .padding(.top, 10)
     }
+    
+    @Namespace private var tabAnimation
     
     // MARK: - Tab Views
     
