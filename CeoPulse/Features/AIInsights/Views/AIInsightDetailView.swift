@@ -256,7 +256,4 @@ struct AIInsightDetailView: View {
     }
 }
 
-// Renk Helper'ı
-extension Color {
-    }
-}
+
