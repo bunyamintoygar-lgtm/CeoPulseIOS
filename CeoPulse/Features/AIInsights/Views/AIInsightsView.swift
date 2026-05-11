@@ -13,15 +13,28 @@ struct AIInsightsView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            LazyVStack(alignment: .leading, spacing: 24) {
                 // Header
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("ai_insights_title".localized())
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(.white)
-                    Text("ai_insights_subtitle".localized())
-                        .font(.system(size: 11))
-                        .foregroundColor(AppColors.textSecondary)
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("ai_insights_title".localized())
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(.white)
+                        Text("ai_insights_subtitle".localized())
+                            .font(.system(size: 11))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                    
+                    Spacer()
+                    
+                    // ARAMA BUTONU
+                    Button(action: { /* Arama aksiyonu buraya gelecek */ }) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(Circle().fill(Color.white.opacity(0.1)))
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
@@ -49,7 +62,7 @@ struct AIInsightsView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 20)
                     
-                    VStack(spacing: 20) {
+                    LazyVStack(spacing: 20) {
                         ForEach(viewModel.filteredInsights.prefix(3)) { insight in
                             NavigationLink(destination: AIInsightDetailView(insight: insight)) {
                                 FeaturedAnalysisCard(
@@ -69,11 +82,11 @@ struct AIInsightsView: View {
                 // Recommended Section
                 VStack(alignment: .leading, spacing: 16) {
                     Text("ai_recommended_for_you".localized())
-                        .font(.system(size: 17, weight: .bold)) // 18 -> 17
+                        .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.white)
                         .padding(.horizontal, 20)
                     
-                    VStack(spacing: 16) {
+                    LazyVStack(spacing: 16) {
                         ForEach(viewModel.filteredInsights.dropFirst(1)) { insight in
                             NavigationLink(destination: AIInsightDetailView(insight: insight)) {
                                 RecommendationRow(
