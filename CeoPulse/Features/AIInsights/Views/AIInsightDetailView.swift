@@ -212,20 +212,15 @@ struct AIInsightDetailView: View {
                         ZStack {
                             RoundedRectangle(cornerRadius: 12)
                                 .fill(Color.indigo.opacity(0.1))
-                            Image(systemName: stat.icon)
-                                .foregroundColor(.indigo)
-                                .font(.system(size: 16))
-                        }
-                        .frame(width: 44, height: 44)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(stat.label)
-                                .font(.system(size: 12))
-                                .foregroundColor(.gray)
-                            Text(stat.value)
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(.white)
-                                .lineLimit(2)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(stat.label)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.gray)
+                                Text(stat.value)
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                            .lineLimit(2)
                         }
                         
                         Spacer()

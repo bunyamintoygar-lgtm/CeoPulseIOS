@@ -42,7 +42,6 @@ struct SummaryTab: Codable {
 struct InsightStat: Codable, Hashable {
     let label: String
     let value: String
-    let icon: String
 }
 
 struct InsightFinding: Codable, Identifiable {
@@ -50,7 +49,6 @@ struct InsightFinding: Codable, Identifiable {
     let title: String
     let desc: String
     let percentage: Double
-    let icon: String
 }
 
 struct AnalysisTab: Codable {
@@ -84,5 +82,4 @@ struct InsightRecommendation: Codable, Identifiable {
     let title: String
     let desc: String
     let impact: String
-    let icon: String
 }

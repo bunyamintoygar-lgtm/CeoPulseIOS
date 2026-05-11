@@ -42,7 +42,6 @@ serve(async (req) => {
       - "analysis_tab.trends": En az 4 farklı veri serisi ve her seride en az 6 veri noktası (zaman serisi) olmalı.
       - "analysis_tab.regional_data": En az 6-7 farklı bölge/pazar detayı içermeli (Türkiye'yi de mutlaka dahil et).
       - "recommendations_tab": En az 5 adet, "Radikal" ve "Pratik" dengesinde stratejik öneri içermeli. "impact" alanını "Yüksek" veya "Orta" olarak Türkçe ver.
-      - "icon" SEÇİMİ: Sadece geçerli SF Symbols kullan (Örn: 'chart.line.uptrend.xyaxis', 'dollarsign.circle', 'rocket', 'airplane', 'flask', 'person.2.fill', 'banknote', 'lightbulb.fill', 'target', 'bolt.fill', 'cpu').
       
       JSON FORMATI:
       {
@@ -54,13 +53,13 @@ serve(async (req) => {
           "summary_tab": {
             "description": "Stratejik derinliği olan, neden-sonuç ilişkisi kuran uzun özet...",
             "stats": [
-              { "label": "Stratejik Metrik 1", "value": "...", "icon": "..." },
-              { "label": "Finansal Etki", "value": "...", "icon": "..." },
-              { "label": "Güven Aralığı", "value": "%98", "icon": "checkmark.seal" }
+              { "label": "Stratejik Metrik 1", "value": "..." },
+              { "label": "Finansal Etki", "value": "..." },
+              { "label": "Güven Aralığı", "value": "%98" }
             ]
           },
           "findings_tab": [
-            { "title": "Kritik Bulgu", "desc": "Detaylı analiz ve sayısal veri içeren açıklama...", "percentage": 75, "icon": "..." }
+            { "title": "Kritik Bulgu", "desc": "Detaylı analiz ve sayısal veri içeren açıklama...", "percentage": 75 }
           ],
           "analysis_tab": {
             "trends": [
