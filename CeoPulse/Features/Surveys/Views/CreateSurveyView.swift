@@ -14,10 +14,15 @@ struct CreateSurveyView: View {
     @State private var targetAudience = NSLocalizedString("ao_privacy_public", comment: "")
     @State private var hasEndDate = true // Default to true as per new 3-month rule
     @State private var startDate = Date()
-    @State private var endDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
+    @State private var endDate = Calendar.current.date(byAdding: .month, value: 1, to: Date()) ?? Date()
+    @State private var showingStartDatePicker = false
+    @State private var showingEndDatePicker = false
     
     private var maxEndDate: Date {
         Calendar.current.date(byAdding: .month, value: 3, to: startDate) ?? startDate
+    }
+    private var minEndDate: Date {
+        Calendar.current.date(byAdding: .day, value: 1, to: startDate) ?? startDate
     }
     @State private var isGeneratingAI = false
     @State private var isPublishing = false
@@ -510,39 +515,118 @@ struct CreateSurveyView: View {
                 }
             }
             
-            // Bitiş Tarihi Ayarı
+            // Anket Süresi Ayarı
             VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Text(LocalizedStringKey("survey_setting_end_date"))
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(LocalizedStringKey("survey_setting_duration_title"))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
-                    Spacer()
-                    Text(LocalizedStringKey("survey_setting_max_duration"))
-                        .font(.system(size: 10, weight: .bold))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.purple.opacity(0.1))
-                        .foregroundColor(.purple)
-                        .cornerRadius(6)
+                    Text(LocalizedStringKey("survey_setting_duration_subtitle"))
+                        .font(.system(size: 12))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 
-                VStack(spacing: 12) {
-                    DatePicker(
-                        NSLocalizedString("survey_setting_end_date", comment: ""),
-                        selection: $endDate,
-                        in: startDate...maxEndDate,
-                        displayedComponents: [.date]
-                    )
-                    .datePickerStyle(.graphical)
-                    .accentColor(.purple)
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.03)))
-                    .colorScheme(.dark)
+                VStack(spacing: 0) {
+                    // Başlangıç Satırı
+                    Button(action: { showingStartDatePicker = true }) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "calendar")
+                                .font(.system(size: 18))
+                                .foregroundColor(AppColors.textSecondary)
+                            Text(LocalizedStringKey("survey_setting_start_label"))
+                                .font(.system(size: 15))
+                                .foregroundColor(.white)
+                            Spacer()
+                            Text(Calendar.current.isDateInToday(startDate) ? NSLocalizedString("survey_setting_start_now", comment: "") : startDate.formatted(date: .long, time: .omitted))
+                                .font(.system(size: 15))
+                                .foregroundColor(.purple)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 16)
+                    }
+                    
+                    Divider().background(Color.white.opacity(0.1))
+                    
+                    // Bitiş Satırı
+                    Button(action: { showingEndDatePicker = true }) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "calendar")
+                                .font(.system(size: 18))
+                                .foregroundColor(AppColors.textSecondary)
+                            Text(LocalizedStringKey("survey_setting_end_label"))
+                                .font(.system(size: 15))
+                                .foregroundColor(.white)
+                            Spacer()
+                            Text(endDate.formatted(date: .long, time: .omitted))
+                                .font(.system(size: 15))
+                                .foregroundColor(.purple)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        .padding(.vertical, 16)
+                        .padding(.horizontal, 16)
+                    }
                 }
+                .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.03)))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
                 
-                Text(String(format: NSLocalizedString("survey_setting_auto_close_info", comment: ""), maxEndDate.formatted(date: .long, time: .omitted)))
+                Text(LocalizedStringKey("survey_setting_auto_close_desc"))
                     .font(.system(size: 11))
                     .foregroundColor(AppColors.textSecondary)
+            }
+            .sheet(isPresented: $showingStartDatePicker) {
+                VStack(spacing: 20) {
+                    Text(LocalizedStringKey("survey_setting_start_label"))
+                        .font(.headline)
+                        .padding(.top)
+                    
+                    DatePicker("", selection: $startDate, in: Date()..., displayedComponents: .date)
+                        .datePickerStyle(.graphical)
+                        .accentColor(.purple)
+                        .labelsHidden()
+                    
+                    Button(action: { showingStartDatePicker = false }) {
+                        Text(LocalizedStringKey("button_done"))
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.purple)
+                            .cornerRadius(12)
+                    }
+                }
+                .padding()
+                .presentationDetents([.medium, .large])
+                .colorScheme(.dark)
+            }
+            .sheet(isPresented: $showingEndDatePicker) {
+                VStack(spacing: 20) {
+                    Text(LocalizedStringKey("survey_setting_end_label"))
+                        .font(.headline)
+                        .padding(.top)
+                    
+                    DatePicker("", selection: $endDate, in: minEndDate...maxEndDate, displayedComponents: .date)
+                        .datePickerStyle(.graphical)
+                        .accentColor(.purple)
+                        .labelsHidden()
+                    
+                    Button(action: { showingEndDatePicker = false }) {
+                        Text(LocalizedStringKey("button_done"))
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.purple)
+                            .cornerRadius(12)
+                    }
+                }
+                .padding()
+                .presentationDetents([.medium, .large])
+                .colorScheme(.dark)
             }
         }
     }

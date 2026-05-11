@@ -514,6 +514,11 @@
 "photo_take_new" = "Take Photo";
 "photo_select_gallery" = "Upload from Gallery";
 
-
-
-
+// Survey Creation Settings Redesign
+"survey_setting_duration_title" = "Survey Duration";
+"survey_setting_duration_subtitle" = "Determine how long your survey will stay online.";
+"survey_setting_start_label" = "Start";
+"survey_setting_end_label" = "End";
+"survey_setting_start_now" = "Immediately";
+"survey_setting_auto_close_desc" = "The survey will automatically close when the end date is reached.";
+"button_done" = "Done";

@@ -508,6 +508,11 @@
 "photo_take_new" = "Fotoğraf Çek";
 "photo_select_gallery" = "Galerimden Yükle";
 
-
-
-
+// Survey Creation Settings Redesign
+"survey_setting_duration_title" = "Anket Süresi";
+"survey_setting_duration_subtitle" = "Anketinizin ne kadar süre yayında kalacağını belirleyin.";
+"survey_setting_start_label" = "Başlangıç";
+"survey_setting_end_label" = "Bitiş";
+"survey_setting_start_now" = "Hemen";
+"survey_setting_auto_close_desc" = "Bitiş tarihi geldiğinde anket otomatik olarak kapanır.";
+"button_done" = "Tamam";
