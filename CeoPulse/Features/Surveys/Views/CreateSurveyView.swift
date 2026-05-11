@@ -505,16 +505,6 @@ struct CreateSurveyView: View {
                 }
             }
             
-            // Diğer Ayarlar
-            VStack(alignment: .leading, spacing: 12) {
-                Text(LocalizedStringKey("survey_setting_advanced")).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
-                VStack(spacing: 12) {
-                    SettingsToggle(title: NSLocalizedString("survey_setting_allow_change", comment: ""), icon: "arrow.left.arrow.right.circle", isOn: $allowChangeResponse)
-                    SettingsToggle(title: NSLocalizedString("survey_setting_required", comment: ""), icon: "exclamationmark.circle", isOn: $isRequiredToAnswer)
-                    SettingsToggle(title: NSLocalizedString("survey_setting_anonymous", comment: ""), icon: "eye.slash", isOn: $isAnonymous)
-                }
-            }
-            
             // Anket Süresi Ayarı
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -634,6 +624,18 @@ struct CreateSurveyView: View {
                 .presentationDetents([.medium, .large])
                 .colorScheme(.dark)
             }
+
+            // Diğer Ayarlar
+            VStack(alignment: .leading, spacing: 12) {
+                Text(LocalizedStringKey("survey_setting_advanced")).font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                VStack(spacing: 12) {
+                    SettingsToggle(title: NSLocalizedString("survey_setting_allow_change", comment: ""), icon: "arrow.left.arrow.right.circle", isOn: $allowChangeResponse)
+                    SettingsToggle(title: NSLocalizedString("survey_setting_required", comment: ""), icon: "exclamationmark.circle", isOn: $isRequiredToAnswer)
+                    SettingsToggle(title: NSLocalizedString("survey_setting_anonymous", comment: ""), icon: "eye.slash", isOn: $isAnonymous)
+                }
+            }
+            
+
         }
     }
     
