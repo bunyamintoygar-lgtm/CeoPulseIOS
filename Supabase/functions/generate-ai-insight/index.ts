@@ -74,7 +74,7 @@ serve(async (req) => {
         input: [
           { 
             role: 'system', 
-            content: 'Sen profesyonel bir iş analisti ve stratejistsin. Görevin CEO''lar için internette derinlemesine araştırma yaparak taze ve stratejik içgörüler üretmektir.' 
+            content: 'Sen profesyonel bir iş analisti ve stratejistsin. Görevin CEO\'lar için internette derinlemesine araştırma yaparak taze ve stratejik içgörüler üretmektir.' 
           },
           { 
             role: 'user', 
