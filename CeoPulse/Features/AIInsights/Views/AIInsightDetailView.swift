@@ -1,9 +1,14 @@
 import SwiftUI
+import AVFoundation
 
 struct AIInsightDetailView: View {
     let insight: AIInsight
     @Environment(\.dismiss) var dismiss
     @State private var selectedTab = 0
+    
+    // Seslendirme Özellikleri
+    @State private var isSpeaking = false
+    @State private var speechSynthesizer = AVSpeechSynthesizer()
     
     let tabs = ["Özet", "Bulgular", "Veri Analizi", "Çıkarımlar"]
     
@@ -39,6 +44,36 @@ struct AIInsightDetailView: View {
             }
         }
         .navigationBarHidden(true)
+        .onDisappear {
+            // Sayfadan çıkınca sesi durdur
+            speechSynthesizer.stopSpeaking(at: .immediate)
+        }
+    }
+    
+    // MARK: - Speech Logic
+    
+    private func toggleSpeech() {
+        if isSpeaking {
+            speechSynthesizer.pauseSpeaking(at: .immediate)
+            isSpeaking = false
+        } else {
+            if speechSynthesizer.isPaused {
+                speechSynthesizer.continueSpeaking()
+                isSpeaking = true
+            } else {
+                let textToRead = insight.content.summaryTab.description
+                let utterance = AVSpeechUtterance(string: textToRead)
+                
+                // Türkçe ses seçimi (varsayılan Siri sesi kalitesinde)
+                utterance.voice = AVSpeechSynthesisVoice(language: "tr-TR")
+                utterance.rate = 0.52 // İdeal konuşma hızı
+                utterance.pitchMultiplier = 1.0
+                utterance.volume = 1.0
+                
+                speechSynthesizer.speak(utterance)
+                isSpeaking = true
+            }
+        }
     }
     
     // MARK: - Sections
@@ -74,7 +109,7 @@ struct AIInsightDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(insight.category.uppercased())
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.indigo)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
@@ -83,6 +118,20 @@ struct AIInsightDetailView: View {
                 
                 Spacer()
                 
+                // DİNLE BUTONU (Premium Dokunuş)
+                Button(action: { toggleSpeech() }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: isSpeaking ? "pause.fill" : "speaker.wave.2.fill")
+                        Text(isSpeaking ? "Durdur" : "Dinle")
+                    }
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(isSpeaking ? Color.red.opacity(0.2) : Color.white.opacity(0.1))
+                    .cornerRadius(20)
+                }
+                
                 if insight.isPremium {
                     HStack(spacing: 4) {
                         Image(systemName: "crown.fill")
@@ -90,6 +139,7 @@ struct AIInsightDetailView: View {
                     }
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(.orange)
+                    .padding(.leading, 8)
                 }
             }
             
