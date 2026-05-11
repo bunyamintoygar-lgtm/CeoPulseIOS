@@ -9,21 +9,37 @@ serve(async (req) => {
   try {
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!)
 
-    // 1. OpenAI ile Güncel Konu Belirleme ve Araştırma
+    // 1. app_config'den kategorileri çek
+    const { data: configData } = await supabase
+      .from('app_config')
+      .select('value')
+      .eq('key', 'ai_insight_categories')
+      .single()
+
+    const categories = configData?.value || [
+      { id: "tech", tr: "Teknoloji", en: "Technology", icon: "cpu" }
+    ]
+    
+    // Rastgele bir kategori seç
+    const selectedCategory = categories[Math.floor(Math.random() * categories.length)]
+    const categoryLabel = selectedCategory.tr || selectedCategory.id
+
+    // 2. OpenAI ile Güncel Konu Belirleme ve Araştırma
     const prompt = `
-      Sen dünyanın en prestijli strateji danışmanlık firmalarında (McKinsey, BCG gibi) çalışan bir "Senior Strategy Consultant" ve Yapay Zeka uzmanısın. 
-      Görevin CEO'lar için "Deep Research" yaparak benzersiz, niş ve yüksek stratejik değere sahip bir analiz raporu hazırlamak.
+      UZMANLIK ALANIN: ${categoryLabel}
       
-      ADIMLAR:
-      1. Web araması yaparak bugün iş dünyasını sarsan, henüz herkesin tam analiz edemediği çok taze ve kritik bir konu seç.
-      2. Bu konu hakkında "Deep Dive" araştırma yap. Genel geçer bilgilerden kaçın, gizli trendleri ve sayısal verileri bul.
-      3. Çıktıyı MUTLAKA aşağıdaki JSON formatında ver.
+      Görevin CEO'lar için internette derinlemesine araştırma yaparak taze ve stratejik içgörüler üretmektir.
+      
+      ARAŞTIRMA KRİTERLERİ:
+      1. ${categoryLabel} alanında bugün dünyayı sarsan en güncel global trendi bul.
+      2. ÖNEMLİ: Eğer içerik dili Türkçe ise, bu global trendin TÜRKİYE pazarına yansımalarını, Türkiye'deki yerel haberleri, Türk şirketlerinin bu konudaki hamlelerini ve yerel regülasyonları da mutlaka araştır ve analize dahil et.
+      3. Çıktı dili mutlaka Türkçe olmalı.
       
       ULTRA DETAY KURALLARI:
-      - "summary_tab.description": En az 150 kelimelik, derinlemesine bir yönetici özeti olmalı.
+      - "summary_tab.description": En az 150 kelimelik, derinlemesine bir yönetici özeti olmalı. Hem global hem de Türkiye perspektifini içermeli.
       - "findings_tab": En az 5 adet, her biri şaşırtıcı bir veri içeren bulgu olmalı.
       - "analysis_tab.trends": En az 4 farklı veri serisi ve her seride en az 6 veri noktası (zaman serisi) olmalı.
-      - "analysis_tab.regional_data": En az 6-7 farklı bölge/pazar detayı içermeli.
+      - "analysis_tab.regional_data": En az 6-7 farklı bölge/pazar detayı içermeli (Türkiye'yi de mutlaka dahil et).
       - "recommendations_tab": En az 5 adet, "Radikal" ve "Pratik" dengesinde stratejik öneri içermeli.
       - "icon" SEÇİMİ: Sadece geçerli SF Symbols kullan (Örn: 'chart.line.uptrend.xyaxis', 'dollarsign.circle', 'rocket.fill', 'flask', 'person.2.fill', 'banknote', 'lightbulb.fill', 'target', 'bolt.fill').
       
