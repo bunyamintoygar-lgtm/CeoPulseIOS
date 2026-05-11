@@ -88,8 +88,24 @@ serve(async (req) => {
       throw new Error(`OpenAI API Error: ${aiResult.error.message}`)
     }
 
-    // v1/responses yapısında içerik genellikle output.text içinde gelir
-    let rawContent = aiResult.output?.text || aiResult.choices?.[0]?.message?.content
+    // v1/responses yapısında içerik output dizisi içindeki message -> content -> output_text hiyerarşisindedir
+    let rawContent: string | null = null;
+    
+    if (Array.isArray(aiResult.output)) {
+      const messageOutput = aiResult.output.find((o: any) => o.type === "message");
+      if (messageOutput && Array.isArray(messageOutput.content)) {
+        const textContent = messageOutput.content.find((c: any) => c.type === "output_text");
+        if (textContent) {
+          rawContent = textContent.text;
+        }
+      }
+    }
+
+    // Fallback if the above structure fails
+    if (!rawContent) {
+      rawContent = aiResult.output?.text || aiResult.choices?.[0]?.message?.content;
+    }
+
     if (!rawContent) {
       console.error("AI Result Structure:", JSON.stringify(aiResult))
       throw new Error("AI response structure unexpected or empty.")
