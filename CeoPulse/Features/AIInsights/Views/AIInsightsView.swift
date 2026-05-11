@@ -152,10 +152,12 @@ struct RecommendationRow: View {
                     .foregroundColor(.white)
                     .lineLimit(1)
                 
-                Text(description)
-                    .font(.system(size: 10)) // 11 -> 10
+                Text(description.trimmingCharacters(in: .whitespacesAndNewlines))
+                    .font(.system(size: 10))
                     .foregroundColor(AppColors.textSecondary)
                     .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 
                 HStack(spacing: 8) {
                     Text(date)
