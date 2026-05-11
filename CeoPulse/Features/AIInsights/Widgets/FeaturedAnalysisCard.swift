@@ -5,6 +5,7 @@ struct FeaturedAnalysisCard: View {
     let description: String
     let readTime: Int
     let date: String
+    let category: String
     let imageUrl: String?
     
     var body: some View {
@@ -38,17 +39,14 @@ struct FeaturedAnalysisCard: View {
             // Bottom Information Panel (Protects text from image content)
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    HStack(spacing: 4) {
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 10))
-                        Text("ai_featured_analysis".localized().uppercased())
-                            .font(.system(size: 10, weight: .black))
-                    }
-                    .foregroundColor(.orange)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.orange.opacity(0.15))
-                    .cornerRadius(6)
+                    // Kategori Rozeti (Öne Çıkan yerine)
+                    Text(category.uppercased())
+                        .font(.system(size: 10, weight: .black))
+                        .foregroundColor(.purple)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.purple.opacity(0.15))
+                        .cornerRadius(6)
                     
                     Spacer()
                     

@@ -57,6 +57,7 @@ struct AIInsightsView: View {
                                     description: insight.subtitle ?? "",
                                     readTime: insight.readTime,
                                     date: "Analiz",
+                                    category: insight.category,
                                     imageUrl: insight.imageUrl
                                 )
                             }
