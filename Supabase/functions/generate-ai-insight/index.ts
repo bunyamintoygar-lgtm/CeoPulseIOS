@@ -71,24 +71,30 @@ serve(async (req) => {
         tools: [
           { type: "web_search" }
         ],
-        input: [
-          { 
-            role: 'system', 
-            content: 'Sen profesyonel bir iş analisti ve stratejistsin. Görevin CEO\'lar için internette derinlemesine araştırma yaparak taze ve stratejik içgörüler üretmektir.' 
-          },
-          { 
-            role: 'user', 
-            content: prompt 
+        input: `
+          Sen profesyonel bir iş analisti ve stratejistsin. Görevin CEO'lar için internette derinlemesine araştırma yaparak taze ve stratejik içgörüler üretmektir.
+          
+          Lütfen şu çerçevede bir analiz hazırla:
+          ${prompt}
+        `,
+        text: {
+          format: {
+            type: "json_object"
           }
-        ],
-        response_format: {
-          type: "json_object"
         }
       }),
     })
 
     const aiResult = await response.json()
-    const insightData = JSON.parse(aiResult.choices[0].message.content)
+    
+    // v1/responses yapısında içerik genellikle output.text içinde gelir
+    const rawContent = aiResult.output?.text || aiResult.choices?.[0]?.message?.content
+    if (!rawContent) {
+      console.error("AI Result Structure:", JSON.stringify(aiResult))
+      throw new Error("AI response structure unexpected or empty.")
+    }
+
+    const insightData = JSON.parse(rawContent)
 
     // 2. Veritabanına Kaydet
     const { data, error } = await supabase
