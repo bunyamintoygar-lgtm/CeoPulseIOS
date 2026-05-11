@@ -141,7 +141,7 @@ struct AIInsightDetailView: View {
             }
             
             Text(insight.title)
-                .font(.system(size: 16, weight: .bold)) // 18 -> 16
+                .font(.system(size: 15, weight: .bold)) // 16 -> 15
                 .foregroundColor(.white)
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
@@ -193,6 +193,7 @@ struct AIInsightDetailView: View {
                 .font(.system(size: 15))
                 .foregroundColor(.gray)
                 .lineSpacing(5)
+                .multilineTextAlignment(.leading) // Özet kısmı genelde leading daha iyi okunur
                 .padding(.horizontal, 20)
             
             // İstatistik Kartları (Yenilenmiş Tasarım)
@@ -234,13 +235,14 @@ struct AIInsightDetailView: View {
             ForEach(insight.content.findingsTab) { finding in
                 VStack(alignment: .leading, spacing: 8) {
                     Text(finding.title)
-                        .font(.system(size: 14, weight: .bold)) // 15 -> 14
+                        .font(.system(size: 13, weight: .bold)) // 14 -> 13
                         .foregroundColor(.white)
                     
                     Text(finding.desc)
                         .font(.system(size: 13))
                         .foregroundColor(.gray.opacity(0.8))
                         .lineSpacing(4)
+                        .multilineTextAlignment(.justified) // İki yana yasla
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
@@ -314,28 +316,15 @@ struct AIInsightDetailView: View {
         VStack(spacing: 16) {
             ForEach(insight.content.recommendationsTab) { rec in
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text(rec.title)
-                            .font(.system(size: 14, weight: .bold)) // 15 -> 14
-                            .foregroundColor(.white)
-                        Spacer()
-                        
-                        // Yerelleştirilmiş Rozet
-                        let impactText = rec.impact == "High" ? "Yüksek" : (rec.impact == "Medium" ? "Orta" : rec.impact)
-                        
-                        Text(impactText)
-                            .font(.system(size: 10, weight: .bold))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(rec.impact == "High" ? Color.red.opacity(0.2) : Color.orange.opacity(0.2))
-                            .foregroundColor(rec.impact == "High" ? .red : .orange)
-                            .cornerRadius(4)
-                    }
+                    Text(rec.title)
+                        .font(.system(size: 13, weight: .bold)) // 14 -> 13
+                        .foregroundColor(.white)
                     
                     Text(rec.desc)
                         .font(.system(size: 14))
                         .foregroundColor(.gray.opacity(0.8))
                         .lineSpacing(4)
+                        .multilineTextAlignment(.justified) // İki yana yasla
                 }
                 .padding()
                 .background(Color.white.opacity(0.07))
