@@ -3,6 +3,7 @@ import SwiftUI
 struct AIInsightsView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var viewModel = AIInsightsViewModel()
+    @State private var isSearchExpanded = false // Arama çubuğu açık mı?
     
     let categories = [
         ("Tümü", "square.grid.2x2.fill"),
@@ -16,24 +17,62 @@ struct AIInsightsView: View {
             LazyVStack(alignment: .leading, spacing: 24) {
                 // Header
                 HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("ai_insights_title".localized())
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.white)
-                        Text("ai_insights_subtitle".localized())
-                            .font(.system(size: 11))
-                            .foregroundColor(AppColors.textSecondary)
-                    }
-                    
-                    Spacer()
-                    
-                    // ARAMA BUTONU
-                    Button(action: { /* Arama aksiyonu buraya gelecek */ }) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(10)
-                            .background(Circle().fill(Color.white.opacity(0.1)))
+                    if isSearchExpanded {
+                        // GENİŞLEMİŞ ARAMA ÇUBUĞU
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.gray)
+                            TextField("Analizlerde ara...", text: $viewModel.searchText)
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .foregroundColor(.white)
+                                .autocorrectionDisabled()
+                            
+                            if !viewModel.searchText.isEmpty {
+                                Button(action: { viewModel.searchText = "" }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                            
+                            Button("Vazgeç") {
+                                withAnimation {
+                                    isSearchExpanded = false
+                                    viewModel.searchText = ""
+                                }
+                            }
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.indigo)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(12)
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                    } else {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("ai_insights_title".localized())
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundColor(.white)
+                            Text("ai_insights_subtitle".localized())
+                                .font(.system(size: 11))
+                                .foregroundColor(AppColors.textSecondary)
+                        }
+                        .transition(.move(edge: .leading).combined(with: .opacity))
+                        
+                        Spacer()
+                        
+                        // ARAMA BUTONU
+                        Button(action: {
+                            withAnimation {
+                                isSearchExpanded = true
+                            }
+                        }) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(10)
+                                .background(Circle().fill(Color.white.opacity(0.1)))
+                        }
                     }
                 }
                 .padding(.horizontal, 20)

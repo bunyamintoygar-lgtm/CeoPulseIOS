@@ -5,16 +5,30 @@ import Supabase
 class AIInsightsViewModel: ObservableObject {
     @Published var insights: [AIInsight] = []
     @Published var selectedCategory: String = "Tümü"
+    @Published var searchText: String = "" // Yeni arama metni
     @Published var isLoading = false
     @Published var errorMessage: String?
     
     private let client = SupabaseManager.shared.client
     
     var filteredInsights: [AIInsight] {
-        if selectedCategory == "Tümü" {
-            return insights
+        var filtered = insights
+        
+        // 1. Kategori Filtreleme
+        if selectedCategory != "Tümü" {
+            filtered = filtered.filter { $0.category == selectedCategory }
         }
-        return insights.filter { $0.category == selectedCategory }
+        
+        // 2. Arama Filtreleme (Türkçe karakter duyarlı)
+        if !searchText.isEmpty {
+            filtered = filtered.filter { insight in
+                let titleMatch = insight.title.localizedCaseInsensitiveContains(searchText)
+                let subtitleMatch = (insight.subtitle ?? "").localizedCaseInsensitiveContains(searchText)
+                return titleMatch || subtitleMatch
+            }
+        }
+        
+        return filtered
     }
     
     var featuredInsight: AIInsight? {
