@@ -168,11 +168,10 @@
 // AI Insights Screen
 "ai_insights_title" = "AI Insights";
 "ai_insights_subtitle" = "Yapay zeka destekli derinlemesine analizler";
-"ai_featured_analysis" = "ÖNE ÇIKAN ANALİZ";
-"ai_read_analysis" = "Analizi Oku";
+"ai_featured_analyses" = "Öne Çıkan Analizler";
+"ai_recommended_for_you" = "Sizin İçin Önerilenler";
 "ai_read_time" = "%d dk okuma";
 "ai_trend_analyses" = "Trend Analizleri";
-"ai_recommended_for_you" = "Sizin İçin Önerilenler";
 "ai_category_tech" = "Teknoloji";
 "ai_category_economy" = "Ekonomi";
 "ai_category_talent" = "İK & Yetenek";

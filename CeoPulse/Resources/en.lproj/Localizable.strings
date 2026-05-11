@@ -168,11 +168,10 @@
 // AI Insights Screen
 "ai_insights_title" = "AI Insights";
 "ai_insights_subtitle" = "AI-powered in-depth analyses";
-"ai_featured_analysis" = "FEATURED ANALYSIS";
-"ai_read_analysis" = "Read Analysis";
+"ai_featured_analyses" = "Featured Analyses";
+"ai_recommended_for_you" = "Recommended for You";
 "ai_read_time" = "%d min read";
 "ai_trend_analyses" = "Trend Analyses";
-"ai_recommended_for_you" = "Recommended for You";
 "ai_category_tech" = "Technology";
 "ai_category_economy" = "Economy";
 "ai_category_talent" = "HR & Talent";
