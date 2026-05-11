@@ -14,18 +14,31 @@ struct TrendAnalysisCard: View {
     let readTime: Int
     let iconName: String
     let iconColor: Color
+    let imageUrl: String? // Added imageUrl support
     let isPremium: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(iconColor.opacity(0.1))
+                    if let urlString = imageUrl, let url = URL(string: urlString) {
+                        AsyncImage(url: url) { image in
+                            image.resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Color.white.opacity(0.1)
+                        }
                         .frame(width: 36, height: 36)
-                    Image(systemName: iconName)
-                        .foregroundColor(iconColor)
-                        .font(.system(size: 16))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                    } else {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(iconColor.opacity(0.1))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: iconName)
+                            .foregroundColor(iconColor)
+                            .font(.system(size: 16))
+                    }
                 }
                 
                 Spacer()

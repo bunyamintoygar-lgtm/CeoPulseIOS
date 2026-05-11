@@ -103,6 +103,7 @@ struct AIInsightsView: View {
                                         readTime: insight.readTime,
                                         iconName: "cpu",
                                         iconColor: .purple,
+                                        imageUrl: insight.imageUrl,
                                         isPremium: insight.isPremium
                                     )
                                 }
