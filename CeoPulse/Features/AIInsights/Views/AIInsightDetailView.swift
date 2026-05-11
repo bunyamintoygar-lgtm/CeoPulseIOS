@@ -100,12 +100,8 @@ struct AIInsightDetailView: View {
                 Color.gray.opacity(0.1)
             }
             .frame(height: 280)
-            .clipped()
-            .ignoresSafeArea(.all, edges: .top)
-            
-            // Üst Butonlar
+            // Üst Butonlar (Sadece Geri)
             HStack {
-                // Geri Butonu
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .bold))
@@ -113,17 +109,7 @@ struct AIInsightDetailView: View {
                         .padding(12)
                         .background(Circle().fill(.black.opacity(0.4)))
                 }
-                
                 Spacer()
-                
-                // PDF / Paylaş Butonu
-                Button(action: { sharePDF() }) {
-                    Image(systemName: "doc.text.fill")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(12)
-                        .background(Circle().fill(.black.opacity(0.4)))
-                }
             }
             .padding(.top, 10)
             .padding(.horizontal, 20)
@@ -143,7 +129,7 @@ struct AIInsightDetailView: View {
     
     private var titleSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
+            HStack(spacing: 8) {
                 Text(insight.category.uppercased())
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.indigo)
@@ -154,7 +140,7 @@ struct AIInsightDetailView: View {
                 
                 Spacer()
                 
-                // DİNLE BUTONU (Premium Dokunuş)
+                // DİNLE BUTONU
                 Button(action: { toggleSpeech() }) {
                     HStack(spacing: 6) {
                         Image(systemName: isSpeaking ? "pause.fill" : "speaker.wave.2.fill")
@@ -165,6 +151,20 @@ struct AIInsightDetailView: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(isSpeaking ? Color.red.opacity(0.2) : Color.white.opacity(0.1))
+                    .cornerRadius(20)
+                }
+                
+                // PDF PAYLAŞ BUTONU
+                Button(action: { sharePDF() }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "doc.text.fill")
+                        Text("PDF")
+                    }
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(0.1))
                     .cornerRadius(20)
                 }
             }
