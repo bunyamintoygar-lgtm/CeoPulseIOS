@@ -12,11 +12,10 @@ struct AIInsightPDFView: View {
                         .font(.system(size: 10, weight: .black))
                         .foregroundColor(.gray)
                     Text(insight.title)
-                        .font(.system(size: 24, weight: .bold))
+                        .font(.system(size: 20, weight: .bold)) // 24 -> 20
                         .foregroundColor(.black)
                 }
                 Spacer()
-                // Logo placeholder or text
                 Text("AI INSIGHTS")
                     .font(.system(size: 12, weight: .bold))
                     .padding(8)
@@ -29,9 +28,10 @@ struct AIInsightPDFView: View {
             
             // Meta Info
             HStack {
-                Label(insight.category, systemImage: "tag.fill")
+                Text(insight.category.uppercased())
+                    .font(.system(size: 9, weight: .bold))
                 Spacer()
-                Label("\(insight.readTime) dk okuma", systemImage: "clock.fill")
+                Text("\(insight.readTime) dk okuma")
                 Spacer()
                 Text(Date().formatted(date: .long, time: .omitted))
             }
@@ -45,9 +45,9 @@ struct AIInsightPDFView: View {
                     .foregroundColor(.indigo)
                 
                 Text(insight.content.summaryTab.description)
-                    .font(.system(size: 12))
+                    .font(.system(size: 11))
                     .lineSpacing(4)
-                    .multilineTextAlignment(.justified)
+                    .multilineTextAlignment(.leading)
             }
             
             // 2. KRİTİK BULGULAR
@@ -59,16 +59,16 @@ struct AIInsightPDFView: View {
                 ForEach(insight.content.findingsTab) { finding in
                     VStack(alignment: .leading, spacing: 4) {
                         Text("• \(finding.title)")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(.system(size: 11, weight: .bold))
                         Text(finding.desc)
-                            .font(.system(size: 11))
+                            .font(.system(size: 10))
                             .foregroundColor(.gray)
                             .padding(.leading, 12)
                     }
                 }
             }
             
-            // 3. STRATEJİK ÇIKARIMLAR VE ÖNERİLER
+            // 3. STRATEJİK ÖNERİLER
             VStack(alignment: .leading, spacing: 12) {
                 Text("3. STRATEJİK ÖNERİLER")
                     .font(.system(size: 14, weight: .bold))
@@ -77,9 +77,9 @@ struct AIInsightPDFView: View {
                 ForEach(insight.content.recommendationsTab) { rec in
                     VStack(alignment: .leading, spacing: 6) {
                         Text("» \(rec.title)")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(.system(size: 11, weight: .bold))
                         Text(rec.desc)
-                            .font(.system(size: 11))
+                            .font(.system(size: 10))
                             .foregroundColor(.gray)
                             .padding(.leading, 12)
                     }

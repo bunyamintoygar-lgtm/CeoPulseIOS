@@ -134,7 +134,8 @@ struct AIInsightDetailView: View {
     @State private var showShareSheet = false
     
     private func sharePDF() {
-        if let url = PDFManager.shared.generatePDF(insight: insight) {
+        let pdfView = AIInsightPDFView(insight: insight)
+        if let url = PDFManager.shared.generatePDF(view: pdfView, filename: "\(insight.title.prefix(20))") {
             self.pdfURL = url
             self.showShareSheet = true
         }
@@ -270,7 +271,7 @@ struct AIInsightDetailView: View {
                         .font(.system(size: 13))
                         .foregroundColor(.gray.opacity(0.8))
                         .lineSpacing(4)
-                        .multilineTextAlignment(.justified) // İki yana yasla
+                        .multilineTextAlignment(.leading) // İki yana yasla yerine sola yasla
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
@@ -304,7 +305,7 @@ struct AIInsightDetailView: View {
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
                         .lineSpacing(4)
-                        .multilineTextAlignment(.justified) // İki yana yasla
+                        .multilineTextAlignment(.leading) // İki yana yasla yerine sola yasla
                 }
             }
             .padding(.horizontal, 20)
@@ -355,7 +356,7 @@ struct AIInsightDetailView: View {
                         .font(.system(size: 14))
                         .foregroundColor(.gray.opacity(0.8))
                         .lineSpacing(4)
-                        .multilineTextAlignment(.justified) // İki yana yasla
+                        .multilineTextAlignment(.leading) // İki yana yasla yerine sola yasla
                 }
                 .padding()
                 .background(Color.white.opacity(0.07))
