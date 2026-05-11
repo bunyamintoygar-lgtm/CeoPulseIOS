@@ -96,7 +96,7 @@ struct AIInsightDetailView: View {
             }
             
             Text(insight.title)
-                .font(.system(size: 22, weight: .bold))
+                .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
