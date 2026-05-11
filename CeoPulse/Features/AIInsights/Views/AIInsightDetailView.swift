@@ -11,29 +11,27 @@ struct AIInsightDetailView: View {
         ZStack {
             Color.black.ignoresSafeArea()
             
-            VStack(spacing: 0) {
-                // Header (Resim)
-                headerSection
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 24) {
-                        // Başlık ve Kategori Alanı (Görselin hemen altında)
-                        titleSection
-                        
-                        // Tab Seçici (Kaydırılabilir içerik içinde daha akıcı)
-                        tabPicker
-                        
-                        // Sekme İçerikleri
-                        Group {
-                            if selectedTab == 0 {
-                                summaryTabView
-                            } else if selectedTab == 1 {
-                                findingsTabView
-                            } else if selectedTab == 2 {
-                                analysisTabView
-                            } else {
-                                recommendationsTabView
-                            }
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Header (Resim) - Artık Scroll İçinde
+                    headerSection
+                    
+                    // Başlık ve Kategori Alanı
+                    titleSection
+                    
+                    // Tab Seçici
+                    tabPicker
+                    
+                    // Sekme İçerikleri
+                    Group {
+                        if selectedTab == 0 {
+                            summaryTabView
+                        } else if selectedTab == 1 {
+                            findingsTabView
+                        } else if selectedTab == 2 {
+                            analysisTabView
+                        } else {
+                            recommendationsTabView
                         }
                     }
                     .padding(.bottom, 40)
@@ -96,13 +94,13 @@ struct AIInsightDetailView: View {
             }
             
             Text(insight.title)
-                .font(.system(size: 20, weight: .bold))
+                .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.white)
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 20)
-        .padding(.top, 0) // Boşluğu tamamen kaldırdım
+        .padding(.top, 0) // Boşluk tamamen sıfırlandı
     }
     
     private var tabPicker: some View {
@@ -135,7 +133,7 @@ struct AIInsightDetailView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .padding(.top, 10)
+        .padding(.top, 20)
     }
     
     @Namespace private var tabAnimation
@@ -143,11 +141,11 @@ struct AIInsightDetailView: View {
     // MARK: - Tab Views
     
     private var summaryTabView: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 20) {
             Text(insight.content.summaryTab.description)
-                .font(.system(size: 16))
+                .font(.system(size: 15))
                 .foregroundColor(.gray)
-                .lineSpacing(6)
+                .lineSpacing(5)
                 .padding(.horizontal, 20)
             
             // İstatistik Kartları (Yenilenmiş Tasarım)
@@ -186,6 +184,7 @@ struct AIInsightDetailView: View {
             }
             .padding(.horizontal, 20)
         }
+        .padding(.top, 24)
     }
     
     private var findingsTabView: some View {
@@ -208,10 +207,10 @@ struct AIInsightDetailView: View {
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text(finding.title)
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: 15, weight: .bold))
                             .foregroundColor(.white)
                         Text(finding.desc)
-                            .font(.system(size: 14))
+                            .font(.system(size: 13))
                             .foregroundColor(.gray.opacity(0.8))
                     }
                     
@@ -230,6 +229,7 @@ struct AIInsightDetailView: View {
             }
         }
         .padding(.horizontal, 20)
+        .padding(.top, 24)
     }
     
     private var analysisTabView: some View {
@@ -237,7 +237,7 @@ struct AIInsightDetailView: View {
             // Trend Grafiği
             VStack(alignment: .leading, spacing: 16) {
                 Text("Stratejik Trendler")
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 17, weight: .bold))
                 
                 TrendLineChartView(series: insight.content.analysisTab.trends.map { trend in
                     TrendLineData(label: trend.label, points: trend.points, color: Color(hex: trend.color))
@@ -248,7 +248,7 @@ struct AIInsightDetailView: View {
             // Bölgesel Dağılım
             VStack(alignment: .leading, spacing: 16) {
                 Text("Bölgesel Etki")
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 17, weight: .bold))
                 
                 ForEach(insight.content.analysisTab.regionalData) { region in
                     HStack(spacing: 12) {
@@ -275,6 +275,7 @@ struct AIInsightDetailView: View {
             }
             .padding(.horizontal, 20)
         }
+        .padding(.top, 24)
     }
     
     private var recommendationsTabView: some View {
@@ -285,7 +286,7 @@ struct AIInsightDetailView: View {
                         Image(systemName: rec.icon)
                             .foregroundColor(.indigo)
                         Text(rec.title)
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.system(size: 15, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
                         Text(rec.impact)
@@ -312,6 +313,7 @@ struct AIInsightDetailView: View {
             }
         }
         .padding(.horizontal, 20)
+        .padding(.top, 24)
     }
 }
 
