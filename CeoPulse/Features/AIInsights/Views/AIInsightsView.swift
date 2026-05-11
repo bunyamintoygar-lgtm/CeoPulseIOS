@@ -64,53 +64,27 @@ struct AIInsightsView: View {
                     .padding(.horizontal, 20)
                 }
                 
-                // Featured
-                if let featured = viewModel.featuredInsight {
-                    NavigationLink(destination: AIInsightDetailView(insight: featured)) {
-                        FeaturedAnalysisCard(
-                            title: featured.title,
-                            description: featured.subtitle ?? "",
-                            readTime: featured.readTime,
-                            date: "Bugün",
-                            imageUrl: featured.imageUrl
-                        )
-                    }
-                    .padding(.horizontal, 20)
-                }
-                
-                // Trend Analyses Section
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Text("ai_trend_analyses".localized())
-                            .font(.system(size: 17, weight: .bold)) // 18 -> 17
-                            .foregroundColor(.white)
-                        Spacer()
-                        Text("see_all".localized())
-                            .font(.system(size: 14))
-                            .foregroundColor(AppColors.primaryAccent)
-                    }
-                    .padding(.horizontal, 20)
+                // Multi-Featured Analyses (Top 3)
+                VStack(alignment: .leading, spacing: 24) {
+                    Text("ai_featured_analyses".localized())
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
                     
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 16) {
-                            ForEach(viewModel.filteredInsights.prefix(3)) { insight in
-                                NavigationLink(destination: AIInsightDetailView(insight: insight)) {
-                                    TrendAnalysisCard(
-                                        title: insight.title,
-                                        description: insight.subtitle ?? "",
-                                        chartType: .line, // Default to line for AI
-                                        date: "Yeni",
-                                        readTime: insight.readTime,
-                                        iconName: "cpu",
-                                        iconColor: .purple,
-                                        imageUrl: insight.imageUrl,
-                                        isPremium: insight.isPremium
-                                    )
-                                }
+                    VStack(spacing: 20) {
+                        ForEach(viewModel.filteredInsights.prefix(3)) { insight in
+                            NavigationLink(destination: AIInsightDetailView(insight: insight)) {
+                                FeaturedAnalysisCard(
+                                    title: insight.title,
+                                    description: insight.subtitle ?? "",
+                                    readTime: insight.readTime,
+                                    date: "Analiz",
+                                    imageUrl: insight.imageUrl
+                                )
                             }
                         }
-                        .padding(.horizontal, 20)
                     }
+                    .padding(.horizontal, 20)
                 }
                 
                 // Recommended Section
