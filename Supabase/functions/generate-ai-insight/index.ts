@@ -25,6 +25,7 @@ serve(async (req) => {
       - "analysis_tab.trends": En az 4 farklı veri serisi ve her seride en az 6 veri noktası (zaman serisi) olmalı.
       - "analysis_tab.regional_data": En az 6-7 farklı bölge/pazar detayı içermeli.
       - "recommendations_tab": En az 5 adet, "Radikal" ve "Pratik" dengesinde stratejik öneri içermeli.
+      - "icon" SEÇİMİ: Sadece geçerli SF Symbols kullan (Örn: 'chart.line.uptrend.xyaxis', 'dollarsign.circle', 'rocket.fill', 'flask', 'person.2.fill', 'banknote', 'lightbulb.fill', 'target', 'bolt.fill').
       
       JSON FORMATI:
       {
