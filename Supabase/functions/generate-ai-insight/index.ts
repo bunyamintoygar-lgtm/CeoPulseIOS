@@ -60,19 +60,30 @@ serve(async (req) => {
       }
     `;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o', 
-        messages: [
-          { role: 'system', content: 'Sen profesyonel bir iş analisti ve stratejistsin.' },
-          { role: 'user', content: prompt }
+        model: 'gpt-5.4-mini',
+        tools: [
+          { type: "web_search" }
         ],
-        response_format: { type: "json_object" }
+        input: [
+          { 
+            role: 'system', 
+            content: 'Sen profesyonel bir iş analisti ve stratejistsin. Görevin CEO''lar için internette derinlemesine araştırma yaparak taze ve stratejik içgörüler üretmektir.' 
+          },
+          { 
+            role: 'user', 
+            content: prompt 
+          }
+        ],
+        response_format: {
+          type: "json_object"
+        }
       }),
     })
 
