@@ -588,6 +588,9 @@ struct CreateSurveyView: View {
                         .datePickerStyle(.graphical)
                         .accentColor(.purple)
                         .labelsHidden()
+                        .onChange(of: startDate) { _ in
+                            showingStartDatePicker = false
+                        }
                     
                     Button(action: { showingStartDatePicker = false }) {
                         Text(LocalizedStringKey("button_done"))
@@ -613,6 +616,9 @@ struct CreateSurveyView: View {
                         .datePickerStyle(.graphical)
                         .accentColor(.purple)
                         .labelsHidden()
+                        .onChange(of: endDate) { _ in
+                            showingEndDatePicker = false
+                        }
                     
                     Button(action: { showingEndDatePicker = false }) {
                         Text(LocalizedStringKey("button_done"))
