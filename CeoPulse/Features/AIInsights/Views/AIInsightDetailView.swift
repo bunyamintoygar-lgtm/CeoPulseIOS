@@ -261,35 +261,38 @@ struct AIInsightDetailView: View {
     private var analysisTabView: some View {
         VStack(alignment: .leading, spacing: 32) {
             // Trend Grafiği
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 20) {
                 Text("Stratejik Trendler")
-                    .font(.system(size: 17, weight: .bold))
+                    .font(.system(size: 15, weight: .bold)) // 17 -> 15
+                    .foregroundColor(.white)
+                
+                TrendLineChartView(series: insight.content.analysisTab.trends.map { trend in
+                    TrendLineData(label: trend.label, points: trend.points, color: Color(hex: trend.color))
+                })
+                .padding(.bottom, 8)
                 
                 if let description = insight.content.analysisTab.analysisDescription {
                     Text(description)
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
                         .lineSpacing(4)
-                        .padding(.bottom, 8)
+                        .multilineTextAlignment(.justified) // İki yana yasla
                 }
-                
-                TrendLineChartView(series: insight.content.analysisTab.trends.map { trend in
-                    TrendLineData(label: trend.label, points: trend.points, color: Color(hex: trend.color))
-                })
             }
             .padding(.horizontal, 20)
             
             // Bölgesel Dağılım
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Bölgesel Etki")
-                    .font(.system(size: 17, weight: .bold))
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Pazar Dinamikleri ve Coğrafi Yayılım")
+                    .font(.system(size: 15, weight: .bold)) // 17 -> 15
+                    .foregroundColor(.white)
                 
                 ForEach(insight.content.analysisTab.regionalData) { region in
                     HStack(spacing: 12) {
                         Text(region.region)
                             .font(.system(size: 14))
                             .foregroundColor(.white.opacity(0.9))
-                            .frame(width: 80, alignment: .leading)
+                            .frame(width: 90, alignment: .leading)
                         
                         ZStack(alignment: .leading) {
                             Capsule()
