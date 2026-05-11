@@ -96,7 +96,7 @@ struct AIInsightDetailView: View {
             }
             
             Text(insight.title)
-                .font(.system(size: 26, weight: .black))
+                .font(.system(size: 22, weight: .bold))
                 .foregroundColor(.white)
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
@@ -150,24 +150,37 @@ struct AIInsightDetailView: View {
                 .lineSpacing(6)
                 .padding(.horizontal, 20)
             
-            // İstatistik Kartları
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+            // İstatistik Kartları (Yenilenmiş Tasarım)
+            VStack(spacing: 12) {
                 ForEach(insight.content.summaryTab.stats, id: \.self) { stat in
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(stat.value)
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                        Text(stat.label)
-                            .font(.system(size: 10))
-                            .foregroundColor(.gray)
+                    HStack(spacing: 16) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.indigo.opacity(0.1))
+                            Image(systemName: stat.icon)
+                                .foregroundColor(.indigo)
+                                .font(.system(size: 16))
+                        }
+                        .frame(width: 44, height: 44)
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(stat.label)
+                                .font(.system(size: 12))
+                                .foregroundColor(.gray)
+                            Text(stat.value)
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(.white)
+                                .lineLimit(2)
+                        }
+                        
+                        Spacer()
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.white.opacity(0.07))
-                    .cornerRadius(12)
+                    .padding(12)
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(16)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.white.opacity(0.03), lineWidth: 1)
                     )
                 }
             }
@@ -188,7 +201,8 @@ struct AIInsightDetailView: View {
                             .rotationEffect(.degrees(-90))
                         
                         Text("%\(Int(finding.percentage))")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(.system(size: 12, weight: .black))
+                            .foregroundColor(.white)
                     }
                     .frame(width: 44, height: 44)
                     
