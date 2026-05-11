@@ -48,6 +48,11 @@ struct AIInsightDetailView: View {
             // Sayfadan çıkınca sesi durdur
             speechSynthesizer.stopSpeaking(at: .immediate)
         }
+        .sheet(isPresented: $showShareSheet) {
+            if let url = pdfURL {
+                ShareSheet(activityItems: [url])
+            }
+        }
     }
     
     // MARK: - Speech Logic
@@ -98,17 +103,40 @@ struct AIInsightDetailView: View {
             .clipped()
             .ignoresSafeArea(.all, edges: .top)
             
-            // Geri Butonu
-            Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(12)
-                    .background(Circle().fill(.black.opacity(0.4)))
-                    .blur(radius: 0)
+            // Üst Butonlar
+            HStack {
+                // Geri Butonu
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(12)
+                        .background(Circle().fill(.black.opacity(0.4)))
+                }
+                
+                Spacer()
+                
+                // PDF / Paylaş Butonu
+                Button(action: { sharePDF() }) {
+                    Image(systemName: "doc.text.fill")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(12)
+                        .background(Circle().fill(.black.opacity(0.4)))
+                }
             }
-            .padding(.top, 10) // Safe area zaten ignore edildiği için sadece küçük bir offset
-            .padding(.leading, 20)
+            .padding(.top, 10)
+            .padding(.horizontal, 20)
+        }
+    }
+    
+    @State private var pdfURL: URL?
+    @State private var showShareSheet = false
+    
+    private func sharePDF() {
+        if let url = PDFManager.shared.generatePDF(insight: insight) {
+            self.pdfURL = url
+            self.showShareSheet = true
         }
     }
     
