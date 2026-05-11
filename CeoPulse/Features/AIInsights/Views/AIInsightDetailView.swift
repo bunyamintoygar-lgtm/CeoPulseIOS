@@ -221,6 +221,14 @@ struct AIInsightDetailView: View {
                 Text("Stratejik Trendler")
                     .font(.system(size: 17, weight: .bold))
                 
+                if let description = insight.content.analysisTab.analysisDescription {
+                    Text(description)
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                        .lineSpacing(4)
+                        .padding(.bottom, 8)
+                }
+                
                 TrendLineChartView(series: insight.content.analysisTab.trends.map { trend in
                     TrendLineData(label: trend.label, points: trend.points, color: Color(hex: trend.color))
                 })

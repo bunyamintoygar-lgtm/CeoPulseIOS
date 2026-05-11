@@ -43,21 +43,21 @@ struct TrendLineChartView: View {
             }
             .frame(height: 220)
             
-            // Legend (Açıklama)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 20) {
-                    ForEach(series) { item in
-                        HStack(spacing: 6) {
-                            Circle()
-                                .fill(item.color)
-                                .frame(width: 8, height: 8)
-                            Text(item.label)
-                                .font(.system(size: 12))
-                                .foregroundColor(.gray)
-                        }
+            // Legend (Açıklama) - Artık Wrap Yapıyor
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], alignment: .leading, spacing: 12) {
+                ForEach(series) { item in
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(item.color)
+                            .frame(width: 8, height: 8)
+                        Text(item.label)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
                     }
                 }
             }
+            .padding(.top, 8)
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 1.5)) {

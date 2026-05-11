@@ -54,10 +54,12 @@ struct InsightFinding: Codable, Identifiable {
 }
 
 struct AnalysisTab: Codable {
+    let analysisDescription: String?
     let trends: [InsightTrend]
     let regionalData: [RegionalData]
     
     enum CodingKeys: String, CodingKey {
+        case analysisDescription = "analysis_description"
         case trends
         case regionalData = "regional_data"
     }

@@ -38,6 +38,7 @@ serve(async (req) => {
       ULTRA DETAY KURALLARI:
       - "summary_tab.description": En az 150 kelimelik, derinlemesine bir yönetici özeti olmalı. Hem global hem de Türkiye perspektifini içermeli.
       - "findings_tab": En az 5 adet, her biri şaşırtıcı bir veri içeren bulgu olmalı.
+      - "analysis_tab.analysis_description": Grafiklerdeki verilerin ne anlama geldiğini, neden yükselip düştüğünü anlatan en az 3-4 cümlelik stratejik bir analiz özeti.
       - "analysis_tab.trends": En az 4 farklı veri serisi ve her seride en az 6 veri noktası (zaman serisi) olmalı.
       - "analysis_tab.regional_data": En az 6-7 farklı bölge/pazar detayı içermeli (Türkiye'yi de mutlaka dahil et).
       - "recommendations_tab": En az 5 adet, "Radikal" ve "Pratik" dengesinde stratejik öneri içermeli.
