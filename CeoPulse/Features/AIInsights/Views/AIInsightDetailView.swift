@@ -122,19 +122,22 @@ struct AIInsightDetailView: View {
             // İstatistik Kartları
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                 ForEach(insight.content.summaryTab.stats, id: \.self) { stat in
-                    VStack(spacing: 8) {
-                        Image(systemName: stat.icon)
-                            .foregroundColor(.indigo)
+                    VStack(alignment: .leading, spacing: 8) {
                         Text(stat.value)
                             .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
                         Text(stat.label)
                             .font(.system(size: 10))
                             .foregroundColor(.gray)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.white.opacity(0.05))
+                    .background(Color.white.opacity(0.07))
                     .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                    )
                 }
             }
             .padding(.horizontal, 20)
@@ -161,19 +164,24 @@ struct AIInsightDetailView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(finding.title)
                             .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
                         Text(finding.desc)
                             .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                            .foregroundColor(.gray.opacity(0.8))
                     }
                     
                     Spacer()
                     
                     Image(systemName: finding.icon)
-                        .foregroundColor(.gray.opacity(0.5))
+                        .foregroundColor(.indigo.opacity(0.6))
                 }
                 .padding()
-                .background(Color.white.opacity(0.05))
+                .background(Color.white.opacity(0.07))
                 .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                )
             }
         }
         .padding(.horizontal, 20)
@@ -198,24 +206,25 @@ struct AIInsightDetailView: View {
                     .font(.system(size: 18, weight: .bold))
                 
                 ForEach(insight.content.analysisTab.regionalData) { region in
-                    HStack {
+                    HStack(spacing: 12) {
                         Text(region.region)
                             .font(.system(size: 14))
-                        Spacer()
+                            .foregroundColor(.white.opacity(0.9))
+                            .frame(width: 80, alignment: .leading)
+                        
                         ZStack(alignment: .leading) {
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.2))
+                            Capsule()
+                                .fill(Color.white.opacity(0.1))
                                 .frame(height: 8)
-                            Rectangle()
-                                .fill(Color.indigo)
-                                .frame(width: 150 * (region.percentage / 100), height: 8)
+                            Capsule()
+                                .fill(LinearGradient(colors: [.indigo, .purple], startPoint: .leading, endPoint: .trailing))
+                                .frame(width: (UIScreen.main.bounds.width - 160) * (region.percentage / 100), height: 8)
                         }
-                        .frame(width: 150)
-                        .cornerRadius(4)
                         
                         Text("%\(Int(region.percentage))")
                             .font(.system(size: 14, weight: .bold))
-                            .frame(width: 40)
+                            .foregroundColor(.white)
+                            .frame(width: 40, alignment: .trailing)
                     }
                 }
             }
@@ -232,6 +241,7 @@ struct AIInsightDetailView: View {
                             .foregroundColor(.indigo)
                         Text(rec.title)
                             .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
                         Spacer()
                         Text(rec.impact)
                             .font(.system(size: 10, weight: .bold))
@@ -244,12 +254,16 @@ struct AIInsightDetailView: View {
                     
                     Text(rec.desc)
                         .font(.system(size: 14))
-                        .foregroundColor(.gray)
+                        .foregroundColor(.gray.opacity(0.8))
                         .lineSpacing(4)
                 }
                 .padding()
-                .background(Color.white.opacity(0.05))
+                .background(Color.white.opacity(0.07))
                 .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                )
             }
         }
         .padding(.horizontal, 20)

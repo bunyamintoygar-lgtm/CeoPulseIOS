@@ -15,7 +15,8 @@ struct TrendLineChartView: View {
     
     private var maxValue: Double {
         let allPoints = series.flatMap { $0.points }
-        return (allPoints.max() ?? 100) * 1.1 // %10 üst boşluk
+        let max = allPoints.max() ?? 10.0
+        return max == 0 ? 10.0 : max * 1.2 // %20 üst boşluk
     }
     
     var body: some View {
@@ -25,8 +26,9 @@ struct TrendLineChartView: View {
                 // Arka Plan Izgarası
                 VStack {
                     ForEach(0..<gridCount, id: \.self) { i in
-                        Divider()
-                            .background(Color.gray.opacity(0.1))
+                        Rectangle()
+                            .fill(Color.white.opacity(0.05))
+                            .frame(height: 1)
                         if i < gridCount - 1 { Spacer() }
                     }
                 }
@@ -35,11 +37,14 @@ struct TrendLineChartView: View {
                 ForEach(series) { item in
                     LineShape(points: item.points, maxValue: maxValue)
                         .trim(from: 0, to: animationProgress)
-                        .stroke(item.color, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
-                        .shadow(color: item.color.opacity(0.3), radius: 10, x: 0, y: 10)
+                        .stroke(
+                            LinearGradient(colors: [item.color, item.color.opacity(0.7)], startPoint: .leading, endPoint: .trailing),
+                            style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
+                        )
+                        .shadow(color: item.color.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
             }
-            .frame(height: 200)
+            .frame(height: 220) // Biraz daha yüksek
             
             // Legend (Açıklama)
             ScrollView(.horizontal, showsIndicators: false) {
