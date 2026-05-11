@@ -142,7 +142,8 @@ serve(async (req) => {
           category: insightData.category,
           read_time: insightData.read_time,
           content: insightData.content,
-          is_premium: true
+          is_premium: true,
+          lang: 'tr'
         }
       ])
       .select()

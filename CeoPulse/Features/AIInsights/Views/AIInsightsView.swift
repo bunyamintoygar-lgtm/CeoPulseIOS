@@ -15,35 +15,13 @@ struct AIInsightsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 // Header
-                HStack {
-                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                        Image(systemName: "arrow.left")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("ai_insights_title".localized())
-                            .font(.system(size: 22, weight: .bold)) // 24 -> 22
-                            .foregroundColor(.white)
-                        Text("ai_insights_subtitle".localized())
-                            .font(.system(size: 11)) // 12 -> 11
-                            .foregroundColor(AppColors.textSecondary)
-                    }
-                    .padding(.leading, 12)
-                    
-                    Spacer()
-                    
-                    HStack(spacing: 4) {
-                        Image(systemName: "crown.fill")
-                        Text("PREMIUM")
-                    }
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.orange)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.orange.opacity(0.1))
-                    .cornerRadius(8)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("ai_insights_title".localized())
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("ai_insights_subtitle".localized())
+                        .font(.system(size: 11))
+                        .foregroundColor(AppColors.textSecondary)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
