@@ -220,10 +220,10 @@ struct AskOpinionView: View {
             ScrollView {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     ForEach(ConfigManager.shared.opinionCategories.filter {
-                        viewModel.categorySearchText.isEmpty || ConfigManager.shared.getLocalizedValue($0.localizedName).localizedCaseInsensitiveContains(viewModel.categorySearchText)
+                        viewModel.categorySearchText.isEmpty || $0.name.localizedCaseInsensitiveContains(viewModel.categorySearchText)
                     }, id: \.id) { category in
                         CategorySelectCard(
-                            title: ConfigManager.shared.getLocalizedValue(category.localizedName),
+                            title: category.name,
                             icon: category.icon ?? "tag",
                             isSelected: viewModel.category == category.id,
                             action: { viewModel.category = category.id }
