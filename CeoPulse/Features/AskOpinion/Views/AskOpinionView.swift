@@ -160,19 +160,38 @@ struct AskOpinionView: View {
     }
     
     private var stepTwoView: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("ao_add_info".localized() + " (\("ao_optional".localized()))")
+        VStack(alignment: .leading, spacing: 24) {
+            // Question Type (Moved from Step 3)
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("ao_type_title".localized())
+                    Image(systemName: "questionmark.circle")
+                }
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(AppColors.textSecondary)
-            
-            VStack(spacing: 12) {
+                
                 HStack(spacing: 12) {
-                    AttachmentButton(icon: "doc.text.fill", title: "ao_add_doc".localized(), desc: "ao_add_doc_desc".localized())
-                    AttachmentButton(icon: "link", title: "ao_add_link".localized(), desc: "ao_add_link_desc".localized())
+                    AskOpinionTypeCard(icon: "bubble.left.and.bubble.right", title: "ao_type_general".localized(), description: "ao_type_general_desc".localized(), isSelected: viewModel.selectedType == 0) { viewModel.selectedType = 0 }
+                    AskOpinionTypeCard(icon: "scalemass", title: "ao_type_compare".localized(), description: "ao_type_compare_desc".localized(), isSelected: viewModel.selectedType == 1) { viewModel.selectedType = 1 }
+                    AskOpinionTypeCard(icon: "lightbulb", title: "ao_type_solution".localized(), description: "ao_type_solution_desc".localized(), isSelected: viewModel.selectedType == 2) { viewModel.selectedType = 2 }
                 }
-                HStack(spacing: 12) {
-                    AttachmentButton(icon: "photo.fill", title: "ao_add_image".localized(), desc: "ao_add_image_desc".localized())
-                    AttachmentButton(icon: "chart.bar.xaxis", title: "ao_add_survey".localized(), desc: "ao_add_survey_desc".localized())
+            }
+            
+            // Attachments
+            VStack(alignment: .leading, spacing: 16) {
+                Text("ao_add_info".localized() + " (\("ao_optional".localized()))")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(AppColors.textSecondary)
+                
+                VStack(spacing: 12) {
+                    HStack(spacing: 12) {
+                        AttachmentButton(icon: "doc.text.fill", title: "ao_add_doc".localized(), desc: "ao_add_doc_desc".localized())
+                        AttachmentButton(icon: "link", title: "ao_add_link".localized(), desc: "ao_add_link_desc".localized())
+                    }
+                    HStack(spacing: 12) {
+                        AttachmentButton(icon: "photo.fill", title: "ao_add_image".localized(), desc: "ao_add_image_desc".localized())
+                        AttachmentButton(icon: "chart.bar.xaxis", title: "ao_add_survey".localized(), desc: "ao_add_survey_desc".localized())
+                    }
                 }
             }
         }
@@ -181,17 +200,37 @@ struct AskOpinionView: View {
     
     private var stepThreeView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("ao_type_title".localized())
-                Image(systemName: "questionmark.circle")
-            }
-            .font(.system(size: 13, weight: .bold))
-            .foregroundColor(AppColors.textSecondary)
+            Text("ao_select_categories".localized())
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(AppColors.textSecondary)
             
-            HStack(spacing: 12) {
-                AskOpinionTypeCard(icon: "bubble.left.and.bubble.right", title: "ao_type_general".localized(), description: "ao_type_general_desc".localized(), isSelected: viewModel.selectedType == 0) { viewModel.selectedType = 0 }
-                AskOpinionTypeCard(icon: "scalemass", title: "ao_type_compare".localized(), description: "ao_type_compare_desc".localized(), isSelected: viewModel.selectedType == 1) { viewModel.selectedType = 1 }
-                AskOpinionTypeCard(icon: "lightbulb", title: "ao_type_solution".localized(), description: "ao_type_solution_desc".localized(), isSelected: viewModel.selectedType == 2) { viewModel.selectedType = 2 }
+            // Category Search
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.gray)
+                TextField("ao_search_category_placeholder".localized(), text: $viewModel.categorySearchText)
+                    .foregroundColor(.white)
+                    .font(.system(size: 14))
+            }
+            .padding(12)
+            .background(AppColors.surface)
+            .cornerRadius(12)
+            
+            // Categories Grid
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                    ForEach(ConfigManager.shared.opinionCategories.filter {
+                        viewModel.categorySearchText.isEmpty || ConfigManager.shared.getLocalizedValue($0.localizedName).localizedCaseInsensitiveContains(viewModel.categorySearchText)
+                    }, id: \.id) { category in
+                        CategorySelectCard(
+                            title: ConfigManager.shared.getLocalizedValue(category.localizedName),
+                            icon: category.icon ?? "tag",
+                            isSelected: viewModel.category == category.id,
+                            action: { viewModel.category = category.id }
+                        )
+                    }
+                }
+                .padding(.vertical, 10)
             }
         }
         .padding(.horizontal, 20)
@@ -303,6 +342,48 @@ struct PrivacyOptionCard: View {
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: 90)
+            .background(AppColors.surface)
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(isSelected ? Color.purple.opacity(0.5) : Color.white.opacity(0.05), lineWidth: 1)
+            )
+        }
+    }
+}
+
+struct CategorySelectCard: View {
+    let title: String
+    let icon: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    ZStack {
+                        Circle()
+                            .fill(isSelected ? Color.purple.opacity(0.1) : Color.white.opacity(0.05))
+                            .frame(width: 32, height: 32)
+                        Image(systemName: icon)
+                            .font(.system(size: 14))
+                            .foregroundColor(isSelected ? .purple : .white)
+                    }
+                    Spacer()
+                    if isSelected {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.purple)
+                            .font(.system(size: 16))
+                    }
+                }
+                
+                Text(title)
+                    .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+                    .foregroundColor(isSelected ? .white : .white.opacity(0.8))
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(AppColors.surface)
             .cornerRadius(16)
             .overlay(

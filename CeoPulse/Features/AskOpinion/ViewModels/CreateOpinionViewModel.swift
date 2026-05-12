@@ -9,7 +9,8 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
     @Published var selectedType: Int = 0
     @Published var selectedTarget: Int = 0
     @Published var selectedPrivacy: Int = 0
-    @Published var category: String = "Liderlik & Strateji"
+    @Published var category: String = "strategy"
+    @Published var categorySearchText: String = ""
     @Published var attachments: [OpinionAttachment] = []
     
     @Published var isLoading = false
