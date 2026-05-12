@@ -1,7 +1,8 @@
 import Foundation
 import SwiftUI
+import Combine
 
-class CreateOpinionViewModel: ObservableObject {
+class CreateOpinionViewModel: NSObject, ObservableObject {
     @Published var currentStep: Int = 1
     @Published var title: String = ""
     @Published var description: String = ""
@@ -16,6 +17,10 @@ class CreateOpinionViewModel: ObservableObject {
     @Published var isSuccess = false
     
     private let service = AskOpinionService.shared
+    
+    override init() {
+        super.init()
+    }
     
     func nextStep() {
         if currentStep < 4 {

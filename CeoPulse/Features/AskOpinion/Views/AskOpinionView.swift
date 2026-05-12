@@ -118,7 +118,6 @@ struct AskOpinionView: View {
     
     private var stepOneView: some View {
         VStack(alignment: .leading, spacing: 20) {
-            // Title Field
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text("ao_field_title".localized() + " *")
@@ -135,13 +134,8 @@ struct AskOpinionView: View {
                     .cornerRadius(12)
                     .foregroundColor(.white)
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
-                
-                Text("ao_field_title_hint".localized())
-                    .font(.system(size: 11))
-                    .foregroundColor(AppColors.textSecondary.opacity(0.7))
             }
             
-            // Description Field
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text("ao_field_desc".localized() + " *")
@@ -159,10 +153,6 @@ struct AskOpinionView: View {
                     .cornerRadius(12)
                     .foregroundColor(.white)
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
-                
-                Text("ao_field_desc_hint".localized())
-                    .font(.system(size: 11))
-                    .foregroundColor(AppColors.textSecondary.opacity(0.7))
             }
         }
         .padding(.horizontal, 20)
@@ -208,7 +198,6 @@ struct AskOpinionView: View {
     
     private var stepFourView: some View {
         VStack(alignment: .leading, spacing: 24) {
-            // Target Audience
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Text("ao_target_title".localized())
@@ -224,7 +213,6 @@ struct AskOpinionView: View {
                 }
             }
             
-            // Privacy
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Text("ao_privacy_title".localized())
@@ -239,25 +227,6 @@ struct AskOpinionView: View {
                     PrivacyOptionCard(title: "ao_privacy_private".localized(), desc: "ao_privacy_private_desc".localized(), isSelected: viewModel.selectedPrivacy == 2) { viewModel.selectedPrivacy = 2 }
                 }
             }
-            
-            // Info Banner
-            HStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .fill(Color.blue.opacity(0.2))
-                        .frame(width: 36, height: 36)
-                    Image(systemName: "star.fill")
-                        .foregroundColor(.blue)
-                        .font(.system(size: 14))
-                }
-                
-                Text("ao_info_banner".localized())
-                    .font(.system(size: 11))
-                    .foregroundColor(.white.opacity(0.8))
-            }
-            .padding(16)
-            .background(AppColors.surface)
-            .cornerRadius(16)
         }
         .padding(.horizontal, 20)
     }
@@ -340,11 +309,5 @@ struct PrivacyOptionCard: View {
                     .stroke(isSelected ? Color.purple.opacity(0.5) : Color.white.opacity(0.05), lineWidth: 1)
             )
         }
-    }
-}
-
-struct AskOpinionView_Previews: PreviewProvider {
-    static var previews: some View {
-        AskOpinionView()
     }
 }
