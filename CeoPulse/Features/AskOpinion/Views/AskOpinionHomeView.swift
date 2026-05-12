@@ -18,6 +18,8 @@ struct AskOpinionHomeView: View {
                         
                         tabSection
                         
+                        categoryBar
+                        
                         searchAndFilterSection
                         
                         if viewModel.isLoading && viewModel.opinions.isEmpty {
@@ -231,6 +233,43 @@ struct AskOpinionHomeView: View {
                 .padding(.vertical, 10)
                 .background(viewModel.selectedTab == index ? Color.white.opacity(0.1) : Color.clear)
                 .cornerRadius(10)
+        }
+    }
+    
+    private var categoryBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                categoryPill(title: "Tümü", id: nil, icon: "square.grid.2x2.fill")
+                
+                ForEach(ConfigManager.shared.opinionCategories, id: \.id) { category in
+                    categoryPill(title: category.name, id: category.id, icon: category.icon ?? "tag.fill")
+                }
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+    
+    private func categoryPill(title: String, id: String?, icon: String) -> some View {
+        let isSelected = viewModel.selectedCategory == id
+        
+        return Button(action: {
+            withAnimation { viewModel.selectCategory(id) }
+        }) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 14))
+                Text(title)
+                    .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(isSelected ? Color.purple : Color.white.opacity(0.05))
+            .foregroundColor(isSelected ? .white : .white.opacity(0.7))
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(isSelected ? Color.purple : Color.white.opacity(0.1), lineWidth: 1)
+            )
         }
     }
     

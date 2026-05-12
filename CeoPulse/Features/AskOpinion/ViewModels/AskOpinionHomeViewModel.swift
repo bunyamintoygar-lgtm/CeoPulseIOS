@@ -6,6 +6,8 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedTab: Int = 0 // 0: Tüm Sorular, 1: Yanıtladıklarım, 2: Takip Ettiklerim
     @Published var opinions: [Opinion] = []
+    @Published var selectedCategory: String? = nil
+    
     @Published var isLoading: Bool = false
     @Published var isFetchingMore: Bool = false
     @Published var errorMessage: String?
@@ -20,6 +22,14 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
     override init() {
         super.init()
         setupSearchObserver()
+        Task {
+            await refreshOpinions()
+        }
+    }
+    
+    func selectCategory(_ categoryId: String?) {
+        guard selectedCategory != categoryId else { return }
+        selectedCategory = categoryId
         Task {
             await refreshOpinions()
         }
@@ -45,7 +55,7 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
         errorMessage = nil
         
         do {
-            opinions = try await service.fetchOpinions(page: currentPage, pageSize: pageSize, query: searchText)
+            opinions = try await service.fetchOpinions(page: currentPage, pageSize: pageSize, query: searchText, categoryId: selectedCategory)
             if opinions.count < pageSize {
                 canLoadMore = false
             }
@@ -74,7 +84,7 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
         currentPage += 1
         
         do {
-            let nextBatch = try await service.fetchOpinions(page: currentPage, pageSize: pageSize, query: searchText)
+            let nextBatch = try await service.fetchOpinions(page: currentPage, pageSize: pageSize, query: searchText, categoryId: selectedCategory)
             if nextBatch.isEmpty {
                 canLoadMore = false
             } else {

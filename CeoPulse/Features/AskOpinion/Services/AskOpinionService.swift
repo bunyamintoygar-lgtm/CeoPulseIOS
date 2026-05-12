@@ -47,7 +47,7 @@ class AskOpinionService {
             .execute()
     }
     
-    func fetchOpinions(page: Int = 0, pageSize: Int = 10, query: String? = nil) async throws -> [Opinion] {
+    func fetchOpinions(page: Int = 0, pageSize: Int = 10, query: String? = nil, categoryId: String? = nil) async throws -> [Opinion] {
         let from = page * pageSize
         let to = from + pageSize - 1
         
@@ -57,6 +57,10 @@ class AskOpinionService {
             
         if let query = query, !query.isEmpty {
             request = request.or("title.ilike.%\(query)%,description.ilike.%\(query)%")
+        }
+        
+        if let categoryId = categoryId {
+            request = request.eq("category", value: categoryId)
         }
         
         let response: [OpinionDTO] = try await request
