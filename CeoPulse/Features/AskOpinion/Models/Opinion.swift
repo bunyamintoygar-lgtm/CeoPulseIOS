@@ -46,6 +46,8 @@ struct OpinionAttachment: Codable, Identifiable {
 struct OpinionSurveyAttachment: Codable {
     var question: String
     var options: [String]
+    var allowMultiple: Bool = false
+    var isRequired: Bool = true
 }
 
 enum OpinionStatus: String, Codable {

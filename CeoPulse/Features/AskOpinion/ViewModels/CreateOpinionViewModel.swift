@@ -89,21 +89,18 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
     
     // MARK: - Attachment Management
     
-    func addDocument() {
-        // In a real app, trigger FilePicker
-        let newDoc = OpinionAttachment(name: "Stratejik_Rapor.pdf", type: "doc", url: "https://example.com/doc", survey: nil)
+    func addDocument(name: String, url: String) {
+        let newDoc = OpinionAttachment(name: name, type: "doc", url: url, survey: nil)
         attachments.append(newDoc)
     }
     
-    func addLink() {
-        // In a real app, show URL input alert
-        let newLink = OpinionAttachment(name: "Pazar Analizi Linki", type: "link", url: "https://market-analysis.com", survey: nil)
+    func addLink(url: String) {
+        let newLink = OpinionAttachment(name: "Link", type: "link", url: url, survey: nil)
         attachments.append(newLink)
     }
     
-    func addImage() {
-        // In a real app, trigger ImagePicker
-        let newImage = OpinionAttachment(name: "grafik_01.png", type: "image", url: "https://example.com/img", survey: nil)
+    func addImage(name: String, url: String) {
+        let newImage = OpinionAttachment(name: name, type: "image", url: url, survey: nil)
         attachments.append(newImage)
     }
     
@@ -112,9 +109,21 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
             name: "ao_add_survey".localized(),
             type: "survey",
             url: nil,
-            survey: OpinionSurveyAttachment(question: "", options: ["", ""])
+            survey: OpinionSurveyAttachment(question: "", options: ["", ""], allowMultiple: false, isRequired: true)
         )
         attachments.append(newSurvey)
+    }
+    
+    func toggleSurveyMultiple(attachmentId: String) {
+        if let index = attachments.firstIndex(where: { $0.id == attachmentId }) {
+            attachments[index].survey?.allowMultiple.toggle()
+        }
+    }
+    
+    func toggleSurveyRequired(attachmentId: String) {
+        if let index = attachments.firstIndex(where: { $0.id == attachmentId }) {
+            attachments[index].survey?.isRequired.toggle()
+        }
     }
     
     func removeAttachment(at index: Int) {
