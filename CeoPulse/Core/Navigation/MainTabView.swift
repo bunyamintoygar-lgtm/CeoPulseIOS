@@ -12,19 +12,25 @@ struct MainTabView: View {
                 }
                 .tag(0)
                 
-                NetworkView()
-                    .tag(1)
+                NavigationView {
+                    NetworkView()
+                }
+                .tag(1)
                 
-                SurveysHomeView()
-                    .tag(2)
+                NavigationView {
+                    AskOpinionHomeView()
+                }
+                .tag(2)
                 
                 NavigationView {
                     AIInsightsView()
                 }
                 .tag(3)
                 
-                ProfileView()
-                    .tag(4)
+                NavigationView {
+                    ProfileView()
+                }
+                .tag(4)
             }
             .accentColor(AppColors.primaryAccent)
             
@@ -33,37 +39,19 @@ struct MainTabView: View {
                 Divider()
                     .background(Color.white.opacity(0.1))
                 
-                HStack(alignment: .bottom) {
+                HStack(alignment: .center) {
                     TabItem(icon: "house.fill", label: "nav_home".localized(), isSelected: selectedTab == 0) { selectedTab = 0 }
-                    TabItem(icon: "chart.bar.fill", label: "Anketler", isSelected: selectedTab == 2) { selectedTab = 2 }
-                    
-                    // Center Floating Action Button
-                    Button(action: { showCreateSurvey = true }) {
-                        ZStack {
-                            Circle()
-                                .fill(LinearGradient(colors: [.purple, Color(hex: "6C38FF")], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                .frame(width: 56, height: 56)
-                                .shadow(color: Color.purple.opacity(0.4), radius: 10, x: 0, y: 5)
-                            
-                            Image(systemName: "plus")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .offset(y: -15)
-                    
+                    TabItem(icon: "person.2.fill", label: "nav_network".localized(), isSelected: selectedTab == 1) { selectedTab = 1 }
+                    TabItem(icon: "bubble.left.and.bubble.right.fill", label: "Ask Opinion", isSelected: selectedTab == 2) { selectedTab = 2 }
                     TabItem(icon: "sparkles", label: "AI Insights", isSelected: selectedTab == 3) { selectedTab = 3 }
                     TabItem(icon: "person.fill", label: "nav_profile".localized(), isSelected: selectedTab == 4) { selectedTab = 4 }
                 }
                 .padding(.top, 12)
-                .padding(.bottom, 24)
+                .padding(.bottom, 32) // Increased for safe area
                 .background(AppColors.surface.opacity(0.98))
             }
         }
         .ignoresSafeArea(.all, edges: .bottom)
-        .sheet(isPresented: $showCreateSurvey) {
-            CreateSurveyView()
-        }
     }
 }
 
