@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct AskOpinionDetailView: View {
     @Environment(\.presentationMode) var presentationMode
