@@ -8,6 +8,8 @@ struct FeaturedAnalysisCard: View {
     let category: String
     let imageUrl: String?
     
+    @State private var isHovered = false // Animasyon kontrolü
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             // Image or Brain Mesh Background
@@ -16,6 +18,7 @@ struct FeaturedAnalysisCard: View {
                     AsyncImage(url: url) { image in
                         image.resizable()
                             .aspectRatio(contentMode: .fill)
+                            .scaleEffect(isHovered ? 1.05 : 1.0) // Hafif zoom efekti
                     } placeholder: {
                         Color.gray.opacity(0.1)
                     }
@@ -25,18 +28,13 @@ struct FeaturedAnalysisCard: View {
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
-                    .overlay(
-                        Image(systemName: "brain.head.profile")
-                            .font(.system(size: 100))
-                            .foregroundColor(.white.opacity(0.1))
-                    )
                 }
             }
             .frame(height: 240)
             .clipped()
             .cornerRadius(24)
             
-            // Bottom Information Panel (Protects text from image content)
+            // Bottom Information Panel (Animasyonlu)
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     // Kategori Rozeti
@@ -59,17 +57,17 @@ struct FeaturedAnalysisCard: View {
                 }
                 
                 Text(title)
-                    .font(.system(size: 15, weight: .bold)) // 16 -> 15
+                    .font(.system(size: 15, weight: .bold))
                     .foregroundColor(.white)
                     .lineLimit(2)
-                    .multilineTextAlignment(.leading) // Sola yasla
+                    .multilineTextAlignment(.leading)
                 
                 Text(description)
                     .font(.system(size: 11))
                     .foregroundColor(.white.opacity(0.7))
                     .lineLimit(2)
                     .lineSpacing(2)
-                    .multilineTextAlignment(.leading) // Sola yasla
+                    .multilineTextAlignment(.leading)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -78,12 +76,28 @@ struct FeaturedAnalysisCard: View {
                     .background(.ultraThinMaterial)
             )
             .cornerRadius(24, corners: [.bottomLeft, .bottomRight])
+            .offset(y: isHovered ? 0 : 100) // Başlangıçta aşağıda gizli
+            .opacity(isHovered ? 1 : 0) // Başlangıçta şeffaf
         }
         .frame(height: 240)
         .overlay(
             RoundedRectangle(cornerRadius: 24)
                 .stroke(Color.white.opacity(0.1), lineWidth: 1)
         )
+        .onAppear {
+            // Sayfa açıldığında kısa bir süre sonra ilk kartı otomatik göster (Demo için)
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
+                isHovered = true
+            }
+        }
+        // Dokunma/Basılı tutma efekti için
+        .onLongPressGesture(minimumDuration: 0, pressing: { pressing in
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                // Not: Hover olmayan mobil cihazlarda dokunma ile çalışır
+                // Ama kullanıcı zaten tıklayacağı için animasyonun görünmesi istenir.
+                // presentation logic'e göre ayarlanabilir.
+            }
+        }, perform: {})
     }
 }
 
