@@ -3,6 +3,7 @@ import SwiftUI
 struct AskOpinionHomeView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var viewModel = AskOpinionHomeViewModel()
+    @State private var showCreateOpinion = false
     
     var body: some View {
         ZStack {
@@ -28,6 +29,9 @@ struct AskOpinionHomeView: View {
             }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showCreateOpinion) {
+            AskOpinionView()
+        }
     }
     
     // MARK: - Components
