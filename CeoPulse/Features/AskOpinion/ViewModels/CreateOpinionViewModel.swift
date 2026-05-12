@@ -84,7 +84,7 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
             isLoading = false
         } catch {
             print("Error publishing opinion: \(error)")
-            errorMessage = "Soru yayınlanırken bir hata oluştu. Lütfen tekrar deneyin."
+            errorMessage = "Hata: \(String(describing: error))"
             isLoading = false
         }
     }
