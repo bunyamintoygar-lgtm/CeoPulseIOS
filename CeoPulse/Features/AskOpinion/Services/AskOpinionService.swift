@@ -48,7 +48,8 @@ class AskOpinionService {
             view_count: 0,
             response_count: 0,
             like_count: 0,
-            created_at: nil
+            created_at: nil,
+            profiles: nil
         )
         
         try await client
