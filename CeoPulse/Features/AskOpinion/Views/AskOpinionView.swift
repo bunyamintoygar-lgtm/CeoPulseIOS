@@ -183,23 +183,133 @@ struct AskOpinionView: View {
     }
     
     private var stepTwoView: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 24) {
             Text("ao_add_info".localized() + " (\("ao_optional".localized()))")
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(AppColors.textSecondary)
             
+            // Attachment Buttons
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
-                    AttachmentButton(icon: "doc.text.fill", title: "ao_add_doc".localized(), desc: "ao_add_doc_desc".localized())
-                    AttachmentButton(icon: "link", title: "ao_add_link".localized(), desc: "ao_add_link_desc".localized())
+                    AttachmentButton(icon: "doc.text.fill", title: "ao_add_doc".localized(), desc: "ao_add_doc_desc".localized()) {
+                        viewModel.addDocument()
+                    }
+                    AttachmentButton(icon: "link", title: "ao_add_link".localized(), desc: "ao_add_link_desc".localized()) {
+                        viewModel.addLink()
+                    }
                 }
                 HStack(spacing: 12) {
-                    AttachmentButton(icon: "photo.fill", title: "ao_add_image".localized(), desc: "ao_add_image_desc".localized())
-                    AttachmentButton(icon: "chart.bar.xaxis", title: "ao_add_survey".localized(), desc: "ao_add_survey_desc".localized())
+                    AttachmentButton(icon: "photo.fill", title: "ao_add_image".localized(), desc: "ao_add_image_desc".localized()) {
+                        viewModel.addImage()
+                    }
+                    AttachmentButton(icon: "chart.bar.xaxis", title: "ao_add_survey".localized(), desc: "ao_add_survey_desc".localized()) {
+                        viewModel.addSurvey()
+                    }
                 }
+            }
+            
+            // List of added attachments
+            if !viewModel.attachments.isEmpty {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Eklenen Öğeler")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(AppColors.textSecondary)
+                    
+                    ForEach(Array(viewModel.attachments.enumerated()), id: \.offset) { index, attachment in
+                        VStack(spacing: 12) {
+                            HStack {
+                                Image(systemName: getIconForType(attachment.type))
+                                    .foregroundColor(.purple)
+                                    .frame(width: 32)
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(attachment.name)
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.white)
+                                    if let url = attachment.url {
+                                        Text(url)
+                                            .font(.system(size: 10))
+                                            .foregroundColor(.gray)
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                Button(action: { viewModel.removeAttachment(at: index) }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red.opacity(0.8))
+                                        .font(.system(size: 14))
+                                }
+                            }
+                            
+                            // Inline Survey Editor
+                            if attachment.type == "survey", let survey = attachment.survey {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    TextField("Anket Sorusu...", text: Binding(
+                                        get: { survey.question },
+                                        set: { viewModel.attachments[index].survey?.question = $0 }
+                                    ))
+                                    .padding(12)
+                                    .background(Color.white.opacity(0.05))
+                                    .cornerRadius(8)
+                                    .foregroundColor(.white)
+                                    
+                                    ForEach(0..<survey.options.count, id: \.self) { optIndex in
+                                        HStack {
+                                            TextField("Seçenek \(optIndex + 1)", text: Binding(
+                                                get: { survey.options[optIndex] },
+                                                set: { viewModel.updateSurveyOption(attachmentId: attachment.id, optionIndex: optIndex, text: $0) }
+                                            ))
+                                            .font(.system(size: 13))
+                                            .foregroundColor(.white)
+                                            
+                                            if survey.options.count > 2 {
+                                                Button(action: { viewModel.removeSurveyOption(attachmentId: attachment.id, optionIndex: optIndex) }) {
+                                                    Image(systemName: "minus.circle.fill")
+                                                        .foregroundColor(.red.opacity(0.6))
+                                                }
+                                            }
+                                        }
+                                        .padding(10)
+                                        .background(Color.white.opacity(0.03))
+                                        .cornerRadius(8)
+                                    }
+                                    
+                                    Button(action: { viewModel.addSurveyOption(attachmentId: attachment.id) }) {
+                                        HStack {
+                                            Image(systemName: "plus.circle.fill")
+                                            Text("Seçenek Ekle")
+                                        }
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.purple)
+                                    }
+                                    .padding(.top, 4)
+                                }
+                                .padding(12)
+                                .background(Color.purple.opacity(0.05))
+                                .cornerRadius(12)
+                            }
+                        }
+                        .padding(12)
+                        .background(AppColors.surface)
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
+                    }
+                }
+                .padding(.top, 8)
             }
         }
         .padding(.horizontal, 20)
+    }
+    
+    private func getIconForType(_ type: String) -> String {
+        switch type {
+        case "doc": return "doc.text.fill"
+        case "image": return "photo.fill"
+        case "link": return "link"
+        case "survey": return "chart.bar.xaxis"
+        default: return "paperclip"
+        }
     }
     
     private var stepThreeView: some View {

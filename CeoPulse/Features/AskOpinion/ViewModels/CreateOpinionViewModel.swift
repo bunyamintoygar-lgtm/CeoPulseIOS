@@ -86,4 +86,58 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
             isLoading = false
         }
     }
+    
+    // MARK: - Attachment Management
+    
+    func addDocument() {
+        // In a real app, trigger FilePicker
+        let newDoc = OpinionAttachment(name: "Stratejik_Rapor.pdf", type: "doc", url: "https://example.com/doc", survey: nil)
+        attachments.append(newDoc)
+    }
+    
+    func addLink() {
+        // In a real app, show URL input alert
+        let newLink = OpinionAttachment(name: "Pazar Analizi Linki", type: "link", url: "https://market-analysis.com", survey: nil)
+        attachments.append(newLink)
+    }
+    
+    func addImage() {
+        // In a real app, trigger ImagePicker
+        let newImage = OpinionAttachment(name: "grafik_01.png", type: "image", url: "https://example.com/img", survey: nil)
+        attachments.append(newImage)
+    }
+    
+    func addSurvey() {
+        let newSurvey = OpinionAttachment(
+            name: "ao_add_survey".localized(),
+            type: "survey",
+            url: nil,
+            survey: OpinionSurveyAttachment(question: "", options: ["", ""])
+        )
+        attachments.append(newSurvey)
+    }
+    
+    func removeAttachment(at index: Int) {
+        attachments.remove(at: index)
+    }
+    
+    func updateSurveyOption(attachmentId: String, optionIndex: Int, text: String) {
+        if let index = attachments.firstIndex(where: { $0.id == attachmentId }) {
+            attachments[index].survey?.options[optionIndex] = text
+        }
+    }
+    
+    func addSurveyOption(attachmentId: String) {
+        if let index = attachments.firstIndex(where: { $0.id == attachmentId }) {
+            attachments[index].survey?.options.append("")
+        }
+    }
+    
+    func removeSurveyOption(attachmentId: String, optionIndex: Int) {
+        if let index = attachments.firstIndex(where: { $0.id == attachmentId }) {
+            if (attachments[index].survey?.options.count ?? 0) > 2 {
+                attachments[index].survey?.options.remove(at: optionIndex)
+            }
+        }
+    }
 }

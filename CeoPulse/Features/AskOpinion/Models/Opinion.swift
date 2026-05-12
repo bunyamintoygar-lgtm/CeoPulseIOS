@@ -35,10 +35,17 @@ struct OpinionResponse: Identifiable {
     let createdAt: Date
 }
 
-struct OpinionAttachment: Codable {
+struct OpinionAttachment: Codable, Identifiable {
+    var id: String { name + type + (url ?? "") }
     let name: String
-    let type: String
-    let url: String
+    let type: String // doc, image, link, survey
+    let url: String?
+    var survey: OpinionSurveyAttachment?
+}
+
+struct OpinionSurveyAttachment: Codable {
+    var question: String
+    var options: [String]
 }
 
 enum OpinionStatus: String, Codable {
