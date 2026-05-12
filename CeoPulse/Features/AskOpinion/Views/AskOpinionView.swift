@@ -112,6 +112,11 @@ struct AskOpinionView: View {
                 presentationMode.wrappedValue.dismiss()
             }
         }
+        .onAppear {
+            Task {
+                await ConfigManager.shared.fetchConfigs()
+            }
+        }
     }
     
     // MARK: - Steps

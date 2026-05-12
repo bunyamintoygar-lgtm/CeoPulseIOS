@@ -149,6 +149,8 @@
 "ao_privacy_private" = "Özel";
 "ao_privacy_private_desc" = "Sadece davet ettiğiniz kişiler görür";
 "ao_info_banner" = "Kaliteli sorular, kaliteli yanıtlar getirir. Açık, net ve spesifik sorular sormaya özen gösterin.";
+"ao_select_categories" = "Kategori Seçin";
+"ao_search_category_placeholder" = "Kategori ara...";
 
 // Events Screen
 "events_title" = "Etkinlikler";

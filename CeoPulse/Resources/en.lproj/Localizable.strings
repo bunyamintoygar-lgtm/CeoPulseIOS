@@ -149,6 +149,8 @@
 "ao_privacy_private" = "Private";
 "ao_privacy_private_desc" = "Only people you invite see it";
 "ao_info_banner" = "Quality questions bring quality answers. Try to ask clear, net and specific questions.";
+"ao_select_categories" = "Select Categories";
+"ao_search_category_placeholder" = "Search categories...";
 
 // Events Screen
 "events_title" = "Events";
