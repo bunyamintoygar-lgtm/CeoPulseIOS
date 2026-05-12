@@ -166,7 +166,6 @@ struct AskOpinionView: View {
     
     private var stepOneView: some View {
         VStack(alignment: .leading, spacing: 24) {
-            // Title
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text("ao_field_title".localized() + " *")
@@ -185,7 +184,6 @@ struct AskOpinionView: View {
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
             }
             
-            // Description
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text("ao_field_desc".localized() + " *")
@@ -206,7 +204,6 @@ struct AskOpinionView: View {
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
             }
             
-            // Question Type (Moved from Step 2)
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Text("ao_type_title".localized())
@@ -231,7 +228,6 @@ struct AskOpinionView: View {
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(AppColors.textSecondary)
             
-            // Attachment Buttons
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
                     AttachmentButton(icon: "doc.text.fill", title: "ao_add_doc".localized(), desc: "ao_add_doc_desc".localized()) {
@@ -252,7 +248,6 @@ struct AskOpinionView: View {
                 }
             }
             
-            // List of added attachments
             if !viewModel.attachments.isEmpty {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Eklenen Öğeler")
@@ -286,7 +281,6 @@ struct AskOpinionView: View {
                                 }
                             }
                             
-                            // Premium Survey Editor (Matching Image)
                             if attachment.type == "survey", let survey = attachment.survey {
                                 PremiumSurveyEditor(
                                     survey: survey,
@@ -294,18 +288,6 @@ struct AskOpinionView: View {
                                     viewModel: viewModel
                                 )
                             }
-                        }
-                        .padding(12)
-                        .background(AppColors.surface)
-                        .cornerRadius(12)
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
-                    }
-                }
-                .padding(.top, 8)
-            }
-        }
-        .padding(.horizontal, 20)
-    }
                         }
                         .padding(12)
                         .background(AppColors.surface)
@@ -335,7 +317,6 @@ struct AskOpinionView: View {
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(AppColors.textSecondary)
             
-            // Category Search
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.gray)
@@ -347,7 +328,6 @@ struct AskOpinionView: View {
             .background(AppColors.surface)
             .cornerRadius(12)
             
-            // Categories Grid
             ScrollView {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                     ForEach(ConfigManager.shared.opinionCategories.filter {
