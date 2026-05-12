@@ -16,6 +16,22 @@ struct Opinion: Identifiable {
     let attachments: [OpinionAttachment]
     let viewCount: Int
     let responseCount: Int
+    let likeCount: Int
+    let createdAt: Date
+}
+
+struct OpinionResponse: Identifiable {
+    let id: UUID
+    let opinionId: UUID
+    let authorId: UUID
+    let authorName: String
+    let authorTitle: String
+    let authorAvatar: String?
+    let content: String
+    let likeCount: Int
+    let commentCount: Int
+    let isBestResponse: Bool
+    let isAnonymous: Bool
     let createdAt: Date
 }
 

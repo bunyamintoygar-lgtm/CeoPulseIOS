@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS public.ask_opinions (
     attachments JSONB DEFAULT '[]'::jsonb, -- Store list of {name, type, url}
     view_count INTEGER DEFAULT 0,
     response_count INTEGER DEFAULT 0,
+    like_count INTEGER DEFAULT 0,
     status TEXT DEFAULT 'open', -- open, answered, closed
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -25,6 +26,10 @@ CREATE TABLE IF NOT EXISTS public.opinion_responses (
     opinion_id UUID REFERENCES public.ask_opinions(id) ON DELETE CASCADE,
     author_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
+    is_best_response BOOLEAN DEFAULT false,
+    is_anonymous BOOLEAN DEFAULT false,
+    like_count INTEGER DEFAULT 0,
+    comment_count INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
