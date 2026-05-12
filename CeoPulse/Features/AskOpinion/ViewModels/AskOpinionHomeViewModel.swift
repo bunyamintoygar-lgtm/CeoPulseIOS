@@ -10,6 +10,7 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
     @Published var isFetchingMore: Bool = false
     @Published var errorMessage: String?
     
+    private var cancellables = Set<AnyCancellable>()
     private var currentPage: Int = 0
     private let pageSize: Int = 10
     private var canLoadMore: Bool = true
@@ -18,9 +19,22 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
     
     override init() {
         super.init()
+        setupSearchObserver()
         Task {
             await refreshOpinions()
         }
+    }
+    
+    private func setupSearchObserver() {
+        $searchText
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                Task {
+                    await self?.refreshOpinions()
+                }
+            }
+            .store(in: &cancellables)
     }
     
     @MainActor
@@ -31,7 +45,7 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
         errorMessage = nil
         
         do {
-            opinions = try await service.fetchOpinions(page: currentPage, pageSize: pageSize)
+            opinions = try await service.fetchOpinions(page: currentPage, pageSize: pageSize, query: searchText)
             if opinions.count < pageSize {
                 canLoadMore = false
             }
@@ -45,11 +59,11 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
     
     @MainActor
     func fetchMoreOpinionsIfNeeded(currentOpinion: Opinion) async {
-        guard canLoadMore && !isFetchingMore && !isLoading && searchText.isEmpty else { return }
+        guard canLoadMore && !isFetchingMore && !isLoading else { return }
         
         // Load more when user is near the end (e.g., 3 items from bottom)
-        let thresholdIndex = opinions.index(opinions.endIndex, offsetBy: -3)
-        if opinions.firstIndex(where: { $0.id == currentOpinion.id }) == thresholdIndex {
+        if let index = opinions.firstIndex(where: { $0.id == currentOpinion.id }),
+           index >= opinions.count - 3 {
             await loadMoreOpinions()
         }
     }
@@ -60,7 +74,7 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
         currentPage += 1
         
         do {
-            let nextBatch = try await service.fetchOpinions(page: currentPage, pageSize: pageSize)
+            let nextBatch = try await service.fetchOpinions(page: currentPage, pageSize: pageSize, query: searchText)
             if nextBatch.isEmpty {
                 canLoadMore = false
             } else {
@@ -78,15 +92,7 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
     }
     
     var filteredOpinions: [Opinion] {
-        // Simple search filtering
-        var result = opinions
-        
-        if !searchText.isEmpty {
-            result = result.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
-        }
-        
-        // Tab filtering could be added here later
-        
-        return result
+        // Now using server-side filtering, so we just return the fetched opinions
+        return opinions
     }
 }

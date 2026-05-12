@@ -47,13 +47,19 @@ class AskOpinionService {
             .execute()
     }
     
-    func fetchOpinions(page: Int = 0, pageSize: Int = 10) async throws -> [Opinion] {
+    func fetchOpinions(page: Int = 0, pageSize: Int = 10, query: String? = nil) async throws -> [Opinion] {
         let from = page * pageSize
         let to = from + pageSize - 1
         
-        let response: [OpinionDTO] = try await client
+        var request = client
             .from("ask_opinions")
             .select()
+            
+        if let query = query, !query.isEmpty {
+            request = request.or("title.ilike.%\(query)%,description.ilike.%\(query)%")
+        }
+        
+        let response: [OpinionDTO] = try await request
             .order("created_at", ascending: false)
             .range(from: from, to: to)
             .execute()
