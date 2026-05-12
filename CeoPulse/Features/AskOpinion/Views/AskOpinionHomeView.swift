@@ -103,7 +103,7 @@ struct AskOpinionHomeView: View {
                         .frame(maxWidth: 200, alignment: .leading)
                     
                     Button(action: {
-                        // Action to AskOpinionView
+                        showCreateOpinion = true
                     }) {
                         HStack {
                             Text("Yeni Soru Sor")
