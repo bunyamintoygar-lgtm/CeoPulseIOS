@@ -1,7 +1,8 @@
 import Foundation
 import SwiftUI
+import Combine
 
-class AskOpinionDetailViewModel: ObservableObject {
+class AskOpinionDetailViewModel: NSObject, ObservableObject {
     @Published var opinion: Opinion
     @Published var responses: [OpinionResponse] = []
     @Published var newResponseText: String = ""
@@ -12,6 +13,7 @@ class AskOpinionDetailViewModel: ObservableObject {
     
     init(opinion: Opinion) {
         self.opinion = opinion
+        super.init()
         loadDummyResponses()
     }
     
@@ -40,16 +42,14 @@ class AskOpinionDetailViewModel: ObservableObject {
         
         isLoading = true
         
-        // In a real app, this would call the service to save the response to Supabase
-        // And then refresh the list
-        
-        try? await Task.sleep(nanoseconds: 1_000_000_000) // Simulate network
+        // Simulating network delay and response addition
+        try? await Task.sleep(nanoseconds: 1_000_000_000) 
         
         let newResponse = OpinionResponse(
             id: UUID(),
             opinionId: opinion.id,
-            authorId: UUID(), // Current user ID
-            authorName: "Siz", // Current user name
+            authorId: UUID(), // Current user ID placeholder
+            authorName: "Siz", 
             authorTitle: "CEO",
             authorAvatar: nil,
             content: newResponseText,

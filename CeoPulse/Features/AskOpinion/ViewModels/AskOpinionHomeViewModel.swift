@@ -1,12 +1,14 @@
 import Foundation
 import SwiftUI
+import Combine
 
-class AskOpinionHomeViewModel: ObservableObject {
+class AskOpinionHomeViewModel: NSObject, ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedTab: Int = 0 // 0: Tüm Sorular, 1: Yanıtladıklarım, 2: Takip Ettiklerim
     @Published var opinions: [Opinion] = []
     
-    init() {
+    override init() {
+        super.init()
         loadDummyData()
     }
     
