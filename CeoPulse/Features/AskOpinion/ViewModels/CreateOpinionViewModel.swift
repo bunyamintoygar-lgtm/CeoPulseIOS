@@ -94,9 +94,15 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
         attachments.append(newDoc)
     }
     
-    func addLink(url: String) {
-        let newLink = OpinionAttachment(name: "Link", type: "link", url: url, survey: nil)
+    func addLink() {
+        let newLink = OpinionAttachment(name: "ao_add_link".localized(), type: "link", url: "", survey: nil)
         attachments.append(newLink)
+    }
+    
+    func updateLink(attachmentId: String, url: String) {
+        if let index = attachments.firstIndex(where: { $0.id == attachmentId }) {
+            attachments[index].url = url
+        }
     }
     
     func addImage(name: String, url: String) {

@@ -21,7 +21,7 @@ BEGIN
         {"id": "leadership", "tr": "Liderlik", "en": "Leadership", "icon": "crown.fill"},
         {"id": "innovation", "tr": "İnovasyon", "en": "Innovation", "icon": "lightbulb.fill"},
         {"id": "investment", "tr": "Yatırım", "en": "Investment", "icon": "chart.pie.fill"},
-        {"id": "legal", "tr": "Hukuk & Mevzuat", "en": "Legal & Regulation", "icon": "gavel.fill"}
+        {"id": "legal", "tr": "Hukuk & Mevzuat", "en": "Legal & Regulation", "icon": "scale.3d"}
     ]'::JSONB;
 
     -- 2. app_config tablosuna ekle veya güncelle

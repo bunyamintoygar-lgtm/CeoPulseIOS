@@ -8,8 +8,6 @@ struct AskOpinionView: View {
     // Pickers State
     @State private var selectedItem: PhotosPickerItem?
     @State private var isFileImporterPresented = false
-    @State private var isLinkAlertPresented = false
-    @State private var linkInput = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -147,18 +145,6 @@ struct AskOpinionView: View {
                 print("File selection error: \(error)")
             }
         }
-        .alert("Link Ekle", isPresented: $isLinkAlertPresented) {
-            TextField("https://...", text: $linkInput)
-                .textInputAutocapitalization(.never)
-            Button("İptal", role: .cancel) { linkInput = "" }
-            Button("Ekle") {
-                if !linkInput.isEmpty {
-                    viewModel.addLink(url: linkInput)
-                    linkInput = ""
-                }
-            }
-        } message: {
-            Text("Paylaşmak istediğiniz web adresini giriniz.")
         }
     }
     
@@ -233,8 +219,8 @@ struct AskOpinionView: View {
                     AttachmentButton(icon: "doc.text.fill", title: "ao_add_doc".localized(), desc: "ao_add_doc_desc".localized()) {
                         isFileImporterPresented = true
                     }
-                    AttachmentButton(icon: "link", title: "ao_add_link".localized(), desc: "ao_add_link_desc".localized()) {
-                        isLinkAlertPresented = true
+                    AttachmentButton(icon: "link", title: "ao_add_link".localized(), desc: "ao_add_doc_desc".localized()) {
+                        viewModel.addLink()
                     }
                 }
                 HStack(spacing: 12) {
@@ -288,6 +274,11 @@ struct AskOpinionView: View {
                                     viewModel: viewModel
                                 )
                             }
+                            
+                            // Inline Link Editor
+                            if attachment.type == "link" {
+                                LinkEditor(attachment: attachment, viewModel: viewModel)
+                            }
                         }
                         .padding(12)
                         .background(AppColors.surface)
@@ -330,9 +321,11 @@ struct AskOpinionView: View {
             
             ScrollView {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    ForEach(ConfigManager.shared.opinionCategories.filter {
-                        viewModel.categorySearchText.isEmpty || $0.name.localizedCaseInsensitiveContains(viewModel.categorySearchText)
-                    }, id: \.id) { category in
+                    ForEach(ConfigManager.shared.opinionCategories
+                        .sorted { $0.name < $1.name }
+                        .filter {
+                            viewModel.categorySearchText.isEmpty || $0.name.localizedCaseInsensitiveContains(viewModel.categorySearchText)
+                        }, id: \.id) { category in
                         CategorySelectCard(
                             title: category.name,
                             icon: category.icon ?? "tag",
@@ -610,5 +603,34 @@ struct PremiumSurveyEditor: View {
         .background(Color.black.opacity(0.3))
         .cornerRadius(16)
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.purple.opacity(0.2), lineWidth: 1))
+    }
+}
+
+struct LinkEditor: View {
+    let attachment: OpinionAttachment
+    @ObservedObject var viewModel: CreateOpinionViewModel
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Web Bağlantısı")
+                .font(.system(size: 11))
+                .foregroundColor(AppColors.textSecondary)
+            
+            TextField("https://...", text: Binding(
+                get: { attachment.url ?? "" },
+                set: { viewModel.updateLink(attachmentId: attachment.id, url: $0) }
+            ))
+            .padding(12)
+            .background(Color.white.opacity(0.05))
+            .cornerRadius(8)
+            .foregroundColor(.white)
+            .font(.system(size: 13))
+            .textInputAutocapitalization(.never)
+            .keyboardType(.URL)
+        }
+        .padding(12)
+        .background(Color.black.opacity(0.2))
+        .cornerRadius(12)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
     }
 }
