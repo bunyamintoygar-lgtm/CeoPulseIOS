@@ -53,30 +53,30 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
         isLoading = true
         errorMessage = nil
         
-        // Use a dummy author ID for now (In real app, get from AuthSession)
-        let authorId = UUID() 
-        
-        let newOpinion = Opinion(
-            id: UUID(),
-            authorId: authorId,
-            authorName: "", // Server will fill or get from profile join
-            authorTitle: "",
-            authorAvatar: nil,
-            title: title,
-            description: opinionDescription,
-            status: .open,
-            category: category,
-            type: selectedType,
-            targetAudience: selectedTarget,
-            privacyLevel: selectedPrivacy,
-            attachments: attachments,
-            viewCount: 0,
-            responseCount: 0,
-            likeCount: 0,
-            createdAt: Date()
-        )
-        
         do {
+            let session = try await SupabaseManager.shared.client.auth.session
+            let authorId = session.user.id
+            
+            let newOpinion = Opinion(
+                id: UUID(),
+                authorId: authorId,
+                authorName: "", // Server will fill or get from profile join
+                authorTitle: "",
+                authorAvatar: nil,
+                title: title,
+                description: opinionDescription,
+                status: .open,
+                category: category,
+                type: selectedType,
+                targetAudience: selectedTarget,
+                privacyLevel: selectedPrivacy,
+                attachments: attachments,
+                viewCount: 0,
+                responseCount: 0,
+                likeCount: 0,
+                createdAt: Date()
+            )
+            
             try await service.createOpinion(newOpinion)
             isSuccess = true
             isLoading = false

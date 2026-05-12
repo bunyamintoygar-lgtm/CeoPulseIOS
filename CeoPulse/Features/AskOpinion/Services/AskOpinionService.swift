@@ -11,7 +11,7 @@ struct OpinionDTO: Codable {
     let type: Int
     let target_audience: Int
     let privacy_level: Int
-    let attachments: String // JSON string
+    let attachments: [OpinionAttachment]
     let status: String
     let view_count: Int?
     let response_count: Int?
@@ -24,10 +24,6 @@ class AskOpinionService {
     private let client = SupabaseManager.shared.client
     
     func createOpinion(_ opinion: Opinion) async throws {
-        // Convert attachments to JSON string
-        let attachmentsData = try JSONEncoder().encode(opinion.attachments)
-        let attachmentsString = String(data: attachmentsData, encoding: .utf8) ?? "[]"
-        
         let dto = OpinionDTO(
             id: nil,
             author_id: opinion.authorId,
@@ -37,7 +33,7 @@ class AskOpinionService {
             type: opinion.type,
             target_audience: opinion.targetAudience,
             privacy_level: opinion.privacyLevel,
-            attachments: attachmentsString,
+            attachments: opinion.attachments,
             status: opinion.status.rawValue,
             view_count: 0,
             response_count: 0,
@@ -61,10 +57,6 @@ class AskOpinionService {
         
         // Map DTOs to Domain Models
         return response.map { dto in
-            // Parse attachments JSON string
-            let attachmentsData = dto.attachments.data(using: .utf8) ?? Data()
-            let attachments = (try? JSONDecoder().decode([OpinionAttachment].self, from: attachmentsData)) ?? []
-            
             return Opinion(
                 id: dto.id ?? UUID(),
                 authorId: dto.author_id,
@@ -78,7 +70,7 @@ class AskOpinionService {
                 type: dto.type,
                 targetAudience: dto.target_audience,
                 privacyLevel: dto.privacy_level,
-                attachments: attachments,
+                attachments: dto.attachments,
                 viewCount: dto.view_count ?? 0,
                 responseCount: dto.response_count ?? 0,
                 likeCount: dto.like_count ?? 0,
