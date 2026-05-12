@@ -29,6 +29,7 @@ class AskOpinionHomeViewModel: ObservableObject {
                 attachments: [],
                 viewCount: 128,
                 responseCount: 15,
+                likeCount: 4,
                 createdAt: Date().addingTimeInterval(-7200)
             ),
             Opinion(
@@ -47,6 +48,7 @@ class AskOpinionHomeViewModel: ObservableObject {
                 attachments: [],
                 viewCount: 96,
                 responseCount: 11,
+                likeCount: 3,
                 createdAt: Date().addingTimeInterval(-18000)
             ),
             Opinion(
@@ -65,6 +67,7 @@ class AskOpinionHomeViewModel: ObservableObject {
                 attachments: [],
                 viewCount: 210,
                 responseCount: 23,
+                likeCount: 7,
                 createdAt: Date().addingTimeInterval(-86400)
             )
         ]

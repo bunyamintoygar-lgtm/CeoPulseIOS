@@ -66,6 +66,7 @@ class CreateOpinionViewModel: ObservableObject {
             attachments: attachments,
             viewCount: 0,
             responseCount: 0,
+            likeCount: 0,
             createdAt: Date()
         )
         

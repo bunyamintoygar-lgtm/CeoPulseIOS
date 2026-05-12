@@ -107,8 +107,8 @@ struct AskOpinionView: View {
         }
         .background(AppColors.background.ignoresSafeArea())
         .navigationBarHidden(true)
-        .onChange(of: viewModel.isSuccess) { success in
-            if success {
+        .onChange(of: viewModel.isSuccess) { oldValue, newValue in
+            if newValue {
                 presentationMode.wrappedValue.dismiss()
             }
         }
@@ -260,10 +260,6 @@ struct AskOpinionView: View {
             .cornerRadius(16)
         }
         .padding(.horizontal, 20)
-    }
-}
-        .background(AppColors.background.ignoresSafeArea())
-        .navigationBarHidden(true)
     }
 }
 
