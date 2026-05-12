@@ -20,17 +20,70 @@ struct AskOpinionHomeView: View {
                         
                         searchAndFilterSection
                         
-                        opinionList
+                        if viewModel.isLoading && viewModel.opinions.isEmpty {
+                            VStack {
+                                Spacer()
+                                ProgressView()
+                                    .tint(.purple)
+                                    .scaleEffect(1.5)
+                                Text("Sorular yükleniyor...")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.gray)
+                                    .padding(.top, 10)
+                                Spacer()
+                            }
+                            .frame(height: 300)
+                            .frame(maxWidth: .infinity)
+                        } else if let error = viewModel.errorMessage {
+                            VStack(spacing: 12) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.orange)
+                                Text(error)
+                                    .foregroundColor(.white)
+                                Button("Tekrar Dene") {
+                                    Task { await viewModel.fetchOpinions() }
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(Color.purple)
+                                .cornerRadius(10)
+                            }
+                            .frame(height: 300)
+                            .frame(maxWidth: .infinity)
+                        } else if viewModel.filteredOpinions.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "doc.text.magnifyingglass")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.gray)
+                                Text(viewModel.searchText.isEmpty ? "Henüz hiç soru sorulmamış." : "Aramanızla eşleşen soru bulunamadı.")
+                                    .foregroundColor(.gray)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .frame(height: 300)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 40)
+                        } else {
+                            opinionList
+                        }
                         
                         footerSection
                     }
                     .padding(.top, 10)
                 }
+                .refreshable {
+                    await viewModel.fetchOpinions()
+                }
             }
         }
         .navigationBarHidden(true)
-        .sheet(isPresented: $showCreateOpinion) {
+        .sheet(isPresented: $showCreateOpinion, onDismiss: {
+            Task { await viewModel.fetchOpinions() }
+        }) {
             AskOpinionView()
+        }
+        .onAppear {
+            Task { await viewModel.fetchOpinions() }
         }
     }
     
