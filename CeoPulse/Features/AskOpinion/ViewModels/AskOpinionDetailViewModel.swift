@@ -8,6 +8,7 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
     @Published var newResponseText: String = ""
     @Published var isAnonymous: Bool = false
     @Published var isLoading = false
+    @Published var attachments: [OpinionAttachment] = []
     
     private let service = AskOpinionService.shared
     
@@ -15,6 +16,15 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
         self.opinion = opinion
         super.init()
         loadDummyResponses()
+    }
+    
+    func addAttachment(name: String, url: String) {
+        let newAttachment = OpinionAttachment(name: name, type: "doc", url: url)
+        attachments.append(newAttachment)
+    }
+    
+    func removeAttachment(_ attachment: OpinionAttachment) {
+        attachments.removeAll { $0.id == attachment.id }
     }
     
     func loadDummyResponses() {

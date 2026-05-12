@@ -250,36 +250,37 @@ struct AskOpinionHomeView: View {
                 .cornerRadius(12)
                 
                 Button(action: { isFilterSheetPresented = true }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: viewModel.selectedCategory == nil ? "line.3.horizontal.decrease" : "line.3.horizontal.decrease.circle.fill")
-                        Text(viewModel.selectedCategory == nil ? "Filtrele" : "Filtreli")
+                    HStack(spacing: 8) {
+                        if let selectedId = viewModel.selectedCategory,
+                           let category = ConfigManager.shared.opinionCategories.first(where: { $0.id == selectedId }) {
+                            Image(systemName: category.icon ?? "line.3.horizontal.decrease.circle.fill")
+                            Text(category.name)
+                                .lineLimit(1)
+                        } else {
+                            Image(systemName: "line.3.horizontal.decrease")
+                            Text("Filtrele")
+                        }
                     }
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(viewModel.selectedCategory == nil ? .white.opacity(0.8) : .purple)
+                    .foregroundColor(viewModel.selectedCategory == nil ? .white.opacity(0.8) : .white)
+                    .frame(minWidth: 100)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(viewModel.selectedCategory == nil ? Color.white.opacity(0.05) : Color.purple.opacity(0.1))
+                    .background(viewModel.selectedCategory == nil ? Color.white.opacity(0.05) : Color.purple)
                     .cornerRadius(12)
                 }
             }
             
-            if let selectedId = viewModel.selectedCategory,
-               let category = ConfigManager.shared.opinionCategories.first(where: { $0.id == selectedId }) {
-                HStack(spacing: 8) {
-                    Text("Kategori: \(category.name)")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.purple)
-                    
-                    Button(action: { viewModel.selectCategory(nil) }) {
+            if viewModel.selectedCategory != nil {
+                Button(action: { viewModel.selectCategory(nil) }) {
+                    HStack(spacing: 4) {
+                        Text("Filtreyi Temizle")
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
                     }
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.gray)
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.purple.opacity(0.1))
-                .cornerRadius(20)
-                .transition(.scale.combined(with: .opacity))
+                .padding(.leading, 4)
             }
         }
         .padding(.horizontal, 20)

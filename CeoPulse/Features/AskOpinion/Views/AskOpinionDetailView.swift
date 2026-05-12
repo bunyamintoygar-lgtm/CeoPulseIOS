@@ -3,6 +3,7 @@ import SwiftUI
 struct AskOpinionDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel: AskOpinionDetailViewModel
+    @State private var isFileImporterPresented = false
     
     var body: some View {
         ZStack {
@@ -213,23 +214,62 @@ struct AskOpinionDetailView: View {
             }
             
             VStack(spacing: 0) {
-                TextEditor(text: $viewModel.newResponseText)
-                    .frame(height: 120)
-                    .padding(8)
-                    .background(AppColors.surface)
-                    .foregroundColor(.white)
-                    .cornerRadius(12, corners: [.topLeft, .topRight])
+                ZStack(alignment: .topLeading) {
+                    if viewModel.newResponseText.isEmpty {
+                        Text("Görüşünüzü buraya yazın...")
+                            .foregroundColor(.white.opacity(0.3))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 16)
+                    }
+                    
+                    TextEditor(text: $viewModel.newResponseText)
+                        .frame(height: 120)
+                        .padding(8)
+                        .scrollContentBackground(.hidden) // Remove default background
+                        .background(Color.white.opacity(0.03))
+                        .foregroundColor(.white)
+                }
+                .cornerRadius(12, corners: [.topLeft, .topRight])
+                
+                // Attachments List
+                if !viewModel.attachments.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(viewModel.attachments) { attachment in
+                                HStack(spacing: 6) {
+                                    Image(systemName: "doc.fill")
+                                        .font(.system(size: 10))
+                                    Text(attachment.name)
+                                        .font(.system(size: 10, weight: .medium))
+                                    Button(action: { viewModel.removeAttachment(attachment) }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.system(size: 12))
+                                    }
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 6)
+                                .background(Color.purple.opacity(0.2))
+                                .cornerRadius(8)
+                            }
+                        }
+                        .padding(10)
+                    }
+                    .background(Color.white.opacity(0.02))
+                }
                 
                 HStack {
-                    HStack(spacing: 20) {
-                        Image(systemName: "bold")
-                        Image(systemName: "italic")
-                        Image(systemName: "list.bullet")
-                        Image(systemName: "list.number")
-                        Image(systemName: "photo")
+                    Button(action: { isFileImporterPresented = true }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "paperclip")
+                            Text("Dosya Ekle")
+                        }
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.purple)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.purple.opacity(0.1))
+                        .cornerRadius(10)
                     }
-                    .font(.system(size: 16))
-                    .foregroundColor(.white.opacity(0.6))
                     
                     Spacer()
                     
@@ -243,11 +283,13 @@ struct AskOpinionDetailView: View {
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 24)
-                                .padding(.vertical, 8)
+                                .padding(.vertical, 10)
                                 .background(Color.purple)
                                 .cornerRadius(10)
                         }
                     }
+                    .disabled(viewModel.newResponseText.isEmpty)
+                    .opacity(viewModel.newResponseText.isEmpty ? 0.5 : 1.0)
                 }
                 .padding(12)
                 .background(Color.white.opacity(0.05))
@@ -256,6 +298,20 @@ struct AskOpinionDetailView: View {
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
         }
         .padding(.horizontal, 20)
+        .fileImporter(
+            isPresented: $isFileImporterPresented,
+            allowedContentTypes: [.pdf, .text, .plainText, .image],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                if let url = urls.first {
+                    viewModel.addAttachment(name: url.lastPathComponent, url: url.absoluteString)
+                }
+            case .failure(let error):
+                print("File selection error: \(error)")
+            }
+        }
     }
     
     private var responsesListSection: some View {
