@@ -47,9 +47,25 @@ struct FeaturedAnalysisCard: View {
                             .lineLimit(2)
                             .lineSpacing(2)
                             .multilineTextAlignment(.leading)
+                        
+                        // Metadata (Yeni Yeri: Detayların Altı)
+                        HStack(spacing: 10) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "clock")
+                                Text("\(readTime) dk")
+                            }
+                            Text("•")
+                            HStack(spacing: 4) {
+                                Image(systemName: "calendar")
+                                Text("18 May 2025")
+                            }
+                        }
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundColor(.white.opacity(0.4))
+                        .padding(.top, 4)
                     }
                     
-                    Spacer(minLength: 16)
+                    Spacer(minLength: 12)
                     
                     // Read Button
                     HStack(spacing: 6) {
@@ -67,48 +83,21 @@ struct FeaturedAnalysisCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
                 // Right Image (approx 40% width)
-                ZStack(alignment: .bottomTrailing) {
-                    if let urlString = imageUrl, let url = URL(string: urlString) {
-                        AsyncImage(url: url) { image in
-                            image.resizable()
-                                .aspectRatio(contentMode: .fill)
-                        } placeholder: {
-                            Color.white.opacity(0.05)
-                        }
-                        .frame(width: 140, height: 180)
-                        .mask(
-                            LinearGradient(
-                                colors: [.black, .black, .clear],
-                                startPoint: .trailing,
-                                endPoint: .leading
-                            )
+                if let urlString = imageUrl, let url = URL(string: urlString) {
+                    AsyncImage(url: url) { image in
+                        image.resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Color.white.opacity(0.05)
+                    }
+                    .frame(width: 140, height: 180)
+                    .mask(
+                        LinearGradient(
+                            colors: [.black, .black, .clear],
+                            startPoint: .trailing,
+                            endPoint: .leading
                         )
-                    }
-                    
-                    // Metadata Capsule (Bottom Right)
-                    HStack(spacing: 12) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "clock")
-                            Text("\(readTime) dk")
-                        }
-                        
-                        Divider()
-                            .frame(height: 10)
-                            .background(Color.white.opacity(0.3))
-                        
-                        HStack(spacing: 4) {
-                            Image(systemName: "calendar")
-                            Text("18 May 2025") // Placeholder or actual date logic
-                        }
-                    }
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundColor(.white.opacity(0.7))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.black.opacity(0.4))
-                    .cornerRadius(10)
-                    .padding(.trailing, 16)
-                    .padding(.bottom, 16)
+                    )
                 }
             }
         }
