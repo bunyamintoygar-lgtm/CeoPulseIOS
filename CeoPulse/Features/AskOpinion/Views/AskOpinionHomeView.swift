@@ -18,8 +18,6 @@ struct AskOpinionHomeView: View {
                         
                         tabSection
                         
-                        categoryBar
-                        
                         searchAndFilterSection
                         
                         if viewModel.isLoading && viewModel.opinions.isEmpty {
@@ -236,67 +234,63 @@ struct AskOpinionHomeView: View {
         }
     }
     
-    private var categoryBar: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                categoryPill(title: "Tümü", id: nil, icon: "square.grid.2x2.fill")
-                
-                ForEach(ConfigManager.shared.opinionCategories, id: \.id) { category in
-                    categoryPill(title: category.name, id: category.id, icon: category.icon ?? "tag.fill")
-                }
-            }
-            .padding(.horizontal, 20)
-        }
-    }
-    
-    private func categoryPill(title: String, id: String?, icon: String) -> some View {
-        let isSelected = viewModel.selectedCategory == id
-        
-        return Button(action: {
-            withAnimation { viewModel.selectCategory(id) }
-        }) {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 14))
-                Text(title)
-                    .font(.system(size: 13, weight: isSelected ? .bold : .medium))
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(isSelected ? Color.purple : Color.white.opacity(0.05))
-            .foregroundColor(isSelected ? .white : .white.opacity(0.7))
-            .cornerRadius(20)
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(isSelected ? Color.purple : Color.white.opacity(0.1), lineWidth: 1)
-            )
-        }
-    }
-    
     private var searchAndFilterSection: some View {
-        HStack(spacing: 12) {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-                TextField("Sorularda ara...", text: $viewModel.searchText)
-                    .foregroundColor(.white)
-                    .font(.system(size: 14))
-            }
-            .padding(12)
-            .background(Color.white.opacity(0.05))
-            .cornerRadius(12)
-            
-            Button(action: {}) {
-                HStack(spacing: 6) {
-                    Image(systemName: "line.3.horizontal.decrease")
-                    Text("Filtrele")
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.gray)
+                    TextField("Sorularda ara...", text: $viewModel.searchText)
+                        .foregroundColor(.white)
+                        .font(.system(size: 14))
                 }
-                .font(.system(size: 13, weight: .bold))
-                .foregroundColor(.white.opacity(0.8))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .padding(12)
                 .background(Color.white.opacity(0.05))
                 .cornerRadius(12)
+                
+                Menu {
+                    Button(action: { viewModel.selectCategory(nil) }) {
+                        Label("Tüm Kategoriler", systemImage: "square.grid.2x2")
+                    }
+                    
+                    Divider()
+                    
+                    ForEach(ConfigManager.shared.opinionCategories, id: \.id) { category in
+                        Button(action: { viewModel.selectCategory(category.id) }) {
+                            Label(category.name, systemImage: category.icon ?? "tag")
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: viewModel.selectedCategory == nil ? "line.3.horizontal.decrease" : "line.3.horizontal.decrease.circle.fill")
+                        Text(viewModel.selectedCategory == nil ? "Filtrele" : "Filtreli")
+                    }
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(viewModel.selectedCategory == nil ? .white.opacity(0.8) : .purple)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(viewModel.selectedCategory == nil ? Color.white.opacity(0.05) : Color.purple.opacity(0.1))
+                    .cornerRadius(12)
+                }
+            }
+            
+            if let selectedId = viewModel.selectedCategory,
+               let category = ConfigManager.shared.opinionCategories.first(where: { $0.id == selectedId }) {
+                HStack(spacing: 8) {
+                    Text("Kategori: \(category.name)")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.purple)
+                    
+                    Button(action: { viewModel.selectCategory(nil) }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.gray)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.purple.opacity(0.1))
+                .cornerRadius(20)
+                .transition(.scale.combined(with: .opacity))
             }
         }
         .padding(.horizontal, 20)
