@@ -122,7 +122,8 @@ struct AskOpinionView: View {
     // MARK: - Steps
     
     private var stepOneView: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 24) {
+            // Title
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text("ao_field_title".localized() + " *")
@@ -141,6 +142,7 @@ struct AskOpinionView: View {
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
             }
             
+            // Description
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text("ao_field_desc".localized() + " *")
@@ -155,18 +157,13 @@ struct AskOpinionView: View {
                     .padding(8)
                     .frame(height: 120)
                     .scrollContentBackground(.hidden)
-                    .background(Color.black)
+                    .background(AppColors.surface)
                     .cornerRadius(12)
                     .foregroundColor(.white)
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
             }
-        }
-        .padding(.horizontal, 20)
-    }
-    
-    private var stepTwoView: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            // Question Type (Moved from Step 3)
+            
+            // Question Type (Moved from Step 2)
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Text("ao_type_title".localized())
@@ -181,22 +178,24 @@ struct AskOpinionView: View {
                     AskOpinionTypeCard(icon: "lightbulb", title: "ao_type_solution".localized(), description: "ao_type_solution_desc".localized(), isSelected: viewModel.selectedType == 2) { viewModel.selectedType = 2 }
                 }
             }
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    private var stepTwoView: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("ao_add_info".localized() + " (\("ao_optional".localized()))")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(AppColors.textSecondary)
             
-            // Attachments
-            VStack(alignment: .leading, spacing: 16) {
-                Text("ao_add_info".localized() + " (\("ao_optional".localized()))")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(AppColors.textSecondary)
-                
-                VStack(spacing: 12) {
-                    HStack(spacing: 12) {
-                        AttachmentButton(icon: "doc.text.fill", title: "ao_add_doc".localized(), desc: "ao_add_doc_desc".localized())
-                        AttachmentButton(icon: "link", title: "ao_add_link".localized(), desc: "ao_add_link_desc".localized())
-                    }
-                    HStack(spacing: 12) {
-                        AttachmentButton(icon: "photo.fill", title: "ao_add_image".localized(), desc: "ao_add_image_desc".localized())
-                        AttachmentButton(icon: "chart.bar.xaxis", title: "ao_add_survey".localized(), desc: "ao_add_survey_desc".localized())
-                    }
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    AttachmentButton(icon: "doc.text.fill", title: "ao_add_doc".localized(), desc: "ao_add_doc_desc".localized())
+                    AttachmentButton(icon: "link", title: "ao_add_link".localized(), desc: "ao_add_link_desc".localized())
+                }
+                HStack(spacing: 12) {
+                    AttachmentButton(icon: "photo.fill", title: "ao_add_image".localized(), desc: "ao_add_image_desc".localized())
+                    AttachmentButton(icon: "chart.bar.xaxis", title: "ao_add_survey".localized(), desc: "ao_add_survey_desc".localized())
                 }
             }
         }
