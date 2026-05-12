@@ -2,17 +2,19 @@ import SwiftUI
 
 struct AskOpinionView: View {
     @Environment(\.presentationMode) var presentationMode
-    @State private var title: String = ""
-    @State private var description: String = ""
-    @State private var selectedType: Int = 0
-    @State private var selectedTarget: Int = 0
-    @State private var selectedPrivacy: Int = 0
+    @StateObject private var viewModel = CreateOpinionViewModel()
     
     var body: some View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                Button(action: { 
+                    if viewModel.currentStep > 1 {
+                        viewModel.previousStep()
+                    } else {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                }) {
                     Image(systemName: "arrow.left")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
@@ -57,156 +59,39 @@ struct AskOpinionView: View {
                         .padding(.horizontal, 20)
                     
                     // Stepper
-                    AskOpinionStepper(currentStep: 1)
+                    AskOpinionStepper(currentStep: viewModel.currentStep)
                         .padding(.horizontal, 20)
                     
-                    // Input Fields
-                    VStack(alignment: .leading, spacing: 20) {
-                        // Title Field
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Text("ao_field_title".localized() + " *")
-                                Image(systemName: "questionmark.circle")
-                                Spacer()
-                                Text("\(title.count)/120")
-                            }
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(AppColors.textSecondary)
-                            
-                            TextField("ao_field_title_placeholder".localized(), text: $title)
-                                .padding()
-                                .background(AppColors.surface)
-                                .cornerRadius(12)
-                                .foregroundColor(.white)
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
-                            
-                            Text("ao_field_title_hint".localized())
-                                .font(.system(size: 11))
-                                .foregroundColor(AppColors.textSecondary.opacity(0.7))
-                        }
-                        
-                        // Description Field
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Text("ao_field_desc".localized() + " *")
-                                Image(systemName: "questionmark.circle")
-                                Spacer()
-                                Text("\(description.count)/1500")
-                            }
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(AppColors.textSecondary)
-                            
-                            TextEditor(text: $description)
-                                .padding(8)
-                                .frame(height: 120)
-                                .background(AppColors.surface)
-                                .cornerRadius(12)
-                                .foregroundColor(.white)
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
-                            
-                            Text("ao_field_desc_hint".localized())
-                                .font(.system(size: 11))
-                                .foregroundColor(AppColors.textSecondary.opacity(0.7))
-                        }
+                    if viewModel.currentStep == 1 {
+                        stepOneView
+                    } else if viewModel.currentStep == 2 {
+                        stepTwoView
+                    } else if viewModel.currentStep == 3 {
+                        stepThreeView
+                    } else {
+                        stepFourView
                     }
-                    .padding(.horizontal, 20)
                     
-                    // Attachments Section
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("ao_add_info".localized() + " (\("ao_optional".localized()))")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(AppColors.textSecondary)
-                        
-                        VStack(spacing: 12) {
-                            HStack(spacing: 12) {
-                                AttachmentButton(icon: "doc.text.fill", title: "ao_add_doc".localized(), desc: "ao_add_doc_desc".localized())
-                                AttachmentButton(icon: "link", title: "ao_add_link".localized(), desc: "ao_add_link_desc".localized())
-                            }
-                            HStack(spacing: 12) {
-                                AttachmentButton(icon: "photo.fill", title: "ao_add_image".localized(), desc: "ao_add_image_desc".localized())
-                                AttachmentButton(icon: "chart.bar.xaxis", title: "ao_add_survey".localized(), desc: "ao_add_survey_desc".localized())
-                            }
-                        }
+                    if let error = viewModel.errorMessage {
+                        Text(error)
+                            .font(.system(size: 12))
+                            .foregroundColor(.red)
+                            .padding(.horizontal, 20)
                     }
-                    .padding(.horizontal, 20)
-                    
-                    // Question Type
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            Text("ao_type_title".localized())
-                            Image(systemName: "questionmark.circle")
-                        }
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(AppColors.textSecondary)
-                        
-                        HStack(spacing: 12) {
-                            AskOpinionTypeCard(icon: "bubble.left.and.bubble.right", title: "ao_type_general".localized(), description: "ao_type_general_desc".localized(), isSelected: selectedType == 0) { selectedType = 0 }
-                            AskOpinionTypeCard(icon: "scalemass", title: "ao_type_compare".localized(), description: "ao_type_compare_desc".localized(), isSelected: selectedType == 1) { selectedType = 1 }
-                            AskOpinionTypeCard(icon: "lightbulb", title: "ao_type_solution".localized(), description: "ao_type_solution_desc".localized(), isSelected: selectedType == 2) { selectedType = 2 }
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    // Target Audience
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            Text("ao_target_title".localized())
-                            Image(systemName: "questionmark.circle")
-                        }
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(AppColors.textSecondary)
-                        
-                        HStack(spacing: 12) {
-                            AskOpinionTypeCard(icon: "person.2.fill", title: "ao_target_all".localized(), description: "ao_target_all_desc".localized(), isSelected: selectedTarget == 0) { selectedTarget = 0 }
-                            AskOpinionTypeCard(icon: "star.bubble.fill", title: "ao_target_experts".localized(), description: "ao_target_experts_desc".localized(), isSelected: selectedTarget == 1) { selectedTarget = 1 }
-                            AskOpinionTypeCard(icon: "person.crop.circle.badge.plus", title: "ao_target_specific".localized(), description: "ao_target_specific_desc".localized(), isSelected: selectedTarget == 2) { selectedTarget = 2 }
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    // Privacy
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            Text("ao_privacy_title".localized())
-                            Image(systemName: "questionmark.circle")
-                        }
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(AppColors.textSecondary)
-                        
-                        HStack(spacing: 12) {
-                            PrivacyOptionCard(title: "ao_privacy_public".localized(), desc: "ao_privacy_public_desc".localized(), isSelected: selectedPrivacy == 0) { selectedPrivacy = 0 }
-                            PrivacyOptionCard(title: "ao_privacy_community".localized(), desc: "ao_privacy_community_desc".localized(), isSelected: selectedPrivacy == 1) { selectedPrivacy = 1 }
-                            PrivacyOptionCard(title: "ao_privacy_private".localized(), desc: "ao_privacy_private_desc".localized(), isSelected: selectedPrivacy == 2) { selectedPrivacy = 2 }
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    // Info Banner
-                    HStack(spacing: 16) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.blue.opacity(0.2))
-                                .frame(width: 36, height: 36)
-                            Image(systemName: "star.fill")
-                                .foregroundColor(.blue)
-                                .font(.system(size: 14))
-                        }
-                        
-                        Text("ao_info_banner".localized())
-                            .font(.system(size: 11))
-                            .foregroundColor(.white.opacity(0.8))
-                    }
-                    .padding(16)
-                    .background(AppColors.surface)
-                    .cornerRadius(16)
-                    .padding(.horizontal, 20)
                     
                     // Action Button
-                    Button(action: {}) {
+                    Button(action: {
+                        viewModel.nextStep()
+                    }) {
                         HStack {
-                            Text("continue".localized())
-                                .font(.system(size: 16, weight: .bold))
-                            Image(systemName: "arrow.right")
+                            if viewModel.isLoading {
+                                ProgressView()
+                                    .tint(.white)
+                            } else {
+                                Text(viewModel.currentStep == 4 ? "Yayınla" : "continue".localized())
+                                    .font(.system(size: 16, weight: .bold))
+                                Image(systemName: viewModel.currentStep == 4 ? "checkmark.circle.fill" : "arrow.right")
+                            }
                         }
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -214,11 +99,169 @@ struct AskOpinionView: View {
                         .background(AppColors.primary)
                         .cornerRadius(16)
                     }
+                    .disabled(viewModel.isLoading)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 40)
                 }
             }
         }
+        .background(AppColors.background.ignoresSafeArea())
+        .navigationBarHidden(true)
+        .onChange(of: viewModel.isSuccess) { success in
+            if success {
+                presentationMode.wrappedValue.dismiss()
+            }
+        }
+    }
+    
+    // MARK: - Steps
+    
+    private var stepOneView: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            // Title Field
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text("ao_field_title".localized() + " *")
+                    Image(systemName: "questionmark.circle")
+                    Spacer()
+                    Text("\(viewModel.title.count)/120")
+                }
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(AppColors.textSecondary)
+                
+                TextField("ao_field_title_placeholder".localized(), text: $viewModel.title)
+                    .padding()
+                    .background(AppColors.surface)
+                    .cornerRadius(12)
+                    .foregroundColor(.white)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                
+                Text("ao_field_title_hint".localized())
+                    .font(.system(size: 11))
+                    .foregroundColor(AppColors.textSecondary.opacity(0.7))
+            }
+            
+            // Description Field
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text("ao_field_desc".localized() + " *")
+                    Image(systemName: "questionmark.circle")
+                    Spacer()
+                    Text("\(viewModel.description.count)/1500")
+                }
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(AppColors.textSecondary)
+                
+                TextEditor(text: $viewModel.description)
+                    .padding(8)
+                    .frame(height: 120)
+                    .background(AppColors.surface)
+                    .cornerRadius(12)
+                    .foregroundColor(.white)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                
+                Text("ao_field_desc_hint".localized())
+                    .font(.system(size: 11))
+                    .foregroundColor(AppColors.textSecondary.opacity(0.7))
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    private var stepTwoView: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("ao_add_info".localized() + " (\("ao_optional".localized()))")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(AppColors.textSecondary)
+            
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    AttachmentButton(icon: "doc.text.fill", title: "ao_add_doc".localized(), desc: "ao_add_doc_desc".localized())
+                    AttachmentButton(icon: "link", title: "ao_add_link".localized(), desc: "ao_add_link_desc".localized())
+                }
+                HStack(spacing: 12) {
+                    AttachmentButton(icon: "photo.fill", title: "ao_add_image".localized(), desc: "ao_add_image_desc".localized())
+                    AttachmentButton(icon: "chart.bar.xaxis", title: "ao_add_survey".localized(), desc: "ao_add_survey_desc".localized())
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    private var stepThreeView: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("ao_type_title".localized())
+                Image(systemName: "questionmark.circle")
+            }
+            .font(.system(size: 13, weight: .bold))
+            .foregroundColor(AppColors.textSecondary)
+            
+            HStack(spacing: 12) {
+                AskOpinionTypeCard(icon: "bubble.left.and.bubble.right", title: "ao_type_general".localized(), description: "ao_type_general_desc".localized(), isSelected: viewModel.selectedType == 0) { viewModel.selectedType = 0 }
+                AskOpinionTypeCard(icon: "scalemass", title: "ao_type_compare".localized(), description: "ao_type_compare_desc".localized(), isSelected: viewModel.selectedType == 1) { viewModel.selectedType = 1 }
+                AskOpinionTypeCard(icon: "lightbulb", title: "ao_type_solution".localized(), description: "ao_type_solution_desc".localized(), isSelected: viewModel.selectedType == 2) { viewModel.selectedType = 2 }
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    private var stepFourView: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            // Target Audience
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("ao_target_title".localized())
+                    Image(systemName: "questionmark.circle")
+                }
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(AppColors.textSecondary)
+                
+                HStack(spacing: 12) {
+                    AskOpinionTypeCard(icon: "person.2.fill", title: "ao_target_all".localized(), description: "ao_target_all_desc".localized(), isSelected: viewModel.selectedTarget == 0) { viewModel.selectedTarget = 0 }
+                    AskOpinionTypeCard(icon: "star.bubble.fill", title: "ao_target_experts".localized(), description: "ao_target_experts_desc".localized(), isSelected: viewModel.selectedTarget == 1) { viewModel.selectedTarget = 1 }
+                    AskOpinionTypeCard(icon: "person.crop.circle.badge.plus", title: "ao_target_specific".localized(), description: "ao_target_specific_desc".localized(), isSelected: viewModel.selectedTarget == 2) { viewModel.selectedTarget = 2 }
+                }
+            }
+            
+            // Privacy
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("ao_privacy_title".localized())
+                    Image(systemName: "questionmark.circle")
+                }
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(AppColors.textSecondary)
+                
+                HStack(spacing: 12) {
+                    PrivacyOptionCard(title: "ao_privacy_public".localized(), desc: "ao_privacy_public_desc".localized(), isSelected: viewModel.selectedPrivacy == 0) { viewModel.selectedPrivacy = 0 }
+                    PrivacyOptionCard(title: "ao_privacy_community".localized(), desc: "ao_privacy_community_desc".localized(), isSelected: viewModel.selectedPrivacy == 1) { viewModel.selectedPrivacy = 1 }
+                    PrivacyOptionCard(title: "ao_privacy_private".localized(), desc: "ao_privacy_private_desc".localized(), isSelected: viewModel.selectedPrivacy == 2) { viewModel.selectedPrivacy = 2 }
+                }
+            }
+            
+            // Info Banner
+            HStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(Color.blue.opacity(0.2))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: "star.fill")
+                        .foregroundColor(.blue)
+                        .font(.system(size: 14))
+                }
+                
+                Text("ao_info_banner".localized())
+                    .font(.system(size: 11))
+                    .foregroundColor(.white.opacity(0.8))
+            }
+            .padding(16)
+            .background(AppColors.surface)
+            .cornerRadius(16)
+        }
+        .padding(.horizontal, 20)
+    }
+}
         .background(AppColors.background.ignoresSafeArea())
         .navigationBarHidden(true)
     }
