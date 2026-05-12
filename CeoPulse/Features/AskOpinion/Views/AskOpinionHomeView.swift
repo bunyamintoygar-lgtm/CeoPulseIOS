@@ -42,7 +42,7 @@ struct AskOpinionHomeView: View {
                                 Text(error)
                                     .foregroundColor(.white)
                                 Button("Tekrar Dene") {
-                                    Task { await viewModel.fetchOpinions() }
+                                    Task { await viewModel.refreshOpinions() }
                                 }
                                 .padding(.horizontal, 20)
                                 .padding(.vertical, 10)
@@ -72,18 +72,18 @@ struct AskOpinionHomeView: View {
                     .padding(.top, 10)
                 }
                 .refreshable {
-                    await viewModel.fetchOpinions()
+                    await viewModel.refreshOpinions()
                 }
             }
         }
         .navigationBarHidden(true)
         .sheet(isPresented: $showCreateOpinion, onDismiss: {
-            Task { await viewModel.fetchOpinions() }
+            Task { await viewModel.refreshOpinions() }
         }) {
             AskOpinionView()
         }
         .onAppear {
-            Task { await viewModel.fetchOpinions() }
+            Task { await viewModel.refreshOpinions() }
         }
     }
     
@@ -267,6 +267,17 @@ struct AskOpinionHomeView: View {
         LazyVStack(spacing: 16) {
             ForEach(viewModel.filteredOpinions) { opinion in
                 OpinionCard(opinion: opinion)
+                    .onAppear {
+                        Task {
+                            await viewModel.fetchMoreOpinionsIfNeeded(currentOpinion: opinion)
+                        }
+                    }
+            }
+            
+            if viewModel.isFetchingMore {
+                ProgressView()
+                    .tint(.purple)
+                    .padding(.vertical, 20)
             }
         }
         .padding(.horizontal, 20)

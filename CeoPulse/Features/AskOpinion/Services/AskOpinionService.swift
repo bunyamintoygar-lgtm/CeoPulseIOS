@@ -47,11 +47,15 @@ class AskOpinionService {
             .execute()
     }
     
-    func fetchOpinions() async throws -> [Opinion] {
+    func fetchOpinions(page: Int = 0, pageSize: Int = 10) async throws -> [Opinion] {
+        let from = page * pageSize
+        let to = from + pageSize - 1
+        
         let response: [OpinionDTO] = try await client
             .from("ask_opinions")
             .select()
             .order("created_at", ascending: false)
+            .range(from: from, to: to)
             .execute()
             .value
         
