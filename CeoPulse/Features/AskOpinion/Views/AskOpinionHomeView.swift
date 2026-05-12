@@ -112,27 +112,7 @@ struct AskOpinionHomeView: View {
             Spacer()
             
             HStack(spacing: 16) {
-                ZStack(alignment: .topTrailing) {
-                    Image(systemName: "bell")
-                        .font(.system(size: 20))
-                        .foregroundColor(.white)
-                    Circle()
-                        .fill(Color.orange)
-                        .frame(width: 14, height: 14)
-                        .overlay(Text("3").font(.system(size: 8, weight: .bold)).foregroundColor(.white))
-                        .offset(x: 4, y: -4)
-                }
-                
-                HStack(spacing: 4) {
-                    Image(systemName: "crown.fill")
-                    Text("PREMIUM")
-                }
-                .font(.system(size: 10, weight: .bold))
-                .foregroundColor(.orange)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Color.orange.opacity(0.1))
-                .cornerRadius(8)
+                // Icons removed as requested
             }
         }
         .padding(.horizontal, 20)
