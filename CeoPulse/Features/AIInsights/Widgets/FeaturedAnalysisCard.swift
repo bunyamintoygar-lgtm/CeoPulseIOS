@@ -37,11 +37,11 @@ struct FeaturedAnalysisCard: View {
             .cornerRadius(24)
             
             // Bottom Information Panel (Protects text from image content)
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    // Kategori Rozeti (Öne Çıkan yerine)
+                    // Kategori Rozeti
                     Text(category.uppercased())
-                        .font(.system(size: 10, weight: .black))
+                        .font(.system(size: 9, weight: .black))
                         .foregroundColor(.purple)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
@@ -59,15 +59,17 @@ struct FeaturedAnalysisCard: View {
                 }
                 
                 Text(title)
-                    .font(.system(size: 16, weight: .bold)) // 18 -> 16
+                    .font(.system(size: 15, weight: .bold)) // 16 -> 15
                     .foregroundColor(.white)
                     .lineLimit(2)
+                    .multilineTextAlignment(.leading) // Sola yasla
                 
                 Text(description)
-                    .font(.system(size: 11)) // 12 -> 11
+                    .font(.system(size: 11))
                     .foregroundColor(.white.opacity(0.7))
-                    .lineLimit(2) // 1 -> 2
+                    .lineLimit(2)
                     .lineSpacing(2)
+                    .multilineTextAlignment(.leading) // Sola yasla
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
