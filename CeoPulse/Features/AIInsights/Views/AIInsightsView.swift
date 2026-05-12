@@ -94,7 +94,7 @@ struct AIInsightsView: View {
                     .padding(.horizontal, 20)
                 }
                 
-                // Multi-Featured Analyses (Top 3)
+                // Multi-Featured Analyses (Top 1)
                 VStack(alignment: .leading, spacing: 24) {
                     Text("ai_featured_analyses".localized())
                         .font(.system(size: 17, weight: .bold))
@@ -102,7 +102,7 @@ struct AIInsightsView: View {
                         .padding(.horizontal, 20)
                     
                     LazyVStack(spacing: 20) {
-                        ForEach(viewModel.filteredInsights.prefix(3)) { insight in
+                        ForEach(viewModel.filteredInsights.prefix(1)) { insight in
                             NavigationLink(destination: AIInsightDetailView(insight: insight)) {
                                 FeaturedAnalysisCard(
                                     title: insight.title,
@@ -126,7 +126,7 @@ struct AIInsightsView: View {
                         .padding(.horizontal, 20)
                     
                     LazyVStack(spacing: 16) {
-                        ForEach(viewModel.filteredInsights.dropFirst(3)) { insight in
+                        ForEach(viewModel.filteredInsights.dropFirst(1)) { insight in
                             NavigationLink(destination: AIInsightDetailView(insight: insight)) {
                                 RecommendationRow(
                                     title: insight.title,
