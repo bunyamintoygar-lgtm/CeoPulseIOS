@@ -141,12 +141,12 @@ struct AskOpinionView: View {
                     Text("ao_field_desc".localized() + " *")
                     Image(systemName: "questionmark.circle")
                     Spacer()
-                    Text("\(viewModel.description.count)/1500")
+                    Text("\(viewModel.opinionDescription.count)/1500")
                 }
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(AppColors.textSecondary)
                 
-                TextEditor(text: $viewModel.description)
+                TextEditor(text: $viewModel.opinionDescription)
                     .padding(8)
                     .frame(height: 120)
                     .background(AppColors.surface)

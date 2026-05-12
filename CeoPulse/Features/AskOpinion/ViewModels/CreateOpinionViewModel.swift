@@ -5,7 +5,7 @@ import Combine
 class CreateOpinionViewModel: NSObject, ObservableObject {
     @Published var currentStep: Int = 1
     @Published var title: String = ""
-    @Published var description: String = ""
+    @Published var opinionDescription: String = ""
     @Published var selectedType: Int = 0
     @Published var selectedTarget: Int = 0
     @Published var selectedPrivacy: Int = 0
@@ -44,7 +44,7 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
     
     @MainActor
     func publishOpinion() async {
-        guard !title.isEmpty && !description.isEmpty else {
+        guard !title.isEmpty && !opinionDescription.isEmpty else {
             errorMessage = "Lütfen başlık ve açıklama alanlarını doldurun."
             return
         }
@@ -62,7 +62,7 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
             authorTitle: "",
             authorAvatar: nil,
             title: title,
-            description: description,
+            description: opinionDescription,
             status: .open,
             category: category,
             type: selectedType,
