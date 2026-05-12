@@ -39,7 +39,7 @@ struct OpinionAttachment: Codable, Identifiable {
     var id: String { name + type + (url ?? "") }
     let name: String
     let type: String // doc, image, link, survey
-    let url: String?
+    var url: String?
     var survey: OpinionSurveyAttachment?
 }
 

@@ -1,6 +1,8 @@
 import Foundation
 import SwiftUI
 import Combine
+import Supabase
+import Auth
 
 class CreateOpinionViewModel: NSObject, ObservableObject {
     @Published var currentStep: Int = 1
