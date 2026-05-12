@@ -24,8 +24,8 @@ struct AskOpinionStepper: View {
                     }
                     
                     Text(steps[index])
-                        .font(.system(size: 10))
-                        .foregroundColor(index + 1 <= currentStep ? AppColors.primaryAccent : AppColors.textSecondary)
+                        .font(.system(size: 10, weight: index + 1 <= currentStep ? .bold : .medium))
+                        .foregroundColor(index + 1 <= currentStep ? .white : .white.opacity(0.5))
                         .multilineTextAlignment(.center)
                         .frame(height: 24)
                 }
