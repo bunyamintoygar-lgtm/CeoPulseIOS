@@ -17,6 +17,16 @@ struct OpinionDTO: Codable {
     let response_count: Int?
     let like_count: Int?
     let created_at: Date?
+    
+    // Join from profiles table
+    let profiles: ProfileDTO?
+}
+
+struct ProfileDTO: Codable {
+    let first_name: String?
+    let last_name: String?
+    let avatar_url: String?
+    let position: String?
 }
 
 class AskOpinionService {
@@ -53,7 +63,7 @@ class AskOpinionService {
         
         var request = client
             .from("ask_opinions")
-            .select()
+            .select("*, profiles(*)")
             
         if let query = query, !query.isEmpty {
             request = request.or("title.ilike.%\(query)%,description.ilike.%\(query)%")
@@ -71,12 +81,17 @@ class AskOpinionService {
         
         // Map DTOs to Domain Models
         return response.map { dto in
+            let firstName = dto.profiles?.first_name ?? "Anonim"
+            let lastName = dto.profiles?.last_name ?? ""
+            let lastInitial = lastName.isEmpty ? "" : String(lastName.prefix(1)) + "."
+            let formattedName = "\(firstName) \(lastInitial)".trimmingCharacters(in: .whitespaces)
+            
             return Opinion(
                 id: dto.id ?? UUID(),
                 authorId: dto.author_id,
-                authorName: "Yükleniyor...", // This would normally come from a profile join
-                authorTitle: "CEO",
-                authorAvatar: nil,
+                authorName: formattedName,
+                authorTitle: dto.profiles?.position ?? "CEO",
+                authorAvatar: dto.profiles?.avatar_url,
                 title: dto.title,
                 description: dto.description,
                 status: OpinionStatus(rawValue: dto.status) ?? .open,

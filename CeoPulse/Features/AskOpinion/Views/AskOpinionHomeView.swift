@@ -4,6 +4,7 @@ struct AskOpinionHomeView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var viewModel = AskOpinionHomeViewModel()
     @State private var showCreateOpinion = false
+    @State private var isFilterSheetPresented = false
     
     var body: some View {
         ZStack {
@@ -248,19 +249,7 @@ struct AskOpinionHomeView: View {
                 .background(Color.white.opacity(0.05))
                 .cornerRadius(12)
                 
-                Menu {
-                    Button(action: { viewModel.selectCategory(nil) }) {
-                        Label("Tüm Kategoriler", systemImage: "square.grid.2x2")
-                    }
-                    
-                    Divider()
-                    
-                    ForEach(ConfigManager.shared.opinionCategories, id: \.id) { category in
-                        Button(action: { viewModel.selectCategory(category.id) }) {
-                            Label(category.name, systemImage: category.icon ?? "tag")
-                        }
-                    }
-                } label: {
+                Button(action: { isFilterSheetPresented = true }) {
                     HStack(spacing: 6) {
                         Image(systemName: viewModel.selectedCategory == nil ? "line.3.horizontal.decrease" : "line.3.horizontal.decrease.circle.fill")
                         Text(viewModel.selectedCategory == nil ? "Filtrele" : "Filtreli")
@@ -294,6 +283,80 @@ struct AskOpinionHomeView: View {
             }
         }
         .padding(.horizontal, 20)
+        .sheet(isPresented: $isFilterSheetPresented) {
+            categorySelectionSheet
+        }
+    }
+    
+    private var categorySelectionSheet: some View {
+        NavigationView {
+            ZStack {
+                AppColors.background.ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 12) {
+                        // All Categories Option
+                        Button(action: {
+                            viewModel.selectCategory(nil)
+                            isFilterSheetPresented = false
+                        }) {
+                            HStack {
+                                Image(systemName: "square.grid.2x2.fill")
+                                    .foregroundColor(.purple)
+                                    .frame(width: 30)
+                                Text("Tüm Kategoriler")
+                                    .foregroundColor(.white)
+                                Spacer()
+                                if viewModel.selectedCategory == nil {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.purple)
+                                }
+                            }
+                            .padding()
+                            .background(Color.white.opacity(0.05))
+                            .cornerRadius(12)
+                        }
+                        
+                        Divider()
+                            .background(Color.white.opacity(0.1))
+                            .padding(.vertical, 8)
+                        
+                        // Dynamic Categories
+                        ForEach(ConfigManager.shared.opinionCategories, id: \.id) { category in
+                            Button(action: {
+                                viewModel.selectCategory(category.id)
+                                isFilterSheetPresented = false
+                            }) {
+                                HStack {
+                                    Image(systemName: category.icon ?? "tag.fill")
+                                        .foregroundColor(.purple)
+                                        .frame(width: 30)
+                                    Text(category.name)
+                                        .foregroundColor(.white)
+                                    Spacer()
+                                    if viewModel.selectedCategory == category.id {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(.purple)
+                                    }
+                                }
+                                .padding()
+                                .background(Color.white.opacity(0.05))
+                                .cornerRadius(12)
+                            }
+                        }
+                    }
+                    .padding(20)
+                }
+            }
+            .navigationTitle("Kategori Seçin")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Kapat") { isFilterSheetPresented = false }
+                        .foregroundColor(.purple)
+                }
+            }
+        }
     }
     
     private var opinionList: some View {
