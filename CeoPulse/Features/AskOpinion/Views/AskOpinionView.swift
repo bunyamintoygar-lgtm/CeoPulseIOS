@@ -145,7 +145,6 @@ struct AskOpinionView: View {
                 print("File selection error: \(error)")
             }
         }
-        }
     }
     
     // MARK: - Steps
