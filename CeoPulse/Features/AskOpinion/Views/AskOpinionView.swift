@@ -288,101 +288,24 @@ struct AskOpinionView: View {
                             
                             // Premium Survey Editor (Matching Image)
                             if attachment.type == "survey", let survey = attachment.survey {
-                                VStack(alignment: .leading, spacing: 16) {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("1. Soru (Zorunlu)")
-                                            .font(.system(size: 12, weight: .bold))
-                                            .foregroundColor(.white)
-                                        
-                                        TextField("Anket Sorusu...", text: Binding(
-                                            get: { survey.question },
-                                            set: { viewModel.attachments[index].survey?.question = $0 }
-                                        ))
-                                        .padding(12)
-                                        .background(Color.white.opacity(0.05))
-                                        .cornerRadius(8)
-                                        .foregroundColor(.white)
-                                    }
-                                    
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        HStack {
-                                            Text("Yanıt Seçenekleri")
-                                                .font(.system(size: 11))
-                                                .foregroundColor(AppColors.textSecondary)
-                                            Spacer()
-                                            Button(action: { viewModel.addSurveyOption(attachmentId: attachment.id) }) {
-                                                Text("Seçenek Ekle")
-                                                    .font(.system(size: 11, weight: .bold))
-                                                    .foregroundColor(.purple)
-                                                    .padding(.horizontal, 10)
-                                                    .padding(.vertical, 4)
-                                                    .background(Color.purple.opacity(0.1))
-                                                    .cornerRadius(6)
-                                            }
-                                        }
-                                        
-                                        ForEach(0..<survey.options.count, id: \.self) { optIndex in
-                                            HStack(spacing: 12) {
-                                                Circle()
-                                                    .stroke(Color.white.opacity(0.2), lineWidth: 1.5)
-                                                    .frame(width: 18, height: 18)
-                                                
-                                                TextField("Seçenek \(optIndex + 1)", text: Binding(
-                                                    get: { survey.options[optIndex] },
-                                                    set: { viewModel.updateSurveyOption(attachmentId: attachment.id, optionIndex: optIndex, text: $0) }
-                                                ))
-                                                .font(.system(size: 13))
-                                                .foregroundColor(.white)
-                                                
-                                                Spacer()
-                                                
-                                                Image(systemName: "line.3.horizontal")
-                                                    .foregroundColor(.gray.opacity(0.5))
-                                                
-                                                if survey.options.count > 2 {
-                                                    Button(action: { viewModel.removeSurveyOption(attachmentId: attachment.id, optionIndex: optIndex) }) {
-                                                        Image(systemName: "trash")
-                                                            .foregroundColor(.red.opacity(0.5))
-                                                            .font(.system(size: 12))
-                                                    }
-                                                }
-                                            }
-                                            .padding(12)
-                                            .background(Color.white.opacity(0.03))
-                                            .cornerRadius(10)
-                                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.05), lineWidth: 1))
-                                        }
-                                    }
-                                    
-                                    Divider().background(Color.white.opacity(0.1))
-                                    
-                                    VStack(spacing: 12) {
-                                        Toggle(isOn: Binding(
-                                            get: { survey.allowMultiple },
-                                            set: { _ in viewModel.toggleSurveyMultiple(attachmentId: attachment.id) }
-                                        )) {
-                                            Text("Çoklu yanıt verilebilir")
-                                                .font(.system(size: 12))
-                                                .foregroundColor(AppColors.textSecondary)
-                                        }
-                                        .tint(.purple)
-                                        
-                                        Toggle(isOn: Binding(
-                                            get: { survey.isRequired },
-                                            set: { _ in viewModel.toggleSurveyRequired(attachmentId: attachment.id) }
-                                        )) {
-                                            Text("Zorunlu soru")
-                                                .font(.system(size: 12))
-                                                .foregroundColor(AppColors.textSecondary)
-                                        }
-                                        .tint(.purple)
-                                    }
-                                }
-                                .padding(16)
-                                .background(Color.black.opacity(0.3))
-                                .cornerRadius(16)
-                                .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.purple.opacity(0.2), lineWidth: 1))
+                                PremiumSurveyEditor(
+                                    survey: survey,
+                                    attachmentId: attachment.id,
+                                    viewModel: viewModel
+                                )
                             }
+                        }
+                        .padding(12)
+                        .background(AppColors.surface)
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
+                    }
+                }
+                .padding(.top, 8)
+            }
+        }
+        .padding(.horizontal, 20)
+    }
                         }
                         .padding(12)
                         .background(AppColors.surface)
@@ -600,5 +523,112 @@ struct CategorySelectCard: View {
                     .stroke(isSelected ? Color.purple.opacity(0.5) : Color.white.opacity(0.05), lineWidth: 1)
             )
         }
+    }
+}
+
+struct PremiumSurveyEditor: View {
+    var survey: OpinionSurveyAttachment
+    let attachmentId: String
+    @ObservedObject var viewModel: CreateOpinionViewModel
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("1. Soru (Zorunlu)")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                
+                TextField("Anket Sorusu...", text: Binding(
+                    get: { survey.question },
+                    set: { newQuestion in
+                        if let index = viewModel.attachments.firstIndex(where: { $0.id == attachmentId }) {
+                            viewModel.attachments[index].survey?.question = newQuestion
+                        }
+                    }
+                ))
+                .padding(12)
+                .background(Color.white.opacity(0.05))
+                .cornerRadius(8)
+                .foregroundColor(.white)
+            }
+            
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Yanıt Seçenekleri")
+                        .font(.system(size: 11))
+                        .foregroundColor(AppColors.textSecondary)
+                    Spacer()
+                    Button(action: { viewModel.addSurveyOption(attachmentId: attachmentId) }) {
+                        Text("Seçenek Ekle")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.purple)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(Color.purple.opacity(0.1))
+                            .cornerRadius(6)
+                    }
+                }
+                
+                ForEach(0..<survey.options.count, id: \.self) { optIndex in
+                    HStack(spacing: 12) {
+                        Circle()
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1.5)
+                            .frame(width: 18, height: 18)
+                        
+                        TextField("Seçenek \(optIndex + 1)", text: Binding(
+                            get: { survey.options[optIndex] },
+                            set: { viewModel.updateSurveyOption(attachmentId: attachmentId, optionIndex: optIndex, text: $0) }
+                        ))
+                        .font(.system(size: 13))
+                        .foregroundColor(.white)
+                        
+                        Spacer()
+                        
+                        Image(systemName: "line.3.horizontal")
+                            .foregroundColor(.gray.opacity(0.5))
+                        
+                        if survey.options.count > 2 {
+                            Button(action: { viewModel.removeSurveyOption(attachmentId: attachmentId, optionIndex: optIndex) }) {
+                                Image(systemName: "trash")
+                                    .foregroundColor(.red.opacity(0.5))
+                                    .font(.system(size: 12))
+                            }
+                        }
+                    }
+                    .padding(12)
+                    .background(Color.white.opacity(0.03))
+                    .cornerRadius(10)
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white.opacity(0.05), lineWidth: 1))
+                }
+            }
+            
+            Divider().background(Color.white.opacity(0.1))
+            
+            VStack(spacing: 12) {
+                Toggle(isOn: Binding(
+                    get: { survey.allowMultiple },
+                    set: { _ in viewModel.toggleSurveyMultiple(attachmentId: attachmentId) }
+                )) {
+                    Text("Çoklu yanıt verilebilir")
+                        .font(.system(size: 12))
+                        .foregroundColor(AppColors.textSecondary)
+                }
+                .tint(.purple)
+                
+                Toggle(isOn: Binding(
+                    get: { survey.isRequired },
+                    set: { _ in viewModel.toggleSurveyRequired(attachmentId: attachmentId) }
+                )) {
+                    Text("Zorunlu soru")
+                        .font(.system(size: 12))
+                        .foregroundColor(AppColors.textSecondary)
+                }
+                .tint(.purple)
+            }
+        }
+        .padding(16)
+        .background(Color.black.opacity(0.3))
+        .cornerRadius(16)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.purple.opacity(0.2), lineWidth: 1))
     }
 }
