@@ -390,9 +390,10 @@ struct AttachmentButton: View {
     let icon: String
     let title: String
     let desc: String
+    let action: () -> Void
     
     var body: some View {
-        Button(action: {}) {
+        Button(action: action) {
             HStack(spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 10)
