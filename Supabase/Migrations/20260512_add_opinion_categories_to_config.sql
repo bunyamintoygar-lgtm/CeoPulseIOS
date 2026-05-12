@@ -7,12 +7,21 @@ DECLARE
 BEGIN
     -- 1. Fikir Al (Ask Opinion) Kategorilerini Tanımla
     opinion_categories_json := '[
-        {"id": "leadership-strategy", "tr": "Liderlik & Strateji", "en": "Leadership & Strategy", "icon": "person.2.fill"},
-        {"id": "tech-innovation", "tr": "Teknoloji & İnovasyon", "en": "Tech & Innovation", "icon": "cpu.fill"},
-        {"id": "finance-investment", "tr": "Finans & Yatırım", "en": "Finance & Investment", "icon": "chart.line.uptrend.xyaxis"},
-        {"id": "marketing-growth", "tr": "Pazarlama & Büyüme", "en": "Marketing & Growth", "icon": "megaphone.fill"},
-        {"id": "hr-culture", "tr": "İK & Kurum Kültürü", "en": "HR & Culture", "icon": "person.3.fill"},
-        {"id": "operations-efficiency", "tr": "Operasyon & Verimlilik", "en": "Operations", "icon": "gearshape.2.fill"}
+        {"id": "strategy", "tr": "Strateji", "en": "Strategy", "icon": "target"},
+        {"id": "growth", "tr": "Büyüme", "en": "Growth", "icon": "chart.line.uptrend.xyaxis"},
+        {"id": "product-service", "tr": "Ürün & Hizmet", "en": "Product & Service", "icon": "cube.fill"},
+        {"id": "sustainability", "tr": "Sürdürülebilirlik", "en": "Sustainability", "icon": "leaf.fill"},
+        {"id": "marketing", "tr": "Pazarlama", "en": "Marketing", "icon": "megaphone.fill"},
+        {"id": "sales", "tr": "Satış", "en": "Sales", "icon": "cart.fill"},
+        {"id": "operations", "tr": "Operasyon", "en": "Operations", "icon": "gearshape.2.fill"},
+        {"id": "finance", "tr": "Finans", "en": "Finance", "icon": "dollarsign.circle.fill"},
+        {"id": "technology", "tr": "Teknoloji", "en": "Technology", "icon": "cpu.fill"},
+        {"id": "human-resources", "tr": "İnsan Kaynakları", "en": "Human Resources", "icon": "person.2.fill"},
+        {"id": "management", "tr": "Yönetim", "en": "Management", "icon": "briefcase.fill"},
+        {"id": "leadership", "tr": "Liderlik", "en": "Leadership", "icon": "crown.fill"},
+        {"id": "innovation", "tr": "İnovasyon", "en": "Innovation", "icon": "lightbulb.fill"},
+        {"id": "investment", "tr": "Yatırım", "en": "Investment", "icon": "chart.pie.fill"},
+        {"id": "legal", "tr": "Hukuk & Mevzuat", "en": "Legal & Regulation", "icon": "gavel.fill"}
     ]'::JSONB;
 
     -- 2. app_config tablosuna ekle veya güncelle
