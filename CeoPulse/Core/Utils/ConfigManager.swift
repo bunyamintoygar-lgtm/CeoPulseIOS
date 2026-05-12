@@ -46,6 +46,7 @@ class ConfigManager: ObservableObject {
                 case "durations": self.durations = (try? decoder.decode([LocalizedValue].self, from: valueData)) ?? []
                 case "company_sizes": self.companySizes = (try? decoder.decode([LocalizedValue].self, from: valueData)) ?? []
                 case "survey_categories": self.surveyCategories = (try? decoder.decode([SurveyCategory].self, from: valueData)) ?? []
+                case "opinion_categories": self.opinionCategories = (try? decoder.decode([SurveyCategory].self, from: valueData)) ?? []
                 default: break
                 }
             }
