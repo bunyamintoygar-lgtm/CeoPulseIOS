@@ -1,24 +1,34 @@
 import Foundation
 
 struct Opinion: Identifiable {
-    let id: UUID = UUID()
+    let id: UUID
+    let authorId: UUID
     let authorName: String
     let authorTitle: String
     let authorAvatar: String?
-    let question: String
+    let title: String
+    let description: String
     let status: OpinionStatus
     let category: String
-    let timeAgo: String
+    let type: Int
+    let targetAudience: Int
+    let privacyLevel: Int
+    let attachments: [OpinionAttachment]
     let viewCount: Int
     let responseCount: Int
-    let saveCount: Int
-    let isBookmarked: Bool
+    let createdAt: Date
 }
 
-enum OpinionStatus {
-    case open
-    case answered
-    case closed
+struct OpinionAttachment: Codable {
+    let name: String
+    let type: String
+    let url: String
+}
+
+enum OpinionStatus: String, Codable {
+    case open = "open"
+    case answered = "answered"
+    case closed = "closed"
     
     var title: String {
         switch self {

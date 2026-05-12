@@ -11,45 +11,61 @@ class AskOpinionHomeViewModel: ObservableObject {
     }
     
     func loadDummyData() {
+        let dummyAuthorId = UUID()
         opinions = [
             Opinion(
+                id: UUID(),
+                authorId: dummyAuthorId,
                 authorName: "Zeynep K.",
                 authorTitle: "İş Geliştirme Yöneticisi",
                 authorAvatar: nil,
-                question: "Hibrit çalışma modelinde ekip bağlılığını artırmak için sizin en etkili yöntemleriniz nelerdir?",
+                title: "Hibrit çalışma modelinde ekip bağlılığını artırmak için sizin en etkili yöntemleriniz nelerdir?",
+                description: "Küresel CEO Pulse verilerine göre 2026'da yatırım öncelikleri değişiyor.",
                 status: .open,
                 category: "Liderlik & Strateji",
-                timeAgo: "2 saat önce",
+                type: 0,
+                targetAudience: 0,
+                privacyLevel: 0,
+                attachments: [],
                 viewCount: 128,
                 responseCount: 15,
-                saveCount: 4,
-                isBookmarked: true
+                createdAt: Date().addingTimeInterval(-7200)
             ),
             Opinion(
+                id: UUID(),
+                authorId: dummyAuthorId,
                 authorName: "Mehmet A.",
                 authorTitle: "Ürün Yöneticisi",
                 authorAvatar: nil,
-                question: "Yapay zeka araçlarını iş süreçlerine entegre ederken dikkat edilmesi gereken en kritik noktalar nelerdir?",
+                title: "Yapay zeka araçlarını iş süreçlerine entegre ederken dikkat edilmesi gereken en kritik noktalar nelerdir?",
+                description: "Teknoloji ve inovasyon süreçlerinde AI entegrasyonu.",
                 status: .open,
                 category: "Teknoloji & İnovasyon",
-                timeAgo: "5 saat önce",
+                type: 0,
+                targetAudience: 0,
+                privacyLevel: 0,
+                attachments: [],
                 viewCount: 96,
                 responseCount: 11,
-                saveCount: 3,
-                isBookmarked: false
+                createdAt: Date().addingTimeInterval(-18000)
             ),
             Opinion(
+                id: UUID(),
+                authorId: dummyAuthorId,
                 authorName: "Ayşe T.",
                 authorTitle: "Finansal Analist",
                 authorAvatar: nil,
-                question: "2025 ikinci yarısında yatırımcılar için öne çıkacak sektörler sizce hangileri olacak?",
+                title: "2025 ikinci yarısında yatırımcılar için öne çıkacak sektörler sizce hangileri olacak?",
+                description: "Finans ve yatırım dünyasında gelecek beklentileri.",
                 status: .answered,
                 category: "Finans & Yatırım",
-                timeAgo: "1 gün önce",
+                type: 0,
+                targetAudience: 0,
+                privacyLevel: 0,
+                attachments: [],
                 viewCount: 210,
                 responseCount: 23,
-                saveCount: 7,
-                isBookmarked: true
+                createdAt: Date().addingTimeInterval(-86400)
             )
         ]
     }
@@ -59,6 +75,6 @@ class AskOpinionHomeViewModel: ObservableObject {
         if searchText.isEmpty {
             return opinions
         }
-        return opinions.filter { $0.question.localizedCaseInsensitiveContains(searchText) }
+        return opinions.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
     }
 }

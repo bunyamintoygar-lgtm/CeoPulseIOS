@@ -5,7 +5,7 @@ struct OpinionCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Top Row: Status, Time, Category, Bookmark
+            // Top Row: Status, Time, Category
             HStack {
                 HStack(spacing: 8) {
                     Text(opinion.status.title)
@@ -16,22 +16,16 @@ struct OpinionCard: View {
                         .background(opinion.status == .open ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
                         .cornerRadius(6)
                     
-                    Text("• \(opinion.timeAgo)")
+                    Text("• \(opinion.createdAt.timeAgoDisplay())")
                         .font(.system(size: 11))
                         .foregroundColor(AppColors.textSecondary)
                 }
                 
                 Spacer()
                 
-                HStack(spacing: 8) {
-                    Text(opinion.category)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(Color(hex: "A855F7")) // Purple-ish
-                    
-                    Image(systemName: opinion.isBookmarked ? "bookmark.fill" : "bookmark")
-                        .font(.system(size: 14))
-                        .foregroundColor(.white.opacity(0.6))
-                }
+                Text(opinion.category)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(Color(hex: "A855F7")) // Purple-ish
             }
             
             // Author Row
@@ -59,8 +53,8 @@ struct OpinionCard: View {
                 }
             }
             
-            // Question Text
-            Text(opinion.question)
+            // Question Title
+            Text(opinion.title)
                 .font(.system(size: 15, weight: .bold))
                 .foregroundColor(.white)
                 .lineLimit(3)
@@ -71,7 +65,6 @@ struct OpinionCard: View {
                 HStack(spacing: 16) {
                     Label("\(opinion.viewCount)", systemImage: "eye")
                     Label("\(opinion.responseCount)", systemImage: "bubble.left")
-                    Label("\(opinion.saveCount)", systemImage: "bookmark")
                 }
                 .font(.system(size: 11))
                 .foregroundColor(AppColors.textSecondary)
