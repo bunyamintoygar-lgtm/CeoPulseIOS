@@ -33,14 +33,12 @@ struct AskOpinionDetailView: View {
     // MARK: - Components
     
     private var headerView: some View {
-        HStack {
+        HStack(spacing: 12) {
             Button(action: { presentationMode.wrappedValue.dismiss() }) {
                 Image(systemName: "arrow.left")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
             }
-            
-            Spacer()
             
             HStack(spacing: 12) {
                 Image(systemName: "bubble.left.and.bubble.right.fill")
@@ -65,7 +63,9 @@ struct AskOpinionDetailView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Category & Time
             HStack {
-                Text(viewModel.opinion.category)
+                let categoryName = ConfigManager.shared.opinionCategories.first(where: { $0.id == viewModel.opinion.category })?.name ?? viewModel.opinion.category
+                
+                Text(categoryName)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.purple)
                     .padding(.horizontal, 10)
@@ -78,14 +78,6 @@ struct AskOpinionDetailView: View {
                     .foregroundColor(AppColors.textSecondary)
                 
                 Spacer()
-                
-                HStack(spacing: 20) {
-                    Image(systemName: "bookmark")
-                    Image(systemName: "hand.thumbsup")
-                    Image(systemName: "ellipsis")
-                }
-                .font(.system(size: 16))
-                .foregroundColor(.white.opacity(0.6))
             }
             
             // Author

@@ -91,14 +91,12 @@ struct AskOpinionHomeView: View {
     // MARK: - Components
     
     private var headerView: some View {
-        HStack {
+        HStack(spacing: 12) {
             Button(action: { presentationMode.wrappedValue.dismiss() }) {
                 Image(systemName: "arrow.left")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
             }
-            
-            Spacer()
             
             HStack(spacing: 12) {
                 Image(systemName: "bubble.left.and.bubble.right.fill")

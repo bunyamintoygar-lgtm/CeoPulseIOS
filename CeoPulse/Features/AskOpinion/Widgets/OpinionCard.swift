@@ -24,7 +24,9 @@ struct OpinionCard: View {
                     
                     Spacer()
                     
-                    Text(opinion.category)
+                    let categoryName = ConfigManager.shared.opinionCategories.first(where: { $0.id == opinion.category })?.name ?? opinion.category
+                    
+                    Text(categoryName)
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(Color(hex: "A855F7")) // Purple-ish
                 }
