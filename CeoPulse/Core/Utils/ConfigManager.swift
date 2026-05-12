@@ -12,6 +12,7 @@ class ConfigManager: ObservableObject {
     @Published var skillsList: [LocalizedValue] = []
     @Published var interestsList: [LocalizedValue] = []
     @Published var surveyCategories: [SurveyCategory] = []
+    @Published var opinionCategories: [SurveyCategory] = []
     @Published var isLoading = false
     
     private init() {}
