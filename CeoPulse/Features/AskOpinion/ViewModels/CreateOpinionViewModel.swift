@@ -72,7 +72,7 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
                     let fileName = "\(UUID().uuidString).jpg"
                     try await SupabaseManager.shared.client.storage
                         .from("opinion_attachments")
-                        .upload(fileName, file: data, options: FileOptions(contentType: "image/jpeg"))
+                        .upload(path: fileName, file: data, options: FileOptions(contentType: "image/jpeg"))
                     
                     let publicUrl = try SupabaseManager.shared.client.storage
                         .from("opinion_attachments")
@@ -84,7 +84,7 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
                     let fileName = "\(UUID().uuidString)_\(attachment.name.replacingOccurrences(of: " ", with: "_"))"
                     try await SupabaseManager.shared.client.storage
                         .from("opinion_attachments")
-                        .upload(fileName, file: data, options: FileOptions(contentType: "application/pdf"))
+                        .upload(path: fileName, file: data, options: FileOptions(contentType: "application/pdf"))
                     
                     let publicUrl = try SupabaseManager.shared.client.storage
                         .from("opinion_attachments")

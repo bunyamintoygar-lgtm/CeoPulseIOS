@@ -33,8 +33,15 @@ struct OpinionCard: View {
                 
                 // Author Row
                 HStack(spacing: 12) {
-                    if let avatar = opinion.authorAvatar {
-                        // Avatar implementation
+                    if let avatarUrl = opinion.authorAvatar, let url = URL(string: avatarUrl) {
+                        AsyncImage(url: url) { image in
+                            image.resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Circle().fill(Color.white.opacity(0.1))
+                        }
+                        .frame(width: 36, height: 36)
+                        .clipShape(Circle())
                     } else {
                         Circle()
                             .fill(Color.gray.opacity(0.3))
