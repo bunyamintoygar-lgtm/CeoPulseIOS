@@ -17,6 +17,10 @@ struct AskOpinionDetailView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         opinionDetailSection
                         
+                        if !viewModel.opinion.attachments.isEmpty {
+                            attachmentsSection
+                        }
+                        
                         responseInputSection
                         
                         responsesListSection
@@ -165,6 +169,169 @@ struct AskOpinionDetailView: View {
                 .font(.system(size: 10))
                 .foregroundColor(AppColors.textSecondary)
         }
+    }
+    
+    private var attachmentsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Ekler")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(.white)
+            
+            VStack(spacing: 12) {
+                ForEach(viewModel.opinion.attachments) { attachment in
+                    attachmentView(for: attachment)
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    @ViewBuilder
+    private func attachmentView(for attachment: OpinionAttachment) -> some View {
+        switch attachment.type {
+        case "image":
+            imageAttachmentView(attachment)
+        case "doc":
+            fileAttachmentView(attachment, icon: "doc.fill")
+        case "link":
+            linkAttachmentView(attachment)
+        case "survey":
+            surveyAttachmentView(attachment)
+        default:
+            fileAttachmentView(attachment, icon: "paperclip")
+        }
+    }
+    
+    private func imageAttachmentView(_ attachment: OpinionAttachment) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            AsyncImage(url: URL(string: attachment.url ?? "")) { image in
+                image.resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Rectangle()
+                    .fill(Color.white.opacity(0.05))
+                    .overlay(ProgressView().tint(.white))
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 200)
+            .cornerRadius(16)
+            .clipped()
+            
+            Text(attachment.name)
+                .font(.system(size: 12))
+                .foregroundColor(AppColors.textSecondary)
+        }
+    }
+    
+    private func fileAttachmentView(_ attachment: OpinionAttachment, icon: String) -> some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.purple.opacity(0.1))
+                    .frame(width: 40, height: 40)
+                Image(systemName: icon)
+                    .foregroundColor(.purple)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(attachment.name)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.white)
+                Text("Dosya")
+                    .font(.system(size: 11))
+                    .foregroundColor(AppColors.textSecondary)
+            }
+            
+            Spacer()
+            
+            Image(systemName: "arrow.down.circle")
+                .foregroundColor(AppColors.textSecondary)
+        }
+        .padding(12)
+        .background(Color.white.opacity(0.03))
+        .cornerRadius(12)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
+    }
+    
+    private func linkAttachmentView(_ attachment: OpinionAttachment) -> some View {
+        Link(destination: URL(string: attachment.url ?? "https://google.com") ?? URL(string: "https://google.com")!) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.blue.opacity(0.1))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: "link")
+                        .foregroundColor(.blue)
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(attachment.name)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white)
+                    Text(attachment.url ?? "")
+                        .font(.system(size: 11))
+                        .foregroundColor(.blue)
+                        .lineLimit(1)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "arrow.up.right.square")
+                    .foregroundColor(AppColors.textSecondary)
+            }
+            .padding(12)
+            .background(Color.white.opacity(0.03))
+            .cornerRadius(12)
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
+        }
+    }
+    
+    private func surveyAttachmentView(_ attachment: OpinionAttachment) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 8) {
+                Image(systemName: "chart.bar.fill")
+                    .foregroundColor(.purple)
+                    .font(.system(size: 14))
+                Text("Anket")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.purple)
+                Spacer()
+            }
+            
+            if let survey = attachment.survey {
+                Text(survey.question)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.white)
+                
+                VStack(spacing: 8) {
+                    ForEach(survey.options, id: \.self) { option in
+                        HStack {
+                            Text(option)
+                                .font(.system(size: 13))
+                                .foregroundColor(.white.opacity(0.9))
+                            Spacer()
+                            Circle()
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                .frame(width: 18, height: 18)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(Color.white.opacity(0.05))
+                        .cornerRadius(10)
+                    }
+                }
+                
+                if survey.allowMultiple {
+                    Text("* Birden fazla seçim yapabilirsiniz")
+                        .font(.system(size: 10))
+                        .foregroundColor(AppColors.textSecondary)
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.purple.opacity(0.05))
+        .cornerRadius(16)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.purple.opacity(0.2), lineWidth: 1))
     }
     
     private var responseInputSection: some View {
