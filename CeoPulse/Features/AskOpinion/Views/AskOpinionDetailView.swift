@@ -28,7 +28,7 @@ struct AskOpinionDetailView: View {
                     .padding(.top, 10)
                 }
                 
-                footerSection
+                // footerSection removed as requested
             }
         }
         .navigationBarHidden(true)
@@ -132,10 +132,7 @@ struct AskOpinionDetailView: View {
             // Stats
             HStack {
                 statItem(icon: "eye", value: "\(viewModel.opinion.viewCount)", label: "Görüntüleme")
-                Spacer()
                 statItem(icon: "bubble.left", value: "\(viewModel.opinion.responseCount)", label: "Yanıt")
-                Spacer()
-                statItem(icon: "hand.thumbsup", value: "\(viewModel.opinion.likeCount)", label: "Beğeni")
             }
             .padding(.vertical, 8)
             
@@ -485,19 +482,6 @@ struct AskOpinionDetailView: View {
         .padding(.horizontal, 20)
     }
     
-    private var footerSection: some View {
-        HStack {
-            Image(systemName: "sparkles")
-                .foregroundColor(.purple)
-            Text("Bu soruya yanıt vererek topluluğa katkıda bulunun")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.white.opacity(0.8))
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .background(Color.purple.opacity(0.1))
-        .padding(.bottom, 10)
-    }
 }
 
 struct ResponseCard: View {
