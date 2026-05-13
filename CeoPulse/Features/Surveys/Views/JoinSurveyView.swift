@@ -115,10 +115,10 @@ struct JoinSurveyView: View {
                     .foregroundColor(.white)
                 
                 HStack(spacing: 4) {
-                    Circle()
-                        .fill(Color.green)
-                        .frame(width: 6, height: 6)
-                        .symbolEffect(.pulse, options: .repeating)
+                    Image(systemName: "circle.fill")
+                        .foregroundColor(.green)
+                        .font(.system(size: 6))
+                        .symbolEffect(.breathe, options: .repeating)
                     Text(LocalizedStringKey("survey_join_live"))
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.green)
@@ -205,7 +205,7 @@ struct JoinSurveyView: View {
                 .font(.system(size: 20))
                 .symbolRenderingMode(.hierarchical)
                 .foregroundColor(.green)
-                .symbolEffect(.pulse, options: .repeating)
+                .symbolEffect(.breathe, options: .repeating)
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(LocalizedStringKey("survey_join_privacy_title"))

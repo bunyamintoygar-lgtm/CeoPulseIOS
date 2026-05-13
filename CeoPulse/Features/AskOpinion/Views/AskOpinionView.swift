@@ -125,9 +125,7 @@ struct AskOpinionView: View {
         .onChange(of: selectedItem) { oldValue, newValue in
             Task {
                 if let data = try? await newValue?.loadTransferable(type: Data.self) {
-                    // In a real app, upload to Supabase Storage and get URL
-                    // For now, we simulate with a dummy URL
-                    viewModel.addImage(name: "Görsel", url: "photo_selected.png")
+                    viewModel.addImage(name: "Eklenen Görsel", data: data)
                 }
             }
         }
@@ -139,7 +137,13 @@ struct AskOpinionView: View {
             switch result {
             case .success(let urls):
                 if let url = urls.first {
-                    viewModel.addDocument(name: url.lastPathComponent, url: url.absoluteString)
+                    // Start accessing for security-scoped resource
+                    guard url.startAccessingSecurityScopedResource() else { return }
+                    defer { url.stopAccessingSecurityScopedResource() }
+                    
+                    if let data = try? Data(contentsOf: url) {
+                        viewModel.addDocument(name: url.lastPathComponent, data: data)
+                    }
                 }
             case .failure(let error):
                 print("File selection error: \(error)")

@@ -235,7 +235,7 @@ struct CreateSurveyView: View {
                     Image(systemName: "plus.square.fill.on.square.fill")
                         .symbolRenderingMode(.hierarchical)
                         .foregroundColor(.purple)
-                        .symbolEffect(.bounce, value: currentStep)
+                        .symbolEffect(.wiggle, value: currentStep)
                     Text(surveyToEdit == nil ? LocalizedStringKey("survey_create_nav_title") : LocalizedStringKey("survey_edit_title"))
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
@@ -374,7 +374,7 @@ struct CreateSurveyView: View {
                     } else {
                         Image(systemName: "sparkles")
                             .font(.system(size: 18))
-                            .symbolEffect(.bounce, options: .repeating)
+                            .symbolEffect(.variableColor.iterative, options: .repeating)
                     }
                     
                     VStack(alignment: .leading, spacing: 2) {
@@ -714,11 +714,11 @@ struct CreateSurveyView: View {
             
             // Final Call to Action
             VStack(spacing: 16) {
-                Image(systemName: "paperplane.circle.fill")
-                    .font(.system(size: 60))
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundColor(.purple)
-                    .symbolEffect(.bounce, options: .repeating)
+                    Image(systemName: "paperplane.circle.fill")
+                        .font(.system(size: 60))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundColor(.purple)
+                        .symbolEffect(.wiggle, options: .repeating)
                 
                 Text(LocalizedStringKey("survey_final_ready_title"))
                     .font(.system(size: 18, weight: .bold))
@@ -831,10 +831,10 @@ struct CreateSurveyView: View {
                     .fill(LinearGradient(colors: [.purple.opacity(0.2), .blue.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing))
                     .frame(width: 80, height: 80)
                 
-                Image(systemName: "doc.text.fill")
-                    .font(.system(size: 32))
-                    .foregroundStyle(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .symbolEffect(.bounce, options: .repeating)
+                    Image(systemName: "doc.text.fill")
+                        .font(.system(size: 32))
+                        .foregroundStyle(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .symbolEffect(.breathe, options: .repeating)
             }
             
             VStack(spacing: 8) {
@@ -1340,7 +1340,7 @@ struct QuestionEditCard: View {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 32))
                         .foregroundColor(.red)
-                        .symbolEffect(.bounce, value: showingDeleteConfirm)
+                        .symbolEffect(.wiggle, value: showingDeleteConfirm)
                     
                     VStack(spacing: 4) {
                         Text(LocalizedStringKey("survey_delete_question_title"))

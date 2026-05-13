@@ -126,61 +126,78 @@ struct AskOpinionHomeView: View {
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 ))
-            
-            HStack {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Topluluğa Sorun")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
-                    
-                    Text("Merak ettiğiniz konuyu sorun, uzmanlar ve liderlerden farklı bakış açıları kazanın.")
-                        .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.7))
-                        .frame(maxWidth: 200, alignment: .leading)
-                    
-                    Button(action: {
-                        showCreateOpinion = true
-                    }) {
-                        HStack {
-                            Text("Yeni Soru Sor")
-                            Image(systemName: "plus.circle")
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Topluluğa Sorun")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Text("Merak ettiğiniz konuyu sorun, uzmanlar ve liderlerden farklı bakış açıları kazanın.")
+                            .font(.system(size: 13))
+                            .foregroundColor(.white.opacity(0.8))
+                            .padding(.trailing, 10)
+                        
+                        Button(action: {
+                            showCreateOpinion = true
+                        }) {
+                            HStack {
+                                Text("Yeni Soru Sor")
+                                Image(systemName: "plus.circle")
+                            }
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 12)
+                            .background(Color(hex: "6D28D9"))
+                            .cornerRadius(14)
                         }
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 12)
-                        .background(Color(hex: "6D28D9")) // Deep Purple
-                        .cornerRadius(14)
+                        .padding(.top, 8)
                     }
-                    .padding(.top, 8)
                     
-                    HStack(spacing: 6) {
-                        Image(systemName: "info.circle")
-                            .font(.system(size: 10))
-                        Text("Sorularınız topluluğumuzda yayınlanır ve ilgili kişiler tarafından yanıtlanır.")
-                            .font(.system(size: 10))
+                    Spacer(minLength: 10)
+                    
+                    // Animated SF Symbols 3D Illustration
+                    ZStack {
+                        Circle()
+                            .fill(Color.purple.opacity(0.15))
+                            .frame(width: 120, height: 120)
+                        
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 40))
+                            .foregroundColor(.yellow.opacity(0.8))
+                            .offset(x: -35, y: -35)
+                            .symbolEffect(.variableColor.iterative.dimInactiveLayers.nonReversing, options: .repeating)
+                        
+                        Image(systemName: "bubble.left.and.bubble.right.fill")
+                            .font(.system(size: 65))
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.purple.opacity(0.9), .blue.opacity(0.6))
+                            .offset(x: 5, y: -10)
+                            .symbolEffect(.breathe, options: .repeating) // iOS 18 Özel
+                        
+                        Image(systemName: "lightbulb.fill")
+                            .font(.system(size: 28))
+                            .foregroundColor(Color(hex: "F59E0B")) // Amber
+                            .offset(x: 35, y: 20)
+                            .symbolEffect(.wiggle, options: .repeating) // iOS 18 Özel
                     }
-                    .foregroundColor(.white.opacity(0.4))
-                    .padding(.top, 4)
+                    .offset(y: -10)
                 }
                 
-                Spacer()
-                
-                // 3D Illustration placeholder
-                ZStack {
-                    Circle()
-                        .fill(Color.purple.opacity(0.1))
-                        .frame(width: 100, height: 100)
-                    Image(systemName: "questionmark.bubble.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.purple.opacity(0.8))
-                        .offset(x: 10, y: -10)
-                    Image(systemName: "person.2.fill")
-                        .font(.system(size: 30))
-                        .foregroundColor(.purple.opacity(0.4))
-                        .offset(x: -20, y: 20)
+                // Bottom Text Box 100% Width
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 12))
+                        .padding(.top, 1)
+                    Text("Sorularınız topluluğumuzda yayınlanır ve ilgili kişiler tarafından yanıtlanır.")
+                        .font(.system(size: 11))
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding(.trailing, 10)
+                .foregroundColor(.white.opacity(0.5))
+                .padding(12)
+                .background(Color.white.opacity(0.05))
+                .cornerRadius(10)
             }
             .padding(24)
         }

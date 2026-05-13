@@ -15,6 +15,10 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
     @Published var categorySearchText: String = ""
     @Published var attachments: [OpinionAttachment] = []
     
+    // Temporary storage for local files before upload
+    var attachmentData: [String: Data] = [:]
+    var attachmentLocalUrls: [String: URL] = [:]
+    
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var isSuccess = false
@@ -59,6 +63,37 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
             let session = try await SupabaseManager.shared.client.auth.session
             let authorId = session.user.id
             
+            // Upload attachments first
+            var finalAttachments = attachments
+            for i in 0..<finalAttachments.count {
+                let attachment = finalAttachments[i]
+                
+                if attachment.type == "image", let data = attachmentData[attachment.id] {
+                    let fileName = "\(UUID().uuidString).jpg"
+                    try await SupabaseManager.shared.client.storage
+                        .from("opinion_attachments")
+                        .upload(fileName, file: data, options: FileOptions(contentType: "image/jpeg"))
+                    
+                    let publicUrl = try SupabaseManager.shared.client.storage
+                        .from("opinion_attachments")
+                        .getPublicURL(path: fileName)
+                    
+                    finalAttachments[i].url = publicUrl.absoluteString
+                    
+                } else if attachment.type == "doc", let data = attachmentData[attachment.id] {
+                    let fileName = "\(UUID().uuidString)_\(attachment.name.replacingOccurrences(of: " ", with: "_"))"
+                    try await SupabaseManager.shared.client.storage
+                        .from("opinion_attachments")
+                        .upload(fileName, file: data, options: FileOptions(contentType: "application/pdf"))
+                    
+                    let publicUrl = try SupabaseManager.shared.client.storage
+                        .from("opinion_attachments")
+                        .getPublicURL(path: fileName)
+                    
+                    finalAttachments[i].url = publicUrl.absoluteString
+                }
+            }
+            
             let newOpinion = Opinion(
                 id: UUID(),
                 authorId: authorId,
@@ -72,7 +107,7 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
                 type: selectedType,
                 targetAudience: selectedTarget,
                 privacyLevel: selectedPrivacy,
-                attachments: attachments,
+                attachments: finalAttachments,
                 viewCount: 0,
                 responseCount: 0,
                 likeCount: 0,
@@ -91,9 +126,11 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
     
     // MARK: - Attachment Management
     
-    func addDocument(name: String, url: String) {
-        let newDoc = OpinionAttachment(name: name, type: "doc", url: url, survey: nil)
+    func addDocument(name: String, data: Data) {
+        let dummyId = UUID().uuidString
+        let newDoc = OpinionAttachment(name: name, type: "doc", url: dummyId, survey: nil)
         attachments.append(newDoc)
+        attachmentData[newDoc.id] = data
     }
     
     func addLink() {
@@ -107,9 +144,11 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
         }
     }
     
-    func addImage(name: String, url: String) {
-        let newImage = OpinionAttachment(name: name, type: "image", url: url, survey: nil)
+    func addImage(name: String, data: Data) {
+        let dummyId = UUID().uuidString
+        let newImage = OpinionAttachment(name: name, type: "image", url: dummyId, survey: nil)
         attachments.append(newImage)
+        attachmentData[newImage.id] = data
     }
     
     func addSurvey() {

@@ -240,7 +240,7 @@ struct SurveysHomeView: View {
                                 Image(systemName: "plus")
                                     .font(.system(size: 24, weight: .bold))
                                     .foregroundColor(.white)
-                                    .symbolEffect(.bounce, options: .repeating, value: showCreateSurvey)
+                                    .symbolEffect(.wiggle, options: .repeating, value: showCreateSurvey)
                             }
                         }
                         .padding(.trailing, 20)
@@ -266,7 +266,7 @@ struct SurveysHomeView: View {
                                 Image(systemName: "trash.fill")
                                     .font(.system(size: 32, weight: .bold))
                                     .foregroundColor(.red)
-                                    .symbolEffect(.bounce, options: .repeating)
+                                    .symbolEffect(.wiggle, options: .repeating)
                             }
                             
                             VStack(spacing: 12) {
