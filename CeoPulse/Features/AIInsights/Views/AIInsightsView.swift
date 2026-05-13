@@ -92,14 +92,12 @@ struct AIInsightsView: View {
                         }
                     }
                     .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
                 }
                 
                 // Multi-Featured Analyses (Top 1)
-                VStack(alignment: .leading, spacing: 24) {
-                    Text("ai_featured_analyses".localized())
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
+                VStack(alignment: .leading, spacing: 16) {
+                    // Removed Featured Analyses title as requested
                     
                     LazyVStack(spacing: 20) {
                         ForEach(viewModel.filteredInsights.prefix(1)) { insight in
