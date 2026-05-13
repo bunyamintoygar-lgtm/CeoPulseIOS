@@ -169,13 +169,14 @@ struct SurveysHomeView: View {
                             }
                         }
                         .padding(.horizontal, 20)
-                        .padding(.vertical, 24)
+                        .padding(.top, 16)
+                        .padding(.bottom, 8)
                     }
                     
                     // Content
                     ScrollView {
                         ScrollViewReader { proxy in
-                            LazyVStack(spacing: 24) {
+                            LazyVStack(spacing: 16) {
                                 // Top Anchor for ScrollViewReader
                                 Color.clear.frame(height: 1).id("topAnchor")
                                 
@@ -657,9 +658,7 @@ struct SurveysHomeView: View {
             let discoverySurveys = viewModel.activeSurveysList.prefix(4)
             if !discoverySurveys.isEmpty {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text(LocalizedStringKey("survey_tab_discovery"))
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
+                    // Removed Discover title as requested
                     
                     // The Hero Card (First one)
                     if let firstSurvey = discoverySurveys.first {
