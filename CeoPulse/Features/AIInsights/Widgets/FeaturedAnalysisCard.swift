@@ -20,7 +20,7 @@ struct FeaturedAnalysisCard: View {
             
             HStack(spacing: 0) {
                 // Left Content (approx 60% width)
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 10) {
                     // Category Badge
                     HStack(spacing: 6) {
                         Image(systemName: "sparkles")
@@ -34,16 +34,16 @@ struct FeaturedAnalysisCard: View {
                     .background(Color.white.opacity(0.1))
                     .cornerRadius(8)
                     
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 6) { // Reduced spacing to fit more text
                         Text(title)
-                            .font(.system(size: 15, weight: .bold))
+                            .font(.system(size: 16, weight: .bold))
                             .foregroundColor(.white)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
                         
                         Text(description)
-                            .font(.system(size: 11))
-                            .foregroundColor(.white.opacity(0.6))
+                            .font(.system(size: 12)) // Slightly larger font for readability
+                            .foregroundColor(.white.opacity(0.7))
                             .lineLimit(2)
                             .lineSpacing(2)
                             .multilineTextAlignment(.leading)
@@ -65,7 +65,7 @@ struct FeaturedAnalysisCard: View {
                         .padding(.top, 4)
                     }
                     
-                    Spacer(minLength: 12)
+                    Spacer(minLength: 8)
                     
                     // Read Button
                     HStack(spacing: 6) {
