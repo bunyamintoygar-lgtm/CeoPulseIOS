@@ -13,7 +13,7 @@ struct MainTabView: View {
                 .tag(0)
                 
                 NavigationView {
-                    NetworkView()
+                    SurveysHomeView()
                 }
                 .tag(1)
                 
@@ -41,7 +41,7 @@ struct MainTabView: View {
                 
                 HStack(alignment: .center) {
                     TabItem(icon: "house.fill", label: "nav_home".localized(), isSelected: selectedTab == 0) { selectedTab = 0 }
-                    TabItem(icon: "person.2.fill", label: "nav_network".localized(), isSelected: selectedTab == 1) { selectedTab = 1 }
+                    TabItem(icon: "chart.bar.fill", label: "Anketler", isSelected: selectedTab == 1) { selectedTab = 1 }
                     TabItem(icon: "bubble.left.and.bubble.right.fill", label: "Ask Opinion", isSelected: selectedTab == 2) { selectedTab = 2 }
                     TabItem(icon: "sparkles", label: "AI Insights", isSelected: selectedTab == 3) { selectedTab = 3 }
                     TabItem(icon: "person.fill", label: "nav_profile".localized(), isSelected: selectedTab == 4) { selectedTab = 4 }
