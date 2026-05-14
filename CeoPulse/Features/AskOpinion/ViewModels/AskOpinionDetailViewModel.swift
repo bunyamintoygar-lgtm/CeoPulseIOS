@@ -28,22 +28,7 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
     }
     
     func loadDummyResponses() {
-        responses = [
-            OpinionResponse(
-                id: UUID(),
-                opinionId: opinion.id,
-                authorId: UUID(),
-                authorName: "Mehmet A.",
-                authorTitle: "Ürün Yöneticisi",
-                authorAvatar: nil,
-                content: "Düzenli ve şeffaf iletişim en kritik nokta. Haftalık ekip buluşmaları, birebir görüşmeler ve açık geri bildirim kültürü ile ekibimizin bağlılığını önemli ölçüde artırdık. Ayrıca, başarıları kutlamayı ihmal etmiyoruz.",
-                likeCount: 12,
-                commentCount: 3,
-                isBestResponse: true,
-                isAnonymous: false,
-                createdAt: Date().addingTimeInterval(-18000)
-            )
-        ]
+        responses = []
     }
     
     @MainActor
