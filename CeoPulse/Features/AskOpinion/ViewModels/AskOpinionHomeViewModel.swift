@@ -1,6 +1,8 @@
 import Foundation
 import SwiftUI
 import Combine
+import Supabase
+import Auth
 
 class AskOpinionHomeViewModel: NSObject, ObservableObject {
     @Published var searchText: String = ""

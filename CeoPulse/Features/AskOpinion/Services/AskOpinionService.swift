@@ -94,12 +94,19 @@ class AskOpinionService {
         // 3. Tab Filter
         if tab == 1, let userId = currentUserId {
             // Answered by me: Questions that have a response from the current user
-            // We use a subquery-like approach via RPC or a specific view if possible, 
-            // but for simplicity here we'll filter using a 'in' query if we can get the IDs, 
-            // or better, a custom RPC. Let's assume we can filter by opinion_responses.
-            // Since Supabase doesn't support complex joins easily in select(), 
-            // we'll filter by asking for opinions where there's a response with author_id
-            request = request.filter("id", operator: .in, value: " (SELECT opinion_id FROM opinion_responses WHERE author_id = '\(userId.uuidString)')")
+            // We fetch the opinion IDs from opinion_responses first
+            let responseData: [OpinionResponseDTO] = try await client
+                .from("opinion_responses")
+                .select("opinion_id")
+                .eq("author_id", value: userId)
+                .execute()
+                .value
+            
+            let ids = Array(Set(responseData.map { $0.opinion_id }))
+            if ids.isEmpty {
+                return []
+            }
+            request = request.in("id", values: ids)
         } else if tab == 2, let userId = currentUserId {
             // My Questions: Questions created by the current user
             request = request.eq("author_id", value: userId)
@@ -256,6 +263,7 @@ class AskOpinionService {
             commentCount: saved.comment_count ?? 0,
             isBestResponse: saved.is_best_response ?? false,
             isAnonymous: saved.is_anonymous ?? false,
+            attachments: saved.attachments ?? [],
             createdAt: saved.created_at ?? Date()
         )
     }
