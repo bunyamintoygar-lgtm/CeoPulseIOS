@@ -117,22 +117,27 @@ struct AskOpinionHomeView: View {
                     .cornerRadius(12)
                     
                     Button(action: { isFilterSheetPresented = true }) {
-                        Image(systemName: viewModel.selectedCategory == nil ? "line.3.horizontal.decrease" : "line.3.horizontal.decrease.circle.fill")
+                        let selectedCategory = ConfigManager.shared.opinionCategories.first(where: { $0.id == viewModel.selectedCategory })
+                        Image(systemName: selectedCategory?.icon ?? (viewModel.selectedCategory == nil ? "line.3.horizontal.decrease" : "line.3.horizontal.decrease.circle.fill"))
                             .foregroundColor(viewModel.selectedCategory == nil ? .white : .purple)
                             .font(.system(size: 18))
                             .padding(10)
                             .background(Circle().fill(Color.white.opacity(0.1)))
                     }
                     
-                    Button("Vazgeç") {
+                    Button(action: {
                         withAnimation {
                             isSearchExpanded = false
                             isSearchFocused = false
                             viewModel.searchText = ""
                         }
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(Circle().fill(Color.white.opacity(0.1)))
                     }
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.purple)
                 }
                 .transition(.move(edge: .trailing).combined(with: .opacity))
             } else {
