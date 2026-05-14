@@ -104,16 +104,22 @@ struct AskOpinionDetailView: View {
                         .foregroundColor(AppColors.textSecondary)
                 }
                 
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("Açık")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.green)
-                    Text("Yanıtlanmaya devam ediyor")
-                        .font(.system(size: 10))
-                        .foregroundColor(AppColors.textSecondary)
+                HStack(spacing: 16) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "eye")
+                        Text("\(viewModel.opinion.viewCount)")
+                    }
+                    HStack(spacing: 6) {
+                        Image(systemName: "bubble.left")
+                        Text("\(viewModel.opinion.responseCount)")
+                    }
                 }
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.white.opacity(0.8))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.white.opacity(0.05))
+                .cornerRadius(10)
             }
             .padding(.top, 8)
             
@@ -129,12 +135,6 @@ struct AskOpinionDetailView: View {
                     .lineSpacing(4)
             }
             
-            // Stats
-            HStack {
-                statItem(icon: "eye", value: "\(viewModel.opinion.viewCount)", label: "Görüntüleme")
-                statItem(icon: "bubble.left", value: "\(viewModel.opinion.responseCount)", label: "Yanıt")
-            }
-            .padding(.vertical, 8)
             
             // Info Banner
             HStack(spacing: 12) {
@@ -150,22 +150,6 @@ struct AskOpinionDetailView: View {
             .cornerRadius(12)
         }
         .padding(.horizontal, 20)
-    }
-    
-    private func statItem(icon: String, value: String, label: String) -> some View {
-        VStack(spacing: 4) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 14))
-                Text(value)
-                    .font(.system(size: 14, weight: .bold))
-            }
-            .foregroundColor(.white)
-            
-            Text(label)
-                .font(.system(size: 10))
-                .foregroundColor(AppColors.textSecondary)
-        }
     }
     
     private var attachmentsSection: some View {
