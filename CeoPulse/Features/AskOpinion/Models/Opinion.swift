@@ -8,15 +8,15 @@ struct Opinion: Identifiable {
     let authorAvatar: String?
     let title: String
     let description: String
-    let status: OpinionStatus
+    var status: OpinionStatus
     let category: String
     let type: Int
     let targetAudience: Int
     let privacyLevel: Int
     let attachments: [OpinionAttachment]
-    let viewCount: Int
-    let responseCount: Int
-    let likeCount: Int
+    var viewCount: Int
+    var responseCount: Int
+    var likeCount: Int
     let createdAt: Date
 }
 
