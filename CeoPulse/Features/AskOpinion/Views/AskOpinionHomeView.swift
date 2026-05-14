@@ -85,7 +85,6 @@ struct AskOpinionHomeView: View {
                         
                         footerSection
                     }
-                    .padding(.top, 10)
                 }
                 .coordinateSpace(name: "scroll")
                 .refreshable {
@@ -184,7 +183,8 @@ struct AskOpinionHomeView: View {
             }
         }
         .padding(.horizontal, 20)
-        .padding(.vertical, 16)
+        .padding(.top, 16)
+        .padding(.bottom, 4)
     }
     
     private var heroSection: some View {
