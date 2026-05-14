@@ -42,7 +42,7 @@ struct AskOpinionHomeView: View {
                                 ProgressView()
                                     .tint(.purple)
                                     .scaleEffect(1.5)
-                                Text("Sorular yükleniyor...")
+                                Text("ao_loading_questions".localized())
                                     .font(.system(size: 14))
                                     .foregroundColor(.gray)
                                     .padding(.top, 10)
@@ -57,7 +57,7 @@ struct AskOpinionHomeView: View {
                                     .foregroundColor(.orange)
                                 Text(error)
                                     .foregroundColor(.white)
-                                Button("Tekrar Dene") {
+                                Button("Tekrar Dene") { // Assuming Tekrar Dene is okay or maybe common_retry
                                     Task { await viewModel.refreshOpinions() }
                                 }
                                 .padding(.horizontal, 20)
@@ -72,7 +72,7 @@ struct AskOpinionHomeView: View {
                                 Image(systemName: "doc.text.magnifyingglass")
                                     .font(.system(size: 40))
                                     .foregroundColor(.gray)
-                                Text(viewModel.searchText.isEmpty ? "Henüz hiç soru sorulmamış." : "Aramanızla eşleşen soru bulunamadı.")
+                                Text(viewModel.searchText.isEmpty ? "ao_no_questions".localized() : "ao_no_search_results".localized())
                                     .foregroundColor(.gray)
                                     .multilineTextAlignment(.center)
                             }
@@ -115,7 +115,7 @@ struct AskOpinionHomeView: View {
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
-                        TextField("Sorularda ara...", text: $viewModel.searchText)
+                        TextField("ao_search_placeholder".localized(), text: $viewModel.searchText)
                             .foregroundColor(.white)
                             .font(.system(size: 14))
                             .focused($isSearchFocused)
@@ -229,11 +229,11 @@ struct AskOpinionHomeView: View {
                 
                 // Text content
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Topluluğa Sorun")
+                    Text("ao_ask_community".localized())
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
                     
-                    Text("Merak ettiğiniz konuyu sorun.")
+                    Text("ao_ask_community_desc_compact".localized())
                         .font(.system(size: 13))
                         .foregroundColor(.white.opacity(0.6))
                 }
@@ -242,7 +242,7 @@ struct AskOpinionHomeView: View {
                 
                 // Compact Action Button
                 HStack(spacing: 6) {
-                    Text("Soru Sor")
+                    Text("ao_ask_button".localized())
                         .font(.system(size: 14, weight: .bold))
                     Image(systemName: "plus.circle")
                         .font(.system(size: 16))
@@ -287,11 +287,11 @@ struct AskOpinionHomeView: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Topluluğa Sorun")
+                        Text("ao_ask_community".localized())
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.white)
                         
-                        Text("Merak ettiğiniz konuyu sorun, uzmanlar ve liderlerden farklı bakış açıları kazanın.")
+                        Text("ao_ask_community_desc".localized())
                             .font(.system(size: 13))
                             .foregroundColor(.white.opacity(0.8))
                             .padding(.trailing, 10)
@@ -300,7 +300,7 @@ struct AskOpinionHomeView: View {
                             showCreateOpinion = true
                         }) {
                             HStack {
-                                Text("Yeni Soru Sor")
+                                Text("ao_ask_button_new".localized())
                                 Image(systemName: "plus.circle")
                             }
                             .font(.system(size: 14, weight: .bold))
@@ -348,7 +348,7 @@ struct AskOpinionHomeView: View {
                     Image(systemName: "info.circle")
                         .font(.system(size: 12))
                         .padding(.top, 1)
-                    Text("Burada yer alan görüş ve yanıtlar yatırım tavsiyesi niteliğinde değildir, sadece bilgi amaçlıdır.")
+                    Text("ao_disclaimer".localized())
                         .font(.system(size: 11))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -364,9 +364,9 @@ struct AskOpinionHomeView: View {
     
     private var tabSection: some View {
         HStack(spacing: 0) {
-            tabButton(title: "Tüm Sorular", index: 0)
-            tabButton(title: "Yanıtladıklarım", index: 1)
-            tabButton(title: "Sorularım", index: 2)
+            tabButton(title: "ao_tab_all".localized(), index: 0)
+            tabButton(title: "ao_tab_answered".localized(), index: 1)
+            tabButton(title: "ao_tab_my_questions".localized(), index: 2)
         }
         .padding(4)
         .background(Color.white.opacity(0.05))
@@ -405,7 +405,7 @@ struct AskOpinionHomeView: View {
                                 Image(systemName: "square.grid.2x2.fill")
                                     .foregroundColor(.purple)
                                     .frame(width: 30)
-                                Text("Tüm Kategoriler")
+                                Text("ao_all_categories".localized())
                                     .foregroundColor(.white)
                                 Spacer()
                                 if viewModel.selectedCategory == nil {
@@ -449,11 +449,11 @@ struct AskOpinionHomeView: View {
                     .padding(20)
                 }
             }
-            .navigationTitle("Kategori Seçin")
+            .navigationTitle("ao_select_category".localized())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Kapat") { isFilterSheetPresented = false }
+                    Button("common_close".localized()) { isFilterSheetPresented = false }
                         .foregroundColor(.purple)
                 }
             }
@@ -492,10 +492,10 @@ struct AskOpinionHomeView: View {
             }
             
             VStack(alignment: .leading, spacing: 2) {
-                Text("Kaliteli ve yapıcı yanıtlar vererek topluluğa katkıda bulunun.")
+                Text("ao_footer_title".localized())
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.white)
-                Text("Katkılarınız profilinizde öne çıkar.")
+                Text("ao_footer_subtitle".localized())
                     .font(.system(size: 11))
                     .foregroundColor(AppColors.textSecondary)
             }

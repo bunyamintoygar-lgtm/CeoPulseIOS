@@ -93,7 +93,7 @@ struct AskOpinionView: View {
                                 ProgressView()
                                     .tint(.white)
                             } else {
-                                Text(viewModel.currentStep == 4 ? "Yayınla" : "continue".localized())
+                                Text(viewModel.currentStep == 4 ? "common_publish".localized() : "continue".localized())
                                     .font(.system(size: 16, weight: .bold))
                                 Image(systemName: viewModel.currentStep == 4 ? "checkmark.circle.fill" : "arrow.right")
                             }
@@ -125,7 +125,7 @@ struct AskOpinionView: View {
         .onChange(of: selectedItem) { oldValue, newValue in
             Task {
                 if let data = try? await newValue?.loadTransferable(type: Data.self) {
-                    viewModel.addImage(name: "Eklenen Görsel", data: data)
+                    viewModel.addImage(name: "common_added_image".localized(), data: data)
                 }
             }
         }
@@ -239,7 +239,7 @@ struct AskOpinionView: View {
             
             if !viewModel.attachments.isEmpty {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Eklenen Öğeler")
+                    Text("common_added_items".localized())
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(AppColors.textSecondary)
                     
@@ -510,11 +510,11 @@ struct PremiumSurveyEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("1. Soru (Zorunlu)")
+                Text("ao_survey_step_question_required".localized())
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.white)
                 
-                TextField("Anket Sorusu...", text: Binding(
+                TextField("ao_survey_question_placeholder".localized(), text: Binding(
                     get: { survey.question },
                     set: { newQuestion in
                         if let index = viewModel.attachments.firstIndex(where: { $0.id == attachmentId }) {
@@ -530,12 +530,12 @@ struct PremiumSurveyEditor: View {
             
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text("Yanıt Seçenekleri")
+                    Text("ao_survey_options_label".localized())
                         .font(.system(size: 11))
                         .foregroundColor(AppColors.textSecondary)
                     Spacer()
                     Button(action: { viewModel.addSurveyOption(attachmentId: attachmentId) }) {
-                        Text("Seçenek Ekle")
+                        Text("common_add_option".localized())
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.purple)
                             .padding(.horizontal, 10)
@@ -551,7 +551,7 @@ struct PremiumSurveyEditor: View {
                             .stroke(Color.white.opacity(0.2), lineWidth: 1.5)
                             .frame(width: 18, height: 18)
                         
-                        TextField("Seçenek \(optIndex + 1)", text: Binding(
+                        TextField(String(format: "common_option_n".localized(), optIndex + 1), text: Binding(
                             get: { survey.options[optIndex] },
                             set: { viewModel.updateSurveyOption(attachmentId: attachmentId, optionIndex: optIndex, text: $0) }
                         ))
@@ -585,7 +585,7 @@ struct PremiumSurveyEditor: View {
                     get: { survey.allowMultiple },
                     set: { _ in viewModel.toggleSurveyMultiple(attachmentId: attachmentId) }
                 )) {
-                    Text("Çoklu yanıt verilebilir")
+                    Text("ao_survey_allow_multiple".localized())
                         .font(.system(size: 12))
                         .foregroundColor(AppColors.textSecondary)
                 }
@@ -595,7 +595,7 @@ struct PremiumSurveyEditor: View {
                     get: { survey.isRequired },
                     set: { _ in viewModel.toggleSurveyRequired(attachmentId: attachmentId) }
                 )) {
-                    Text("Zorunlu soru")
+                    Text("common_required_question".localized())
                         .font(.system(size: 12))
                         .foregroundColor(AppColors.textSecondary)
                 }
@@ -615,7 +615,7 @@ struct LinkEditor: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Web Bağlantısı")
+            Text("common_web_link".localized())
                 .font(.system(size: 11))
                 .foregroundColor(AppColors.textSecondary)
             

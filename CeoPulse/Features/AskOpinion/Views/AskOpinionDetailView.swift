@@ -186,7 +186,7 @@ struct AskOpinionDetailView: View {
                     Text(attachment.name)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.white)
-                    Text("Dosya")
+                    Text("common_file".localized())
                         .font(.system(size: 11))
                         .foregroundColor(AppColors.textSecondary)
                 }
@@ -242,7 +242,7 @@ struct AskOpinionDetailView: View {
                 Image(systemName: "chart.bar.fill")
                     .foregroundColor(.purple)
                     .font(.system(size: 14))
-                Text("Anket")
+                Text("common_survey".localized())
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.purple)
                 Spacer()
@@ -272,7 +272,7 @@ struct AskOpinionDetailView: View {
                 }
                 
                 if survey.allowMultiple {
-                    Text("* Birden fazla seçim yapabilirsiniz")
+                    Text("ao_survey_multiple_choice_hint".localized())
                         .font(.system(size: 10))
                         .foregroundColor(AppColors.textSecondary)
                 }
@@ -287,7 +287,7 @@ struct AskOpinionDetailView: View {
     private var responseInputSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text(viewModel.editingResponseId == nil ? "Yanıtınızı Paylaşın" : "Yanıtı Düzenle")
+                Text(viewModel.editingResponseId == nil ? "ao_share_your_response".localized() : "ao_edit_response".localized())
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(viewModel.editingResponseId == nil ? .white : .purple)
                 
@@ -295,7 +295,7 @@ struct AskOpinionDetailView: View {
                 
                 if viewModel.editingResponseId == nil {
                     HStack(spacing: 8) {
-                        Text("Gizli Yanıt")
+                        Text("ao_anonymous_response".localized())
                             .font(.system(size: 11))
                             .foregroundColor(AppColors.textSecondary)
                         Toggle("", isOn: $viewModel.isAnonymous)
@@ -308,7 +308,7 @@ struct AskOpinionDetailView: View {
             VStack(spacing: 0) {
                 ZStack(alignment: .topLeading) {
                     if viewModel.newResponseText.isEmpty {
-                        Text("Görüşünüzü buraya yazın...")
+                        Text("ao_response_placeholder".localized())
                             .foregroundColor(.white.opacity(0.3))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 16)
@@ -353,7 +353,7 @@ struct AskOpinionDetailView: View {
                     Button(action: { isFileImporterPresented = true }) {
                         HStack(spacing: 6) {
                             Image(systemName: "paperclip")
-                            Text("Dosya Ekle")
+                            Text("common_add_file".localized())
                         }
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.purple)
@@ -367,7 +367,7 @@ struct AskOpinionDetailView: View {
                     
                     if viewModel.editingResponseId != nil {
                         Button(action: { viewModel.cancelEditing() }) {
-                            Text("Vazgeç")
+                            Text("common_cancel".localized())
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.white.opacity(0.6))
                                 .padding(.horizontal, 16)
@@ -383,7 +383,7 @@ struct AskOpinionDetailView: View {
                         if viewModel.isLoading {
                             ProgressView().tint(.white)
                         } else {
-                            Text(viewModel.editingResponseId == nil ? "Yanıtla" : "Kaydet")
+                            Text(viewModel.editingResponseId == nil ? "ao_reply".localized() : "common_save".localized())
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 24)
@@ -421,7 +421,7 @@ struct AskOpinionDetailView: View {
     private var responsesListSection: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
-                Text("Mevcut Yanıtlar (\(viewModel.responses.count))")
+                Text(String(format: "ao_existing_responses_count".localized(), viewModel.responses.count))
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(.white)
                 
@@ -432,7 +432,7 @@ struct AskOpinionDetailView: View {
                         ForEach(ResponseSortOption.allCases, id: \.self) { option in
                             Button(action: { viewModel.sortOption = option }) {
                                 HStack {
-                                    Text(option.rawValue)
+                                    Text(option.displayTitle)
                                     if viewModel.sortOption == option {
                                         Image(systemName: "checkmark")
                                     }
@@ -441,7 +441,7 @@ struct AskOpinionDetailView: View {
                         }
                     } label: {
                         HStack(spacing: 4) {
-                            Text(viewModel.sortOption.rawValue)
+                            Text(viewModel.sortOption.displayTitle)
                             Image(systemName: "chevron.down")
                         }
                         .font(.system(size: 12, weight: .bold))
@@ -499,10 +499,10 @@ struct ResponseCard: View {
                         )
                     
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Gizli Kullanıcı")
+                        Text("common_anonymous_user".localized())
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(.white)
-                        Text("CEO Pulse Üyesi")
+                        Text("common_ceo_pulse_member".localized())
                             .font(.system(size: 11))
                             .foregroundColor(AppColors.textSecondary)
                     }
@@ -529,7 +529,7 @@ struct ResponseCard: View {
                 Spacer()
                 
                 if response.isBestResponse {
-                    Text("En Beğenilen Yanıt")
+                    Text("ao_best_response".localized())
                         .font(.system(size: 9, weight: .bold))
                         .foregroundColor(.green)
                         .padding(.horizontal, 8)
@@ -541,13 +541,13 @@ struct ResponseCard: View {
                 if response.authorId == currentUserId {
                     if isConfirmingDelete {
                         HStack(spacing: 10) {
-                            Text("Emin misiniz?")
+                            Text("common_are_you_sure".localized())
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(.red)
                             
                             HStack(spacing: 8) {
                                 Button(action: onDelete) {
-                                    Text("Evet")
+                                    Text("common_yes".localized())
                                         .font(.system(size: 11, weight: .bold))
                                         .foregroundColor(.white)
                                         .padding(.horizontal, 10)
@@ -561,7 +561,7 @@ struct ResponseCard: View {
                                         isConfirmingDelete = false 
                                     }
                                 }) {
-                                    Text("Hayır")
+                                    Text("common_no".localized())
                                         .font(.system(size: 11, weight: .bold))
                                         .foregroundColor(.white)
                                         .padding(.horizontal, 10)
@@ -632,7 +632,7 @@ struct ResponseCard: View {
                 Button(action: onLike) {
                     HStack(spacing: 6) {
                         Image(systemName: response.isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
-                        Text(response.isLiked ? "Beğendin" : "Beğen")
+                        Text(response.isLiked ? "ao_liked".localized() : "ao_like".localized())
                     }
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(response.isLiked ? .purple : .white)

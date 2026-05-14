@@ -520,4 +520,69 @@
 "survey_setting_end_label" = "Bitiş";
 "survey_setting_start_now" = "Hemen";
 "survey_setting_auto_close_desc" = "Bitiş tarihi geldiğinde anket otomatik olarak kapanır.";
-"button_done" = "Tamam";
+// Common/Shared
+"common_close" = "Kapat";
+"common_file" = "Dosya";
+"common_survey" = "Anket";
+"common_add_file" = "Dosya Ekle";
+"common_cancel" = "Vazgeç";
+"common_save" = "Kaydet";
+"common_publish" = "Yayınla";
+"common_anonymous_user" = "Gizli Kullanıcı";
+"common_ceo_pulse_member" = "CEO Pulse Üyesi";
+"common_are_you_sure" = "Emin misiniz?";
+"common_yes" = "Evet";
+"common_no" = "Hayır";
+"common_added_image" = "Eklenen Görsel";
+"common_added_items" = "Eklenen Öğeler";
+"common_add_option" = "Seçenek Ekle";
+"common_option_n" = "Seçenek %d";
+"common_required_question" = "Zorunlu soru";
+"common_web_link" = "Web Bağlantısı";
+"common_error_with_desc" = "Hata: %@";
+
+// Ask Opinion Home
+"ao_loading_questions" = "Sorular yükleniyor...";
+"ao_no_questions" = "Henüz hiç soru sorulmamış.";
+"ao_no_search_results" = "Aramanızla eşleşen soru bulunamadı.";
+"ao_search_placeholder" = "Sorularda ara...";
+"ao_ask_community" = "Topluluğa Sorun";
+"ao_ask_community_desc_compact" = "Merak ettiğiniz konuyu sorun.";
+"ao_ask_community_desc" = "Merak ettiğiniz konuyu sorun, uzmanlar ve liderlerden farklı bakış açıları kazanın.";
+"ao_ask_button" = "Soru Sor";
+"ao_ask_button_new" = "Yeni Soru Sor";
+"ao_disclaimer" = "Burada yer alan görüş ve yanıtlar yatırım tavsiyesi niteliğinde değildir, sadece bilgi amaçlıdır.";
+"ao_tab_all" = "Tüm Sorular";
+"ao_tab_answered" = "Yanıtladıklarım";
+"ao_tab_my_questions" = "Sorularım";
+"ao_all_categories" = "Tüm Kategoriler";
+"ao_select_category" = "Kategori Seçin";
+"ao_footer_title" = "Kaliteli ve yapıcı yanıtlar vererek topluluğa katkıda bulunun.";
+"ao_footer_subtitle" = "Katkılarınız profilinizde öne çıkar.";
+
+// Ask Opinion Detail & Responses
+"ao_survey_multiple_choice_hint" = "* Birden fazla seçim yapabilirsiniz";
+"ao_share_your_response" = "Yanıtınızı Paylaşın";
+"ao_edit_response" = "Yanıtı Düzenle";
+"ao_anonymous_response" = "Gizli Yanıt";
+"ao_response_placeholder" = "Görüşünüzü buraya yazın...";
+"ao_reply" = "Yanıtla";
+"ao_existing_responses_count" = "Mevcut Yanıtlar (%d)";
+"ao_best_response" = "En Beğenilen Yanıt";
+"ao_liked" = "Beğendin";
+"ao_like" = "Beğen";
+"ao_view_results" = "Sonuçları Gör";
+
+// Ask Opinion Create
+"ao_survey_step_question_required" = "1. Soru (Zorunlu)";
+"ao_survey_question_placeholder" = "Anket Sorusu...";
+"ao_survey_options_label" = "Yanıt Seçenekleri";
+"ao_survey_allow_multiple" = "Çoklu yanıt verilebilir";
+"ao_error_missing_fields" = "Lütfen başlık ve açıklama alanlarını doldurun.";
+
+// Ask Opinion Status & Sort
+"ao_status_open" = "Açık";
+"ao_status_answered" = "Yanıtlandı";
+"ao_status_closed" = "Kapandı";
+"ao_sort_top_liked" = "En Beğenilen";
+"ao_sort_newest" = "En Son Yanıtlar";

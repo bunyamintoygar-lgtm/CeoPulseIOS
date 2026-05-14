@@ -59,9 +59,9 @@ enum OpinionStatus: String, Codable {
     
     var title: String {
         switch self {
-        case .open: return "Açık"
-        case .answered: return "Yanıtlandı"
-        case .closed: return "Kapandı"
+        case .open: return "ao_status_open".localized()
+        case .answered: return "ao_status_answered".localized()
+        case .closed: return "ao_status_closed".localized()
         }
     }
 }

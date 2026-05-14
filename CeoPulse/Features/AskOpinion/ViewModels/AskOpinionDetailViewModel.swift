@@ -5,8 +5,15 @@ import Supabase
 import Auth
 
 enum ResponseSortOption: String, CaseIterable {
-    case topLiked = "En Beğenilen"
-    case newest = "En Son Yanıtlar"
+    case topLiked = "topLiked"
+    case newest = "newest"
+    
+    var displayTitle: String {
+        switch self {
+        case .topLiked: return "ao_sort_top_liked".localized()
+        case .newest: return "ao_sort_newest".localized()
+        }
+    }
 }
 
 class AskOpinionDetailViewModel: NSObject, ObservableObject {

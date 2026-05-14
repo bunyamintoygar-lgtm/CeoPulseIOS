@@ -52,7 +52,7 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
     @MainActor
     func publishOpinion() async {
         guard !title.isEmpty && !opinionDescription.isEmpty else {
-            errorMessage = "Lütfen başlık ve açıklama alanlarını doldurun."
+            errorMessage = "ao_error_missing_fields".localized()
             return
         }
         
@@ -119,7 +119,7 @@ class CreateOpinionViewModel: NSObject, ObservableObject {
             isLoading = false
         } catch {
             print("Error publishing opinion: \(error)")
-            errorMessage = "Hata: \(String(describing: error))"
+            errorMessage = String(format: "common_error_with_desc".localized(), error.localizedDescription)
             isLoading = false
         }
     }

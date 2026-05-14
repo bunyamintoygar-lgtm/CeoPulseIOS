@@ -83,7 +83,7 @@ struct OpinionCard: View {
                     
                     if opinion.status == .open {
                         HStack(spacing: 4) {
-                            Text("Yanıtla")
+                            Text("ao_reply".localized())
                             Image(systemName: "chevron.right")
                         }
                         .font(.system(size: 12, weight: .bold))
@@ -94,7 +94,7 @@ struct OpinionCard: View {
                         .cornerRadius(12)
                     } else {
                         HStack(spacing: 4) {
-                            Text("Sonuçları Gör")
+                            Text("ao_view_results".localized())
                             Image(systemName: "chart.bar.fill")
                         }
                         .font(.system(size: 12, weight: .bold))

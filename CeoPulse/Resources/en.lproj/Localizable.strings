@@ -526,4 +526,69 @@
 "survey_setting_end_label" = "End";
 "survey_setting_start_now" = "Immediately";
 "survey_setting_auto_close_desc" = "The survey will automatically close when the end date is reached.";
-"button_done" = "Done";
+// Common/Shared
+"common_close" = "Close";
+"common_file" = "File";
+"common_survey" = "Survey";
+"common_add_file" = "Add File";
+"common_cancel" = "Cancel";
+"common_save" = "Save";
+"common_publish" = "Publish";
+"common_anonymous_user" = "Anonymous User";
+"common_ceo_pulse_member" = "CEO Pulse Member";
+"common_are_you_sure" = "Are you sure?";
+"common_yes" = "Yes";
+"common_no" = "No";
+"common_added_image" = "Added Image";
+"common_added_items" = "Added Items";
+"common_add_option" = "Add Option";
+"common_option_n" = "Option %d";
+"common_required_question" = "Required question";
+"common_web_link" = "Web Link";
+"common_error_with_desc" = "Error: %@";
+
+// Ask Opinion Home
+"ao_loading_questions" = "Loading questions...";
+"ao_no_questions" = "No questions asked yet.";
+"ao_no_search_results" = "No questions matching your search found.";
+"ao_search_placeholder" = "Search questions...";
+"ao_ask_community" = "Ask the Community";
+"ao_ask_community_desc_compact" = "Ask what you're curious about.";
+"ao_ask_community_desc" = "Ask what you're curious about, gain different perspectives from experts and leaders.";
+"ao_ask_button" = "Ask a Question";
+"ao_ask_button_new" = "Ask New Question";
+"ao_disclaimer" = "The views and responses here are not investment advice and are for informational purposes only.";
+"ao_tab_all" = "All Questions";
+"ao_tab_answered" = "Answered by Me";
+"ao_tab_my_questions" = "My Questions";
+"ao_all_categories" = "All Categories";
+"ao_select_category" = "Select Category";
+"ao_footer_title" = "Contribute to the community by providing quality and constructive responses.";
+"ao_footer_subtitle" = "Your contributions will be featured on your profile.";
+
+// Ask Opinion Detail & Responses
+"ao_survey_multiple_choice_hint" = "* You can choose multiple options";
+"ao_share_your_response" = "Share Your Response";
+"ao_edit_response" = "Edit Response";
+"ao_anonymous_response" = "Anonymous Response";
+"ao_response_placeholder" = "Write your opinion here...";
+"ao_reply" = "Reply";
+"ao_existing_responses_count" = "Existing Responses (%d)";
+"ao_best_response" = "Best Response";
+"ao_liked" = "Liked";
+"ao_like" = "Like";
+"ao_view_results" = "View Results";
+
+// Ask Opinion Create
+"ao_survey_step_question_required" = "1. Question (Required)";
+"ao_survey_question_placeholder" = "Survey Question...";
+"ao_survey_options_label" = "Response Options";
+"ao_survey_allow_multiple" = "Allow multiple choices";
+"ao_error_missing_fields" = "Please fill in the title and description fields.";
+
+// Ask Opinion Status & Sort
+"ao_status_open" = "Open";
+"ao_status_answered" = "Answered";
+"ao_status_closed" = "Closed";
+"ao_sort_top_liked" = "Top Liked";
+"ao_sort_newest" = "Newest";
