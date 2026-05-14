@@ -136,29 +136,12 @@ struct AskOpinionDetailView: View {
             }
             
             
-            // Info Banner
-            HStack(spacing: 12) {
-                Image(systemName: "info.circle")
-                    .foregroundColor(.purple)
-                Text("Görüşleriniz topluluğumuzda yayınlanır ve ilgili kişiler tarafından görülebilir.")
-                    .font(.system(size: 11))
-                    .foregroundColor(.white.opacity(0.7))
-            }
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.purple.opacity(0.1))
-            .cornerRadius(12)
         }
         .padding(.horizontal, 20)
     }
     
     private var attachmentsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Ekler")
-                .font(.system(size: 15, weight: .bold))
-                .foregroundColor(.white)
-            
-            VStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 12) {
                 ForEach(viewModel.opinion.attachments) { attachment in
                     attachmentView(for: attachment)
                 }
