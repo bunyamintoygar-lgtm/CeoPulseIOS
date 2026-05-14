@@ -7,6 +7,7 @@ struct AskOpinionHomeView: View {
     @State private var isFilterSheetPresented = false
     @State private var isSearchExpanded = false
     @FocusState private var isSearchFocused: Bool
+    @AppStorage("isAskOpinionHeroCompact") var isHeroCompact: Bool = false
     
     var body: some View {
         ZStack {
@@ -17,6 +18,20 @@ struct AskOpinionHomeView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
+                        // Scroll Tracker
+                        GeometryReader { proxy in
+                            let offset = proxy.frame(in: .named("scroll")).minY
+                            Color.clear
+                                .onChange(of: offset) { newValue in
+                                    if !isHeroCompact && newValue < -80 {
+                                        withAnimation(.spring()) {
+                                            isHeroCompact = true
+                                        }
+                                    }
+                                }
+                        }
+                        .frame(height: 0)
+                        
                         heroSection
                         
                         tabSection
@@ -72,6 +87,7 @@ struct AskOpinionHomeView: View {
                     }
                     .padding(.top, 10)
                 }
+                .coordinateSpace(name: "scroll")
                 .refreshable {
                     await viewModel.refreshOpinions()
                 }
@@ -172,6 +188,17 @@ struct AskOpinionHomeView: View {
     }
     
     private var heroSection: some View {
+        Group {
+            if isHeroCompact {
+                compactHeroSection
+            } else {
+                largeHeroSection
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    private var compactHeroSection: some View {
         Button(action: { showCreateOpinion = true }) {
             HStack(spacing: 16) {
                 // Icon
@@ -231,8 +258,94 @@ struct AskOpinionHomeView: View {
             )
         }
         .buttonStyle(PlainButtonStyle())
-        .padding(.horizontal, 20)
-        .padding(.top, 4)
+        .transition(.asymmetric(insertion: .move(edge: .top).combined(with: .opacity), removal: .opacity))
+    }
+    
+    private var largeHeroSection: some View {
+        ZStack(alignment: .leading) {
+            // Background Gradient
+            RoundedRectangle(cornerRadius: 24)
+                .fill(LinearGradient(
+                    colors: [Color(hex: "2A1B54"), Color(hex: "120C28")],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ))
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Topluluğa Sorun")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Text("Merak ettiğiniz konuyu sorun, uzmanlar ve liderlerden farklı bakış açıları kazanın.")
+                            .font(.system(size: 13))
+                            .foregroundColor(.white.opacity(0.8))
+                            .padding(.trailing, 10)
+                        
+                        Button(action: {
+                            showCreateOpinion = true
+                        }) {
+                            HStack {
+                                Text("Yeni Soru Sor")
+                                Image(systemName: "plus.circle")
+                            }
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 12)
+                            .background(Color(hex: "6D28D9"))
+                            .cornerRadius(14)
+                        }
+                        .padding(.top, 8)
+                    }
+                    
+                    Spacer(minLength: 10)
+                    
+                    // Animated SF Symbols 3D Illustration
+                    ZStack {
+                        Circle()
+                            .fill(Color.purple.opacity(0.15))
+                            .frame(width: 120, height: 120)
+                        
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 40))
+                            .foregroundColor(.yellow.opacity(0.8))
+                            .offset(x: -35, y: -35)
+                            .symbolEffect(.variableColor.iterative.dimInactiveLayers.nonReversing, options: .repeating)
+                        
+                        Image(systemName: "bubble.left.and.bubble.right.fill")
+                            .font(.system(size: 65))
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.purple.opacity(0.9), .blue.opacity(0.6))
+                            .offset(x: 5, y: -10)
+                            .symbolEffect(.breathe, options: .repeating) // iOS 18 Özel
+                        
+                        Image(systemName: "lightbulb.fill")
+                            .font(.system(size: 28))
+                            .foregroundColor(Color(hex: "F59E0B")) // Amber
+                            .offset(x: 35, y: 20)
+                            .symbolEffect(.wiggle, options: .repeating) // iOS 18 Özel
+                    }
+                    .offset(y: -10)
+                }
+                
+                // Bottom Text Box 100% Width
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 12))
+                        .padding(.top, 1)
+                    Text("Burada yer alan görüş ve yanıtlar yatırım tavsiyesi niteliğinde değildir, sadece bilgi amaçlıdır.")
+                        .font(.system(size: 11))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .foregroundColor(.white.opacity(0.5))
+                .padding(12)
+                .background(Color.white.opacity(0.05))
+                .cornerRadius(10)
+            }
+            .padding(24)
+        }
+        .transition(.opacity)
     }
     
     private var tabSection: some View {
