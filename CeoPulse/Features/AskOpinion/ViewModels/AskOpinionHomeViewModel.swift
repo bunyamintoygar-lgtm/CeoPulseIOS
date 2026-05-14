@@ -36,9 +36,20 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
     }
     
     private func setupSearchObserver() {
+        // Search text observer
         $searchText
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .removeDuplicates()
+            .sink { [weak self] _ in
+                Task {
+                    await self?.refreshOpinions()
+                }
+            }
+            .store(in: &cancellables)
+            
+        // Tab change observer
+        $selectedTab
+            .dropFirst()
             .sink { [weak self] _ in
                 Task {
                     await self?.refreshOpinions()
@@ -55,7 +66,15 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
         errorMessage = nil
         
         do {
-            opinions = try await service.fetchOpinions(page: currentPage, pageSize: pageSize, query: searchText, categoryId: selectedCategory)
+            let currentUserId = SupabaseManager.shared.client.auth.currentSession?.user.id
+            opinions = try await service.fetchOpinions(
+                page: currentPage, 
+                pageSize: pageSize, 
+                query: searchText, 
+                categoryId: selectedCategory,
+                tab: selectedTab,
+                currentUserId: currentUserId
+            )
             if opinions.count < pageSize {
                 canLoadMore = false
             }
@@ -84,7 +103,15 @@ class AskOpinionHomeViewModel: NSObject, ObservableObject {
         currentPage += 1
         
         do {
-            let nextBatch = try await service.fetchOpinions(page: currentPage, pageSize: pageSize, query: searchText, categoryId: selectedCategory)
+            let currentUserId = SupabaseManager.shared.client.auth.currentSession?.user.id
+            let nextBatch = try await service.fetchOpinions(
+                page: currentPage, 
+                pageSize: pageSize, 
+                query: searchText, 
+                categoryId: selectedCategory,
+                tab: selectedTab,
+                currentUserId: currentUserId
+            )
             if nextBatch.isEmpty {
                 canLoadMore = false
             } else {

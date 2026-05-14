@@ -73,7 +73,7 @@ class AskOpinionService {
             .execute()
     }
     
-    func fetchOpinions(page: Int = 0, pageSize: Int = 10, query: String? = nil, categoryId: String? = nil) async throws -> [Opinion] {
+    func fetchOpinions(page: Int = 0, pageSize: Int = 10, query: String? = nil, categoryId: String? = nil, tab: Int = 0, currentUserId: UUID? = nil) async throws -> [Opinion] {
         let from = page * pageSize
         let to = from + pageSize - 1
         
@@ -81,12 +81,28 @@ class AskOpinionService {
             .from("ask_opinions")
             .select("*, profiles(*)")
             
+        // 1. Search Query
         if let query = query, !query.isEmpty {
             request = request.or("title.ilike.%\(query)%,description.ilike.%\(query)%")
         }
         
+        // 2. Category Filter
         if let categoryId = categoryId {
             request = request.eq("category", value: categoryId)
+        }
+        
+        // 3. Tab Filter
+        if tab == 1, let userId = currentUserId {
+            // Answered by me: Questions that have a response from the current user
+            // We use a subquery-like approach via RPC or a specific view if possible, 
+            // but for simplicity here we'll filter using a 'in' query if we can get the IDs, 
+            // or better, a custom RPC. Let's assume we can filter by opinion_responses.
+            // Since Supabase doesn't support complex joins easily in select(), 
+            // we'll filter by asking for opinions where there's a response with author_id
+            request = request.filter("id", operator: .in, value: " (SELECT opinion_id FROM opinion_responses WHERE author_id = '\(userId.uuidString)')")
+        } else if tab == 2, let userId = currentUserId {
+            // My Questions: Questions created by the current user
+            request = request.eq("author_id", value: userId)
         }
         
         let response: [OpinionDTO] = try await request

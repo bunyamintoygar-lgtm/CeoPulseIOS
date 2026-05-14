@@ -262,7 +262,7 @@ struct AskOpinionHomeView: View {
         HStack(spacing: 0) {
             tabButton(title: "Tüm Sorular", index: 0)
             tabButton(title: "Yanıtladıklarım", index: 1)
-            tabButton(title: "Takip Ettiklerim", index: 2)
+            tabButton(title: "Sorularım", index: 2)
         }
         .padding(4)
         .background(Color.white.opacity(0.05))
