@@ -6,6 +6,7 @@ import Supabase
 import Realtime
 
 // ViewModel to manage active roundtable sessions and real-time updates
+@MainActor
 class ActiveSessionViewModel: ObservableObject {
     let roundtable: Roundtable
     
@@ -24,7 +25,6 @@ class ActiveSessionViewModel: ObservableObject {
         self.currentUserId = client.auth.currentSession?.user.id
     }
     
-    @MainActor
     func setupSession() async {
         isLoading = true
         errorMessage = nil
@@ -58,56 +58,62 @@ class ActiveSessionViewModel: ObservableObject {
             InsertAction.self,
             schema: "public",
             table: "roundtable_messages",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
-        ) { [weak self] _ in
-            guard let self = self else { return }
-            Task { @MainActor in
-                if let refreshedMessages = try? await self.service.fetchMessages(roundtableId: self.roundtable.id) {
-                    self.messages = refreshedMessages
-                }
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)",
+            callback: { [weak self] _ in
+                self?.refreshMessages()
             }
-        }
+        )
         
         // Listen for participant changes
         _ = channel?.onPostgresChange(
             InsertAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
-        ) { [weak self] _ in
-            self?.refreshParticipants()
-        }
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)",
+            callback: { [weak self] _ in
+                self?.refreshParticipants()
+            }
+        )
         
         _ = channel?.onPostgresChange(
             UpdateAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
-        ) { [weak self] _ in
-            self?.refreshParticipants()
-        }
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)",
+            callback: { [weak self] _ in
+                self?.refreshParticipants()
+            }
+        )
         
         _ = channel?.onPostgresChange(
             DeleteAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
-        ) { [weak self] _ in
-            self?.refreshParticipants()
-        }
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)",
+            callback: { [weak self] _ in
+                self?.refreshParticipants()
+            }
+        )
         
         channel?.subscribe { _ in }
     }
     
     private func refreshParticipants() {
-        Task { @MainActor in
+        Task {
             if let refreshedParticipants = try? await self.service.fetchParticipants(roundtableId: self.roundtable.id) {
                 self.participants = refreshedParticipants
             }
         }
     }
     
-    @MainActor
+    private func refreshMessages() {
+        Task {
+            if let refreshedMessages = try? await self.service.fetchMessages(roundtableId: self.roundtable.id) {
+                self.messages = refreshedMessages
+            }
+        }
+    }
+    
     func sendMessage(_ content: String) async {
         guard !content.isEmpty else { return }
         do {

@@ -53,13 +53,8 @@ struct RoundtableView: View {
                 
                 // Featured Card (Static for now or first active)
                 if let featured = viewModel.roundtables.first {
-                    FeaturedRoundtableCard(
-                        title: featured.title,
-                        description: featured.description ?? "",
-                        participantCount: 28, // Mock count for now
-                        imageName: featured.imageUrl ?? "ai_meeting"
-                    )
-                    .padding(.horizontal, 20)
+                    FeaturedRoundtableCard(roundtable: featured)
+                        .padding(.horizontal, 20)
                 }
                 
                 // AI Summary Card
