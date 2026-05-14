@@ -13,6 +13,7 @@ class ActiveSessionViewModel: ObservableObject {
     @Published var messages: [RoundtableMessage] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var currentUserId: UUID?
     
     private let service = RoundtableService.shared
     private let client = SupabaseManager.shared.client
@@ -20,12 +21,18 @@ class ActiveSessionViewModel: ObservableObject {
     
     init(roundtable: Roundtable) {
         self.roundtable = roundtable
+        self.currentUserId = client.auth.currentSession?.user.id
     }
     
     @MainActor
     func setupSession() async {
         isLoading = true
         errorMessage = nil
+        
+        // Ensure current user is set
+        if currentUserId == nil {
+            currentUserId = try? await client.auth.session.user.id
+        }
         
         do {
             // 1. Initial Load
@@ -48,7 +55,7 @@ class ActiveSessionViewModel: ObservableObject {
         
         // Listen for new messages
         channel?.onPostgresChange(
-            .insert,
+            AnyAction.insert,
             schema: "public",
             table: "roundtable_messages",
             filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
@@ -63,7 +70,7 @@ class ActiveSessionViewModel: ObservableObject {
         
         // Listen for participant changes
         channel?.onPostgresChange(
-            .all,
+            AnyAction.all,
             schema: "public",
             table: "roundtable_participants",
             filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
