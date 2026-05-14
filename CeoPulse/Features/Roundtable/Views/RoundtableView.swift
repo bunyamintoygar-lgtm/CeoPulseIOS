@@ -97,16 +97,7 @@ struct RoundtableView: View {
                     } else {
                         ForEach(viewModel.roundtables) { roundtable in
                             NavigationLink(destination: JoinRoundtableView(roundtable: roundtable)) {
-                                RoundtableRow(
-                                    title: roundtable.title,
-                                    status: roundtable.status.title,
-                                    statusColor: roundtable.status.color,
-                                    participantCount: 0, // Need to fetch or join
-                                    commentCount: 0,
-                                    activityText: roundtable.startTime.timeAgoDisplay(),
-                                    imageName: roundtable.category.lowercased(),
-                                    dateText: roundtable.startTime.formatted(date: .abbreviated, time: .shortened)
-                                )
+                                RoundtableRow(roundtable: roundtable)
                             }
                         }
                     }

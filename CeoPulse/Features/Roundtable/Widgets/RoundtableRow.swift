@@ -1,14 +1,7 @@
 import SwiftUI
 
 struct RoundtableRow: View {
-    let title: String
-    let status: String
-    let statusColor: Color
-    let participantCount: Int
-    let commentCount: Int
-    let activityText: String
-    let imageName: String
-    let dateText: String?
+    let roundtable: Roundtable
     
     var body: some View {
         HStack(spacing: 16) {
@@ -23,12 +16,12 @@ struct RoundtableRow: View {
             
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text(status)
+                    Text(roundtable.status.title)
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(statusColor)
+                        .foregroundColor(roundtable.status.color)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(statusColor.opacity(0.1))
+                        .background(roundtable.status.color.opacity(0.1))
                         .cornerRadius(4)
                     
                     Spacer()
@@ -38,16 +31,14 @@ struct RoundtableRow: View {
                         .foregroundColor(.white.opacity(0.4))
                 }
                 
-                Text(title)
+                Text(roundtable.title)
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.white)
                     .lineLimit(2)
                 
-                if let date = dateText {
-                    Text(date)
-                        .font(.system(size: 11))
-                        .foregroundColor(.white.opacity(0.5))
-                }
+                Text(roundtable.startTime.formatted(date: .abbreviated, time: .shortened))
+                    .font(.system(size: 11))
+                    .foregroundColor(.white.opacity(0.5))
                 
                 HStack(spacing: 12) {
                     // Avatars
@@ -59,24 +50,15 @@ struct RoundtableRow: View {
                         }
                     }
                     
-                    Text("\(participantCount) \("rt_participants".localized())")
+                    Text("\("rt_participants".localized())") // Count should be fetched
                         .font(.system(size: 10))
                         .foregroundColor(AppColors.textSecondary)
-                    
-                    if commentCount > 0 {
-                        HStack(spacing: 4) {
-                            Image(systemName: "bubble.left.fill")
-                            Text("\(commentCount)")
-                        }
-                        .font(.system(size: 10))
-                        .foregroundColor(AppColors.textSecondary)
-                    }
                 }
             }
             
             VStack {
                 Spacer()
-                Text(activityText)
+                Text(roundtable.startTime.timeAgoDisplay())
                     .font(.system(size: 9))
                     .foregroundColor(AppColors.textSecondary)
                     .multilineTextAlignment(.trailing)

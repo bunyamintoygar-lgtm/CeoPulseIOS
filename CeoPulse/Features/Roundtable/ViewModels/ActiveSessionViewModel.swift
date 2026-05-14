@@ -59,8 +59,9 @@ import Realtime
             table: "roundtable_messages",
             filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
         ) { [weak self] _ in
+            guard let self = self else { return }
             Task { @MainActor in
-                self?.refreshMessages()
+                self.refreshMessages()
             }
         }
         
@@ -71,8 +72,9 @@ import Realtime
             table: "roundtable_participants",
             filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
         ) { [weak self] _ in
+            guard let self = self else { return }
             Task { @MainActor in
-                self?.refreshParticipants()
+                self.refreshParticipants()
             }
         }
         
@@ -82,8 +84,9 @@ import Realtime
             table: "roundtable_participants",
             filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
         ) { [weak self] _ in
+            guard let self = self else { return }
             Task { @MainActor in
-                self?.refreshParticipants()
+                self.refreshParticipants()
             }
         }
         
@@ -93,12 +96,13 @@ import Realtime
             table: "roundtable_participants",
             filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
         ) { [weak self] _ in
+            guard let self = self else { return }
             Task { @MainActor in
-                self?.refreshParticipants()
+                self.refreshParticipants()
             }
         }
         
-        channel?.subscribe { _ in }
+        channel?.subscribe()
     }
     
     private func refreshParticipants() {
@@ -127,13 +131,15 @@ import Realtime
     }
     
     func leaveSession() {
-        channel?.unsubscribe()
+        let taskChannel = channel
         Task {
+            await taskChannel?.unsubscribe()
             try? await service.leaveRoundtable(roundtableId: roundtable.id)
         }
     }
     
     deinit {
-        channel?.unsubscribe()
+        // Can't await in deinit, we rely on the server-side timeout or 
+        // manual leaveSession call for cleanup.
     }
 }
