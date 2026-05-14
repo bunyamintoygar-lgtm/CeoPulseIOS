@@ -451,16 +451,30 @@ struct AskOpinionDetailView: View {
                 
                 Spacer()
                 
-                HStack(spacing: 12) {
-                    HStack(spacing: 4) {
-                        Text("En Beğenilen")
-                        Image(systemName: "chevron.down")
+                HStack(spacing: 8) {
+                    Menu {
+                        ForEach(ResponseSortOption.allCases, id: \.self) { option in
+                            Button(action: { viewModel.sortOption = option }) {
+                                HStack {
+                                    Text(option.rawValue)
+                                    if viewModel.sortOption == option {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(viewModel.sortOption.rawValue)
+                            Image(systemName: "chevron.down")
+                        }
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.purple)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.purple.opacity(0.1))
+                        .cornerRadius(8)
                     }
-                    .font(.system(size: 12))
-                    .foregroundColor(AppColors.textSecondary)
-                    
-                    Image(systemName: "line.3.horizontal.decrease")
-                        .foregroundColor(.white)
                 }
             }
             

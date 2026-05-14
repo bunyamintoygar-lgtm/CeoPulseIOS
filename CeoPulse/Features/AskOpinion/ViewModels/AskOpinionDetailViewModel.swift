@@ -2,6 +2,11 @@ import Foundation
 import SwiftUI
 import Combine
 
+enum ResponseSortOption: String, CaseIterable {
+    case topLiked = "En Beğenilen"
+    case newest = "En Son Yanıtlar"
+}
+
 class AskOpinionDetailViewModel: NSObject, ObservableObject {
     @Published var opinion: Opinion
     @Published var responses: [OpinionResponse] = []
@@ -9,6 +14,9 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
     @Published var isAnonymous: Bool = false
     @Published var isLoading = false
     @Published var attachments: [OpinionAttachment] = []
+    @Published var sortOption: ResponseSortOption = .topLiked {
+        didSet { sortResponses() }
+    }
     
     private let service = AskOpinionService.shared
     let currentUserId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
@@ -71,6 +79,7 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
             }
         }
         
+        sortResponses()
         newResponseText = ""
         isLoading = false
     }
@@ -90,6 +99,18 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
                     responses[index].likeCount += 1
                     responses[index].isLiked = true
                 }
+            }
+            sortResponses()
+        }
+    }
+
+    func sortResponses() {
+        withAnimation {
+            switch sortOption {
+            case .topLiked:
+                responses.sort { ($0.likeCount, $0.createdAt) > ($1.likeCount, $1.createdAt) }
+            case .newest:
+                responses.sort { $0.createdAt > $1.createdAt }
             }
         }
     }
