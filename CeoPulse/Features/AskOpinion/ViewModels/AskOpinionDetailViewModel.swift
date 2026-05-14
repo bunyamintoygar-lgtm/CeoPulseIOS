@@ -24,7 +24,9 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
     init(opinion: Opinion) {
         self.opinion = opinion
         super.init()
-        loadDummyResponses()
+        Task {
+            await fetchResponses()
+        }
     }
     
     func addAttachment(name: String, url: String) {
@@ -36,8 +38,17 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
         attachments.removeAll { $0.id == attachment.id }
     }
     
-    func loadDummyResponses() {
-        responses = []
+    @MainActor
+    func fetchResponses() async {
+        isLoading = true
+        do {
+            let fetchedResponses = try await service.fetchResponses(opinionId: opinion.id)
+            self.responses = fetchedResponses
+            sortResponses()
+        } catch {
+            print("Error fetching responses: \(error)")
+        }
+        isLoading = false
     }
     
     @Published var editingResponseId: UUID?
@@ -48,39 +59,34 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
         
         isLoading = true
         
-        // Simulating network delay and response addition
-        try? await Task.sleep(nanoseconds: 1_000_000_000) 
-        
-        if let editingId = editingResponseId {
-            if let index = responses.firstIndex(where: { $0.id == editingId }) {
+        do {
+            if let editingId = editingResponseId {
+                try await service.updateResponse(responseId: editingId, content: newResponseText)
+                if let index = responses.firstIndex(where: { $0.id == editingId }) {
+                    withAnimation {
+                        responses[index].content = newResponseText
+                    }
+                }
+                editingResponseId = nil
+            } else {
+                let newResponse = try await service.createResponse(
+                    opinionId: opinion.id,
+                    authorId: currentUserId,
+                    content: newResponseText,
+                    isAnonymous: isAnonymous
+                )
+                
                 withAnimation {
-                    responses[index].content = newResponseText
+                    responses.insert(newResponse, at: 0)
                 }
             }
-            editingResponseId = nil
-        } else {
-            let newResponse = OpinionResponse(
-                id: UUID(),
-                opinionId: opinion.id,
-                authorId: currentUserId, 
-                authorName: "Siz", 
-                authorTitle: "CEO",
-                authorAvatar: nil,
-                content: newResponseText,
-                likeCount: 0,
-                commentCount: 0,
-                isBestResponse: false,
-                isAnonymous: isAnonymous,
-                createdAt: Date()
-            )
             
-            withAnimation {
-                responses.insert(newResponse, at: 0)
-            }
+            sortResponses()
+            newResponseText = ""
+        } catch {
+            print("Error submitting response: \(error)")
         }
         
-        sortResponses()
-        newResponseText = ""
         isLoading = false
     }
 
@@ -90,6 +96,7 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
     }
 
     func toggleLike(for response: OpinionResponse) {
+        // Toggle like logic (ideally should also be persisted to DB)
         if let index = responses.firstIndex(where: { $0.id == response.id }) {
             withAnimation {
                 if responses[index].isLiked {
@@ -115,10 +122,19 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
         }
     }
 
+    @MainActor
     func deleteResponse(_ response: OpinionResponse) {
-        withAnimation {
-            responses.removeAll { $0.id == response.id }
+        isLoading = true
+        Task {
+            do {
+                try await service.deleteResponse(responseId: response.id)
+                withAnimation {
+                    responses.removeAll { $0.id == response.id }
+                }
+            } catch {
+                print("Error deleting response: \(error)")
+            }
+            isLoading = false
         }
     }
-
 }

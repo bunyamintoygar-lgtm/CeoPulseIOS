@@ -29,6 +29,20 @@ struct ProfileDTO: Codable {
     let position: String?
 }
 
+struct OpinionResponseDTO: Codable {
+    let id: UUID?
+    let opinion_id: UUID
+    let author_id: UUID
+    let content: String
+    let is_best_response: Bool?
+    let is_anonymous: Bool?
+    let like_count: Int?
+    let comment_count: Int?
+    let created_at: Date?
+    
+    let profiles: ProfileDTO?
+}
+
 class AskOpinionService {
     static let shared = AskOpinionService()
     private let client = SupabaseManager.shared.client
@@ -107,5 +121,95 @@ class AskOpinionService {
                 createdAt: dto.created_at ?? Date()
             )
         }
+    }
+    func fetchResponses(opinionId: UUID) async throws -> [OpinionResponse] {
+        let response: [OpinionResponseDTO] = try await client
+            .from("opinion_responses")
+            .select("*, profiles(*)")
+            .eq("opinion_id", value: opinionId)
+            .order("created_at", ascending: false)
+            .execute()
+            .value
+        
+        return response.map { dto in
+            let firstName = dto.profiles?.first_name ?? "Gizli"
+            let lastName = dto.profiles?.last_name ?? ""
+            let lastInitial = lastName.isEmpty ? "" : String(lastName.prefix(1)) + "."
+            let formattedName = "\(firstName) \(lastInitial)".trimmingCharacters(in: .whitespaces)
+            
+            return OpinionResponse(
+                id: dto.id ?? UUID(),
+                opinionId: dto.opinion_id,
+                authorId: dto.author_id,
+                authorName: dto.is_anonymous == true ? "Gizli Kullanıcı" : formattedName,
+                authorTitle: dto.is_anonymous == true ? "CEO Pulse Üyesi" : (dto.profiles?.position ?? "CEO"),
+                authorAvatar: dto.is_anonymous == true ? nil : dto.profiles?.avatar_url,
+                content: dto.content,
+                likeCount: dto.like_count ?? 0,
+                commentCount: dto.comment_count ?? 0,
+                isBestResponse: dto.is_best_response ?? false,
+                isAnonymous: dto.is_anonymous ?? false,
+                createdAt: dto.created_at ?? Date()
+            )
+        }
+    }
+    
+    func createResponse(opinionId: UUID, authorId: UUID, content: String, isAnonymous: Bool) async throws -> OpinionResponse {
+        let dto = OpinionResponseDTO(
+            id: nil,
+            opinion_id: opinionId,
+            author_id: authorId,
+            content: content,
+            is_best_response: false,
+            is_anonymous: isAnonymous,
+            like_count: 0,
+            comment_count: 0,
+            created_at: nil,
+            profiles: nil
+        )
+        
+        let saved: OpinionResponseDTO = try await client
+            .from("opinion_responses")
+            .insert(dto)
+            .select("*, profiles(*)")
+            .single()
+            .execute()
+            .value
+            
+        // Map back to domain model
+        let firstName = saved.profiles?.first_name ?? "Gizli"
+        let lastName = saved.profiles?.last_name ?? ""
+        let formattedName = "\(firstName) \(lastName.prefix(1)).".trimmingCharacters(in: .whitespaces)
+        
+        return OpinionResponse(
+            id: saved.id ?? UUID(),
+            opinionId: saved.opinion_id,
+            authorId: saved.author_id,
+            authorName: saved.is_anonymous == true ? "Gizli Kullanıcı" : formattedName,
+            authorTitle: saved.is_anonymous == true ? "CEO Pulse Üyesi" : (saved.profiles?.position ?? "CEO"),
+            authorAvatar: saved.is_anonymous == true ? nil : saved.profiles?.avatar_url,
+            content: saved.content,
+            likeCount: saved.like_count ?? 0,
+            commentCount: saved.comment_count ?? 0,
+            isBestResponse: saved.is_best_response ?? false,
+            isAnonymous: saved.is_anonymous ?? false,
+            createdAt: saved.created_at ?? Date()
+        )
+    }
+    
+    func updateResponse(responseId: UUID, content: String) async throws {
+        try await client
+            .from("opinion_responses")
+            .update(["content": content])
+            .eq("id", value: responseId)
+            .execute()
+    }
+    
+    func deleteResponse(responseId: UUID) async throws {
+        try await client
+            .from("opinion_responses")
+            .delete()
+            .eq("id", value: responseId)
+            .execute()
     }
 }
