@@ -1,6 +1,8 @@
 import Foundation
 import SwiftUI
 import Combine
+import Supabase
+import Auth
 
 enum ResponseSortOption: String, CaseIterable {
     case topLiked = "En Beğenilen"
