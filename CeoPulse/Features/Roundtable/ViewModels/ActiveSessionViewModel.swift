@@ -57,42 +57,46 @@ import Realtime
             InsertAction.self,
             schema: "public",
             table: "roundtable_messages",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)",
-            callback: { [weak self] _ in
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+        ) { [weak self] _ in
+            Task { @MainActor in
                 self?.refreshMessages()
             }
-        )
+        }
         
         // Listen for participant changes
         _ = channel?.onPostgresChange(
             InsertAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)",
-            callback: { [weak self] _ in
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+        ) { [weak self] _ in
+            Task { @MainActor in
                 self?.refreshParticipants()
             }
-        )
+        }
         
         _ = channel?.onPostgresChange(
             UpdateAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)",
-            callback: { [weak self] _ in
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+        ) { [weak self] _ in
+            Task { @MainActor in
                 self?.refreshParticipants()
             }
-        )
+        }
         
         _ = channel?.onPostgresChange(
             DeleteAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)",
-            callback: { [weak self] _ in
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+        ) { [weak self] _ in
+            Task { @MainActor in
                 self?.refreshParticipants()
             }
-        )
+        }
         
         channel?.subscribe { _ in }
     }
