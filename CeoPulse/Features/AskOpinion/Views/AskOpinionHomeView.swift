@@ -201,16 +201,30 @@ struct AskOpinionHomeView: View {
     private var compactHeroSection: some View {
         Button(action: { showCreateOpinion = true }) {
             HStack(spacing: 16) {
-                // Icon
+                // Animated Icon
                 ZStack {
                     Circle()
                         .fill(Color.purple.opacity(0.15))
-                        .frame(width: 48, height: 48)
+                        .frame(width: 50, height: 50)
+                    
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 14))
+                        .foregroundColor(.yellow.opacity(0.8))
+                        .offset(x: -15, y: -15)
+                        .symbolEffect(.variableColor.iterative.dimInactiveLayers.nonReversing, options: .repeating)
                     
                     Image(systemName: "bubble.left.and.bubble.right.fill")
-                        .font(.system(size: 20))
+                        .font(.system(size: 24))
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(.purple, .blue.opacity(0.6))
+                        .foregroundStyle(.purple.opacity(0.9), .blue.opacity(0.6))
+                        .offset(x: 2, y: -4)
+                        .symbolEffect(.breathe, options: .repeating)
+                    
+                    Image(systemName: "lightbulb.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(hex: "F59E0B"))
+                        .offset(x: 12, y: 8)
+                        .symbolEffect(.wiggle, options: .repeating)
                 }
                 
                 // Text content
