@@ -65,25 +65,6 @@ struct AskOpinionDetailView: View {
     
     private var opinionDetailSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Category & Time
-            HStack {
-                let categoryName = ConfigManager.shared.opinionCategories.first(where: { $0.id == viewModel.opinion.category })?.name ?? viewModel.opinion.category
-                
-                Text(categoryName)
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.purple)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.purple.opacity(0.1))
-                    .cornerRadius(8)
-                
-                Text("• \(viewModel.opinion.createdAt.timeAgoDisplay())")
-                    .font(.system(size: 11))
-                    .foregroundColor(AppColors.textSecondary)
-                
-                Spacer()
-            }
-            
             // Author
             HStack(spacing: 12) {
                 Circle()
