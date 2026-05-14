@@ -104,6 +104,8 @@ struct AskOpinionDetailView: View {
                         .foregroundColor(AppColors.textSecondary)
                 }
                 
+                Spacer()
+                
                 HStack(spacing: 16) {
                     HStack(spacing: 6) {
                         Image(systemName: "eye")
@@ -628,6 +630,15 @@ struct ResponseCard: View {
                 .foregroundColor(.white.opacity(0.9))
                 .lineSpacing(3)
             
+            if !response.attachments.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(response.attachments) { attachment in
+                        responseAttachmentView(for: attachment)
+                    }
+                }
+                .padding(.top, 4)
+            }
+            
             HStack {
                 HStack(spacing: 16) {
                     Label("\(response.likeCount)", systemImage: response.isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
@@ -655,5 +666,29 @@ struct ResponseCard: View {
         .background(AppColors.surface)
         .cornerRadius(20)
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.05), lineWidth: 1))
+    }
+    
+    @ViewBuilder
+    private func responseAttachmentView(for attachment: OpinionAttachment) -> some View {
+        Link(destination: URL(string: attachment.url ?? "") ?? URL(string: "https://google.com")!) {
+            HStack(spacing: 10) {
+                Image(systemName: attachment.type == "image" ? "photo" : "doc.fill")
+                    .foregroundColor(.purple)
+                    .font(.system(size: 14))
+                
+                Text(attachment.name)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.8))
+                
+                Spacer()
+                
+                Image(systemName: "arrow.down.circle")
+                    .foregroundColor(.gray)
+                    .font(.system(size: 12))
+            }
+            .padding(10)
+            .background(Color.white.opacity(0.03))
+            .cornerRadius(10)
+        }
     }
 }

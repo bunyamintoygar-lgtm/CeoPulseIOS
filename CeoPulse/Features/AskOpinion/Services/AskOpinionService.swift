@@ -38,6 +38,7 @@ struct OpinionResponseDTO: Codable {
     let is_anonymous: Bool?
     let like_count: Int?
     let comment_count: Int?
+    let attachments: [OpinionAttachment]?
     let created_at: Date?
     
     let profiles: ProfileDTO?
@@ -122,7 +123,7 @@ class AskOpinionService {
             )
         }
     }
-    func fetchResponses(opinionId: UUID) async throws -> [OpinionResponse] {
+    func fetchResponses(opinionId: UUID, currentUserId: UUID? = nil) async throws -> [OpinionResponse] {
         let response: [OpinionResponseDTO] = try await client
             .from("opinion_responses")
             .select("*, profiles(*)")
@@ -130,6 +131,21 @@ class AskOpinionService {
             .order("created_at", ascending: false)
             .execute()
             .value
+        
+        var likedResponseIds: Set<UUID> = []
+        if let userId = currentUserId {
+            do {
+                let likes: [[String: UUID]] = try await client
+                    .from("opinion_response_likes")
+                    .select("response_id")
+                    .eq("user_id", value: userId)
+                    .execute()
+                    .value
+                likedResponseIds = Set(likes.compactMap { $0["response_id"] })
+            } catch {
+                print("Error fetching likes: \(error)")
+            }
+        }
         
         return response.map { dto in
             let firstName = dto.profiles?.first_name ?? "Gizli"
@@ -149,12 +165,42 @@ class AskOpinionService {
                 commentCount: dto.comment_count ?? 0,
                 isBestResponse: dto.is_best_response ?? false,
                 isAnonymous: dto.is_anonymous ?? false,
+                isLiked: likedResponseIds.contains(dto.id ?? UUID()),
+                attachments: dto.attachments ?? [],
                 createdAt: dto.created_at ?? Date()
             )
         }
     }
     
-    func createResponse(opinionId: UUID, authorId: UUID, content: String, isAnonymous: Bool) async throws -> OpinionResponse {
+    func toggleLikeResponse(responseId: UUID, userId: UUID, isLiked: Bool) async throws {
+        if isLiked {
+            try await client
+                .from("opinion_response_likes")
+                .insert(["user_id": userId, "response_id": responseId])
+                .execute()
+        } else {
+            try await client
+                .from("opinion_response_likes")
+                .delete()
+                .eq("user_id", value: userId)
+                .eq("response_id", value: responseId)
+                .execute()
+        }
+    }
+    
+    func incrementViewCount(opinionId: UUID) async throws {
+        do {
+            try await client
+                .rpc("increment_opinion_view_count", params: ["op_id": opinionId])
+                .execute()
+            print("DEBUG: View count incremented for \(opinionId)")
+        } catch {
+            print("ERROR: Failed to increment view count: \(error)")
+            throw error
+        }
+    }
+    
+    func createResponse(opinionId: UUID, authorId: UUID, content: String, isAnonymous: Bool, attachments: [OpinionAttachment] = []) async throws -> OpinionResponse {
         let dto = OpinionResponseDTO(
             id: nil,
             opinion_id: opinionId,
@@ -164,6 +210,7 @@ class AskOpinionService {
             is_anonymous: isAnonymous,
             like_count: 0,
             comment_count: 0,
+            attachments: attachments,
             created_at: nil,
             profiles: nil
         )

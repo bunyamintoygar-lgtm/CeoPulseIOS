@@ -34,6 +34,10 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
         super.init()
         Task {
             await fetchResponses()
+            try? await service.incrementViewCount(opinionId: opinion.id)
+            await MainActor.run {
+                self.opinion.viewCount += 1
+            }
         }
     }
     
@@ -50,7 +54,7 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
     func fetchResponses() async {
         isLoading = true
         do {
-            let fetchedResponses = try await service.fetchResponses(opinionId: opinion.id)
+            let fetchedResponses = try await service.fetchResponses(opinionId: opinion.id, currentUserId: currentUserId)
             self.responses = fetchedResponses
             sortResponses()
         } catch {
@@ -82,7 +86,8 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
                     opinionId: opinion.id,
                     authorId: currentUserId,
                     content: newResponseText,
-                    isAnonymous: isAnonymous
+                    isAnonymous: isAnonymous,
+                    attachments: attachments
                 )
                 
                 withAnimation {
@@ -92,6 +97,7 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
             
             sortResponses()
             newResponseText = ""
+            attachments = [] // Clear attachments after successful submission
         } catch {
             print("Error submitting response: \(error)")
         }
@@ -105,18 +111,36 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
     }
 
     func toggleLike(for response: OpinionResponse) {
-        // Toggle like logic (ideally should also be persisted to DB)
         if let index = responses.firstIndex(where: { $0.id == response.id }) {
+            let wasLiked = responses[index].isLiked
+            let newLikedStatus = !wasLiked
+            
+            // Optimistic UI update
             withAnimation {
-                if responses[index].isLiked {
-                    responses[index].likeCount -= 1
-                    responses[index].isLiked = false
-                } else {
-                    responses[index].likeCount += 1
-                    responses[index].isLiked = true
-                }
+                responses[index].isLiked = newLikedStatus
+                responses[index].likeCount += newLikedStatus ? 1 : -1
             }
             sortResponses()
+            
+            // Persist to DB
+            Task {
+                do {
+                    try await service.toggleLikeResponse(
+                        responseId: response.id,
+                        userId: currentUserId,
+                        isLiked: newLikedStatus
+                    )
+                } catch {
+                    print("Error toggling like: \(error)")
+                    // Revert UI on error
+                    await MainActor.run {
+                        withAnimation {
+                            responses[index].isLiked = wasLiked
+                            responses[index].likeCount += wasLiked ? 1 : -1
+                        }
+                    }
+                }
+            }
         }
     }
 

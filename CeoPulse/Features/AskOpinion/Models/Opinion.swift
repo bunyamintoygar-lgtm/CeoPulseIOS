@@ -33,6 +33,7 @@ struct OpinionResponse: Identifiable {
     let isBestResponse: Bool
     let isAnonymous: Bool
     var isLiked: Bool = false
+    let attachments: [OpinionAttachment]
     let createdAt: Date
 }
 
