@@ -54,7 +54,7 @@ class ActiveSessionViewModel: ObservableObject {
         channel = client.realtimeV2.channel(channelId)
         
         // Listen for new messages
-        channel?.onPostgresChange(
+        _ = channel?.onPostgresChange(
             InsertAction.self,
             schema: "public",
             table: "roundtable_messages",
@@ -69,21 +69,42 @@ class ActiveSessionViewModel: ObservableObject {
         }
         
         // Listen for participant changes
-        channel?.onPostgresChange(
-            AllAction.self,
+        _ = channel?.onPostgresChange(
+            InsertAction.self,
             schema: "public",
             table: "roundtable_participants",
             filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
         ) { [weak self] _ in
-            guard let self = self else { return }
-            Task { @MainActor in
-                if let refreshedParticipants = try? await self.service.fetchParticipants(roundtableId: self.roundtable.id) {
-                    self.participants = refreshedParticipants
-                }
-            }
+            self?.refreshParticipants()
+        }
+        
+        _ = channel?.onPostgresChange(
+            UpdateAction.self,
+            schema: "public",
+            table: "roundtable_participants",
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+        ) { [weak self] _ in
+            self?.refreshParticipants()
+        }
+        
+        _ = channel?.onPostgresChange(
+            DeleteAction.self,
+            schema: "public",
+            table: "roundtable_participants",
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+        ) { [weak self] _ in
+            self?.refreshParticipants()
         }
         
         channel?.subscribe { _ in }
+    }
+    
+    private func refreshParticipants() {
+        Task { @MainActor in
+            if let refreshedParticipants = try? await self.service.fetchParticipants(roundtableId: self.roundtable.id) {
+                self.participants = refreshedParticipants
+            }
+        }
     }
     
     @MainActor
