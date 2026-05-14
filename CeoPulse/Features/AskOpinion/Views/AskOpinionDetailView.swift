@@ -379,18 +379,6 @@ struct AskOpinionDetailView: View {
                 }
                 
                 HStack(spacing: 12) {
-                    if viewModel.editingResponseId != nil {
-                        Button(action: { viewModel.cancelEditing() }) {
-                            Text("Vazgeç")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.white.opacity(0.6))
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 10)
-                                .background(Color.white.opacity(0.1))
-                                .cornerRadius(10)
-                        }
-                    }
-                    
                     Button(action: { isFileImporterPresented = true }) {
                         HStack(spacing: 6) {
                             Image(systemName: "paperclip")
@@ -406,13 +394,25 @@ struct AskOpinionDetailView: View {
                     
                     Spacer()
                     
+                    if viewModel.editingResponseId != nil {
+                        Button(action: { viewModel.cancelEditing() }) {
+                            Text("Vazgeç")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white.opacity(0.6))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(Color.white.opacity(0.1))
+                                .cornerRadius(10)
+                        }
+                    }
+                    
                     Button(action: {
                         Task { await viewModel.submitResponse() }
                     }) {
                         if viewModel.isLoading {
                             ProgressView().tint(.white)
                         } else {
-                            Text(viewModel.editingResponseId == nil ? "Yanıtla" : "Güncelle")
+                            Text(viewModel.editingResponseId == nil ? "Yanıtla" : "Kaydet")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 24)
