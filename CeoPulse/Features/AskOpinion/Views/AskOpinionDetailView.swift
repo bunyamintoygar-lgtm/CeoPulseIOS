@@ -319,7 +319,7 @@ struct AskOpinionDetailView: View {
                 
                 if viewModel.editingResponseId == nil {
                     HStack(spacing: 8) {
-                        Text("Anonim olarak gönder")
+                        Text("Gizli Yanıt")
                             .font(.system(size: 11))
                             .foregroundColor(AppColors.textSecondary)
                         Toggle("", isOn: $viewModel.isAnonymous)
