@@ -5,8 +5,6 @@ struct AskOpinionDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel: AskOpinionDetailViewModel
     @State private var isFileImporterPresented = false
-    @State private var showDeleteAlert = false
-    @State private var responseToDelete: OpinionResponse?
     
     var body: some View {
         ZStack {
@@ -34,16 +32,6 @@ struct AskOpinionDetailView: View {
             }
         }
         .navigationBarHidden(true)
-        .alert("Yanıtı Sil", isPresented: $showDeleteAlert) {
-            Button("Sil", role: .destructive) {
-                if let response = responseToDelete {
-                    viewModel.deleteResponse(response)
-                }
-            }
-            Button("Vazgeç", role: .cancel) {}
-        } message: {
-            Text("Bu yanıtı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")
-        }
     }
     
     // MARK: - Components
@@ -490,8 +478,7 @@ struct AskOpinionDetailView: View {
                         currentUserId: viewModel.currentUserId,
                         onLike: { viewModel.toggleLike(for: response) },
                         onDelete: {
-                            responseToDelete = response
-                            showDeleteAlert = true
+                            viewModel.deleteResponse(response)
                         },
                         onEdit: {
                             viewModel.editingResponseId = response.id
@@ -512,6 +499,8 @@ struct ResponseCard: View {
     let onLike: () -> Void
     let onDelete: () -> Void
     let onEdit: () -> Void
+    
+    @State private var isConfirmingDelete = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -567,24 +556,64 @@ struct ResponseCard: View {
                 }
                 
                 if response.authorId == currentUserId {
-                    HStack(spacing: 8) {
-                        Button(action: onEdit) {
-                            Image(systemName: "pencil")
-                                .font(.system(size: 14))
-                                .foregroundColor(.purple)
-                                .padding(8)
-                                .background(Color.purple.opacity(0.1))
-                                .clipShape(Circle())
-                        }
-                        
-                        Button(action: onDelete) {
-                            Image(systemName: "trash")
-                                .font(.system(size: 14))
+                    if isConfirmingDelete {
+                        HStack(spacing: 10) {
+                            Text("Emin misiniz?")
+                                .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(.red)
-                                .padding(8)
-                                .background(Color.red.opacity(0.1))
-                                .clipShape(Circle())
+                            
+                            HStack(spacing: 8) {
+                                Button(action: onDelete) {
+                                    Text("Evet")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .background(Color.red)
+                                        .cornerRadius(6)
+                                }
+                                
+                                Button(action: { 
+                                    withAnimation(.spring()) {
+                                        isConfirmingDelete = false 
+                                    }
+                                }) {
+                                    Text("Hayır")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .background(Color.white.opacity(0.1))
+                                        .cornerRadius(6)
+                                }
+                            }
                         }
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                    } else {
+                        HStack(spacing: 8) {
+                            Button(action: onEdit) {
+                                Image(systemName: "pencil")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.purple)
+                                    .padding(8)
+                                    .background(Color.purple.opacity(0.1))
+                                    .clipShape(Circle())
+                            }
+                            
+                            Button(action: { 
+                                withAnimation(.spring()) {
+                                    isConfirmingDelete = true 
+                                }
+                            }) {
+                                Image(systemName: "trash")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.red)
+                                    .padding(8)
+                                    .background(Color.red.opacity(0.1))
+                                    .clipShape(Circle())
+                            }
+                        }
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
                     }
                 }
             }
