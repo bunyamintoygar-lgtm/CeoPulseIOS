@@ -51,11 +51,11 @@ class ActiveSessionViewModel: ObservableObject {
     
     private func setupRealtime() {
         let channelId = "roundtable:\(roundtable.id.uuidString)"
-        channel = client.realtimeV2.channel(.init(name: channelId))
+        channel = client.realtimeV2.channel(channelId)
         
         // Listen for new messages
         channel?.onPostgresChange(
-            AnyAction.insert,
+            InsertAction.self,
             schema: "public",
             table: "roundtable_messages",
             filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
@@ -70,7 +70,7 @@ class ActiveSessionViewModel: ObservableObject {
         
         // Listen for participant changes
         channel?.onPostgresChange(
-            AnyAction.all,
+            AllAction.self,
             schema: "public",
             table: "roundtable_participants",
             filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
