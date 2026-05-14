@@ -5,6 +5,8 @@ struct AskOpinionHomeView: View {
     @StateObject private var viewModel = AskOpinionHomeViewModel()
     @State private var showCreateOpinion = false
     @State private var isFilterSheetPresented = false
+    @State private var isSearchExpanded = false
+    @FocusState private var isSearchFocused: Bool
     
     var body: some View {
         ZStack {
@@ -18,8 +20,6 @@ struct AskOpinionHomeView: View {
                         heroSection
                         
                         tabSection
-                        
-                        searchAndFilterSection
                         
                         if viewModel.isLoading && viewModel.opinions.isEmpty {
                             VStack {
@@ -83,6 +83,9 @@ struct AskOpinionHomeView: View {
         }) {
             AskOpinionView()
         }
+        .sheet(isPresented: $isFilterSheetPresented) {
+            categorySelectionSheet
+        }
         .onAppear {
             Task { await viewModel.refreshOpinions() }
         }
@@ -92,25 +95,71 @@ struct AskOpinionHomeView: View {
     
     private var headerView: some View {
         HStack(spacing: 12) {
-            Button(action: { presentationMode.wrappedValue.dismiss() }) {
-                Image(systemName: "arrow.left")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
-            }
-            
-            HStack(spacing: 12) {
-                Image(systemName: "bubble.left.and.bubble.right.fill")
+            if isSearchExpanded {
+                HStack(spacing: 12) {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.gray)
+                        TextField("Sorularda ara...", text: $viewModel.searchText)
+                            .foregroundColor(.white)
+                            .font(.system(size: 14))
+                            .focused($isSearchFocused)
+                        
+                        if !viewModel.searchText.isEmpty {
+                            Button(action: { viewModel.searchText = "" }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                    .padding(10)
+                    .background(Color.white.opacity(0.08))
+                    .cornerRadius(12)
+                    
+                    Button(action: { isFilterSheetPresented = true }) {
+                        Image(systemName: viewModel.selectedCategory == nil ? "line.3.horizontal.decrease" : "line.3.horizontal.decrease.circle.fill")
+                            .foregroundColor(viewModel.selectedCategory == nil ? .white : .purple)
+                            .font(.system(size: 18))
+                            .padding(10)
+                            .background(Circle().fill(Color.white.opacity(0.1)))
+                    }
+                    
+                    Button("Vazgeç") {
+                        withAnimation {
+                            isSearchExpanded = false
+                            isSearchFocused = false
+                            viewModel.searchText = ""
+                        }
+                    }
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.purple)
-                    .font(.system(size: 22))
-                Text("Ask Opinion")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
-            }
-            
-            Spacer()
-            
-            HStack(spacing: 16) {
-                // Icons removed as requested
+                }
+                .transition(.move(edge: .trailing).combined(with: .opacity))
+            } else {
+                HStack(spacing: 12) {
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                        .foregroundColor(.purple)
+                        .font(.system(size: 22))
+                    Text("Ask Opinion")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                .transition(.move(edge: .leading).combined(with: .opacity))
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation {
+                        isSearchExpanded = true
+                        isSearchFocused = true
+                    }
+                }) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(10)
+                        .background(Circle().fill(Color.white.opacity(0.1)))
+                }
             }
         }
         .padding(.horizontal, 20)
@@ -230,59 +279,6 @@ struct AskOpinionHomeView: View {
         }
     }
     
-    private var searchAndFilterSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 12) {
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                    TextField("Sorularda ara...", text: $viewModel.searchText)
-                        .foregroundColor(.white)
-                        .font(.system(size: 14))
-                }
-                .padding(12)
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(12)
-                
-                Button(action: { isFilterSheetPresented = true }) {
-                    HStack(spacing: 8) {
-                        if let selectedId = viewModel.selectedCategory,
-                           let category = ConfigManager.shared.opinionCategories.first(where: { $0.id == selectedId }) {
-                            Image(systemName: category.icon ?? "line.3.horizontal.decrease.circle.fill")
-                            Text(category.name)
-                                .lineLimit(1)
-                        } else {
-                            Image(systemName: "line.3.horizontal.decrease")
-                            Text("Filtrele")
-                        }
-                    }
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(viewModel.selectedCategory == nil ? .white.opacity(0.8) : .white)
-                    .frame(minWidth: 100)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(viewModel.selectedCategory == nil ? Color.white.opacity(0.05) : Color.purple)
-                    .cornerRadius(12)
-                }
-            }
-            
-            if viewModel.selectedCategory != nil {
-                Button(action: { viewModel.selectCategory(nil) }) {
-                    HStack(spacing: 4) {
-                        Text("Filtreyi Temizle")
-                        Image(systemName: "xmark.circle.fill")
-                    }
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.gray)
-                }
-                .padding(.leading, 4)
-            }
-        }
-        .padding(.horizontal, 20)
-        .sheet(isPresented: $isFilterSheetPresented) {
-            categorySelectionSheet
-        }
-    }
     
     private var categorySelectionSheet: some View {
         NavigationView {

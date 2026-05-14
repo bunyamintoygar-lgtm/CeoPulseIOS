@@ -87,13 +87,6 @@ struct SurveysHomeView: View {
                                         .foregroundColor(.white)
                                 }
                             }
-                            
-                            Image("ceo_profile_1")
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 44, height: 44)
-                                .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.purple.opacity(0.3), lineWidth: 2))
                         }
                     }
                     .padding(.horizontal, 20)
