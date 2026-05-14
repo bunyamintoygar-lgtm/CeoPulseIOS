@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 struct ActiveSessionView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -156,7 +157,7 @@ struct ActiveSessionView: View {
                             roleColor: participant.role.color,
                             isMuted: participant.isMuted,
                             angle: Double(index) * (360.0 / Double(max(1, viewModel.participants.count))) - 90,
-                            isMe: participant.userId == SupabaseManager.shared.client.auth.sessionSync?.user.id
+                            isMe: participant.userId.uuidString == SupabaseManager.shared.client.auth.currentSession?.user.id.uuidString
                         )
                     }
                     

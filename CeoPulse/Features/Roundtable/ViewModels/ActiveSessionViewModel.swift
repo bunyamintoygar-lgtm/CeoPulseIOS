@@ -1,8 +1,11 @@
+// UPDATED_BY_ANTIGRAVITY_v2
 import Foundation
 import SwiftUI
+import Combine
 import Supabase
 import Realtime
 
+// ViewModel to manage active roundtable sessions and real-time updates
 class ActiveSessionViewModel: ObservableObject {
     let roundtable: Roundtable
     
@@ -22,6 +25,7 @@ class ActiveSessionViewModel: ObservableObject {
     @MainActor
     func setupSession() async {
         isLoading = true
+        errorMessage = nil
         
         do {
             // 1. Initial Load
@@ -44,13 +48,12 @@ class ActiveSessionViewModel: ObservableObject {
         
         // Listen for new messages
         channel?.onPostgresChange(
-            PostgresJoin.PostgresAction.insert,
+            .insert,
             schema: "public",
             table: "roundtable_messages",
             filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
-        ) { [weak self] message in
+        ) { [weak self] _ in
             guard let self = self else { return }
-            // In a real app, decode and append
             Task { @MainActor in
                 if let refreshedMessages = try? await self.service.fetchMessages(roundtableId: self.roundtable.id) {
                     self.messages = refreshedMessages
@@ -60,7 +63,7 @@ class ActiveSessionViewModel: ObservableObject {
         
         // Listen for participant changes
         channel?.onPostgresChange(
-            PostgresJoin.PostgresAction.all,
+            .all,
             schema: "public",
             table: "roundtable_participants",
             filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
@@ -73,7 +76,7 @@ class ActiveSessionViewModel: ObservableObject {
             }
         }
         
-        channel?.subscribe()
+        channel?.subscribe { _ in }
     }
     
     @MainActor
