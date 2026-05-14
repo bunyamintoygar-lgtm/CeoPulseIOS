@@ -59,4 +59,18 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
         newResponseText = ""
         isLoading = false
     }
+
+    func toggleLike(for response: OpinionResponse) {
+        if let index = responses.firstIndex(where: { $0.id == response.id }) {
+            withAnimation {
+                if responses[index].isLiked {
+                    responses[index].likeCount -= 1
+                    responses[index].isLiked = false
+                } else {
+                    responses[index].likeCount += 1
+                    responses[index].isLiked = true
+                }
+            }
+        }
+    }
 }

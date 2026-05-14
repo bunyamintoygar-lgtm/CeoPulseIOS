@@ -28,10 +28,11 @@ struct OpinionResponse: Identifiable {
     let authorTitle: String
     let authorAvatar: String?
     let content: String
-    let likeCount: Int
+    var likeCount: Int
     let commentCount: Int
     let isBestResponse: Bool
     let isAnonymous: Bool
+    var isLiked: Bool = false
     let createdAt: Date
 }
 

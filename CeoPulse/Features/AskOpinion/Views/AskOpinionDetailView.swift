@@ -442,7 +442,9 @@ struct AskOpinionDetailView: View {
             
             LazyVStack(spacing: 16) {
                 ForEach(viewModel.responses) { response in
-                    ResponseCard(response: response)
+                    ResponseCard(response: response) {
+                        viewModel.toggleLike(for: response)
+                    }
                 }
             }
         }
@@ -453,6 +455,7 @@ struct AskOpinionDetailView: View {
 
 struct ResponseCard: View {
     let response: OpinionResponse
+    let onLike: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -511,16 +514,16 @@ struct ResponseCard: View {
                 
                 Spacer()
                 
-                Button(action: {}) {
+                Button(action: onLike) {
                     HStack(spacing: 6) {
-                        Image(systemName: "hand.thumbsup")
-                        Text("Beğen")
+                        Image(systemName: response.isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
+                        Text(response.isLiked ? "Beğendin" : "Beğen")
                     }
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(response.isLiked ? .purple : .white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(Color.white.opacity(0.08))
+                    .background(response.isLiked ? Color.purple.opacity(0.2) : Color.white.opacity(0.08))
                     .cornerRadius(12)
                 }
             }
