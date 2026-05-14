@@ -2,6 +2,7 @@ import SwiftUI
 
 struct JoinRoundtableView: View {
     @Environment(\.presentationMode) var presentationMode
+    let roundtable: Roundtable
     
     var body: some View {
         ScrollView {
@@ -27,7 +28,7 @@ struct JoinRoundtableView: View {
                 
                 // Hero Card
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Liderlik & Strateji")
+                    Text(roundtable.category)
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.purple)
                         .padding(.horizontal, 10)
@@ -35,18 +36,18 @@ struct JoinRoundtableView: View {
                         .background(Color.purple.opacity(0.2))
                         .cornerRadius(8)
                     
-                    Text("2025’te Sürdürülebilir Büyüme Stratejileri")
+                    Text(roundtable.title)
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(.white)
                     
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 8) {
                             Image(systemName: "calendar")
-                            Text("24 Mayıs 2025, Cumartesi")
+                            Text(roundtable.startTime.formatted(date: .long, time: .omitted))
                         }
                         HStack(spacing: 8) {
                             Image(systemName: "clock")
-                            Text("20:30 – 22:00 (90 dk)")
+                            Text(roundtable.startTime.formatted(date: .omitted, time: .shortened))
                         }
                     }
                     .font(.system(size: 14))
@@ -59,7 +60,7 @@ struct JoinRoundtableView: View {
                                     .fill(Color.gray)
                                     .frame(width: 32, height: 32)
                                     .overlay(Circle().stroke(AppColors.surface, lineWidth: 2))
-                            }
+                             }
                             ZStack {
                                 Circle()
                                     .fill(Color.indigo)
@@ -70,7 +71,7 @@ struct JoinRoundtableView: View {
                             }
                         }
                         
-                        Text("Ali Yılmaz ve 15 diğer uzman")
+                        Text("Ali Yılmaz ve 15 diğer uzman") // Static for now
                             .font(.system(size: 12))
                             .foregroundColor(AppColors.textSecondary)
                     }
@@ -181,7 +182,7 @@ struct JoinRoundtableView: View {
                         .frame(height: 6)
                     }
                     
-                    NavigationLink(destination: ActiveSessionView()) {
+                    NavigationLink(destination: ActiveSessionView(roundtable: roundtable)) {
                         HStack {
                             Text("rt_join_title".localized())
                                 .font(.system(size: 16, weight: .bold))

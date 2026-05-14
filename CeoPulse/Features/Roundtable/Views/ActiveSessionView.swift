@@ -2,15 +2,22 @@ import SwiftUI
 
 struct ActiveSessionView: View {
     @Environment(\.presentationMode) var presentationMode
-    @State private var selectedTab = 0
+    @StateObject private var viewModel: ActiveSessionViewModel
     @State private var messageText = ""
+    
+    init(roundtable: Roundtable) {
+        _viewModel = StateObject(wrappedValue: ActiveSessionViewModel(roundtable: roundtable))
+    }
     
     var body: some View {
         VStack(spacing: 0) {
             // Header
             VStack(spacing: 12) {
                 HStack {
-                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                    Button(action: { 
+                        viewModel.leaveSession()
+                        presentationMode.wrappedValue.dismiss() 
+                    }) {
                         Image(systemName: "chevron.down")
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.white)
@@ -25,7 +32,7 @@ struct ActiveSessionView: View {
                         Text("rt_active_title".localized())
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
-                        Text("2025’te Sürdürülebilir Büyüme Stratejileri")
+                        Text(viewModel.roundtable.title)
                             .font(.system(size: 12))
                             .foregroundColor(AppColors.textSecondary)
                     }
@@ -41,7 +48,10 @@ struct ActiveSessionView: View {
                                 .clipShape(Circle())
                         }
                         
-                        Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                        Button(action: { 
+                            viewModel.leaveSession()
+                            presentationMode.wrappedValue.dismiss() 
+                        }) {
                             Text("rt_leave_table".localized())
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundColor(.white)
@@ -56,11 +66,11 @@ struct ActiveSessionView: View {
                 HStack(spacing: 20) {
                     HStack(spacing: 6) {
                         Image(systemName: "calendar")
-                        Text("24 Mayıs 2025, Cumartesi")
+                        Text(viewModel.roundtable.startTime.formatted(date: .long, time: .omitted))
                     }
                     HStack(spacing: 6) {
                         Image(systemName: "clock")
-                        Text("20:30 – 22:00 (90 dk)")
+                        Text(viewModel.roundtable.startTime.formatted(date: .omitted, time: .shortened))
                     }
                     Spacer()
                     HStack(spacing: 4) {
@@ -82,7 +92,7 @@ struct ActiveSessionView: View {
                 HStack {
                     HStack(spacing: 4) {
                         Image(systemName: "person.2.fill")
-                        Text("16 / 20 \("rt_participants".localized())")
+                        Text("\(viewModel.participants.count) / 20 \("rt_participants".localized())")
                     }
                     .font(.system(size: 12))
                     .foregroundColor(AppColors.textSecondary)
@@ -138,15 +148,23 @@ struct ActiveSessionView: View {
                         }
                     }
                     
-                    // Avatars around the table
-                    ParticipantAvatarView(name: "Ali Yılmaz", role: "rt_role_moderator".localized(), roleColor: .purple, isMuted: false, angle: -90)
-                    ParticipantAvatarView(name: "Zeynep K.", role: "rt_role_speaker".localized(), roleColor: .blue, isMuted: true, angle: -45)
-                    ParticipantAvatarView(name: "Selin Aras", role: "rt_role_speaker".localized(), roleColor: .blue, isMuted: true, angle: 180)
-                    ParticipantAvatarView(name: "Mehmet D.", role: "rt_role_listener".localized(), roleColor: .gray, isMuted: true, angle: 135)
-                    ParticipantAvatarView(name: "Sen", role: "rt_role_listener".localized(), roleColor: .green, isMuted: false, angle: 90, isMe: true)
-                    ParticipantAvatarView(name: "Deniz Y.", role: "rt_role_listener".localized(), roleColor: .gray, isMuted: true, angle: 45)
-                    ParticipantAvatarView(name: "Ayşe T.", role: "rt_role_listener".localized(), roleColor: .gray, isMuted: true, angle: 0)
-                    ParticipantAvatarView(name: "Murat A.", role: "rt_role_speaker".localized(), roleColor: .blue, isMuted: true, angle: -135)
+                    // Avatars around the table (Dynamic)
+                    ForEach(Array(viewModel.participants.enumerated()), id: \.element.id) { index, participant in
+                        ParticipantAvatarView(
+                            name: participant.userName ?? "Lider",
+                            role: participant.role.title,
+                            roleColor: participant.role.color,
+                            isMuted: participant.isMuted,
+                            angle: Double(index) * (360.0 / Double(max(1, viewModel.participants.count))) - 90,
+                            isMe: participant.userId == SupabaseManager.shared.client.auth.sessionSync?.user.id
+                        )
+                    }
+                    
+                    if viewModel.participants.isEmpty {
+                        Text("Masada kimse yok...")
+                            .font(.system(size: 12))
+                            .foregroundColor(.gray)
+                    }
                 }
                 .frame(height: 320)
                 
@@ -164,10 +182,10 @@ struct ActiveSessionView: View {
             VStack(spacing: 0) {
                 // Custom Tabs
                 HStack(spacing: 0) {
-                    SessionTabItem(title: "rt_tab_chat".localized(), isSelected: selectedTab == 0) { selectedTab = 0 }
-                    SessionTabItem(title: "rt_tab_insights".localized(), isSelected: selectedTab == 1) { selectedTab = 1 }
-                    SessionTabItem(title: "rt_tab_notes".localized(), isSelected: selectedTab == 2) { selectedTab = 2 }
-                    SessionTabItem(title: "rt_tab_surveys".localized(), isSelected: selectedTab == 3) { selectedTab = 3 }
+                    SessionTabItem(title: "rt_tab_chat".localized(), isSelected: viewModel.selectedTab == 0) { viewModel.selectedTab = 0 }
+                    SessionTabItem(title: "rt_tab_insights".localized(), isSelected: viewModel.selectedTab == 1) { viewModel.selectedTab = 1 }
+                    SessionTabItem(title: "rt_tab_notes".localized(), isSelected: viewModel.selectedTab == 2) { viewModel.selectedTab = 2 }
+                    SessionTabItem(title: "rt_tab_surveys".localized(), isSelected: viewModel.selectedTab == 3) { viewModel.selectedTab = 3 }
                 }
                 .padding(.horizontal, 20)
                 
@@ -176,23 +194,22 @@ struct ActiveSessionView: View {
                 // Chat List
                 ScrollView {
                     VStack(spacing: 16) {
-                        ChatRow(name: "Ali Yılmaz", role: "rt_role_moderator".localized(), roleColor: .purple, message: "Hoş geldiniz! Harika bir sohbet bizi bekliyor.", time: "20:31")
-                        ChatRow(name: "Zeynep K.", role: "rt_role_speaker".localized(), roleColor: .blue, message: "Sürdürülebilir büyüme için en kritik önceliğiniz sizce nedir?", time: "20:32")
-                        ChatRow(name: "Mehmet D.", role: "rt_role_listener".localized(), roleColor: .gray, message: "Teknoloji yatırımlarının etkisi hakkında ne düşünüyorsunuz?", time: "20:33")
-                        
-                        // New Messages Divider
-                        HStack {
-                            Rectangle().fill(Color.white.opacity(0.1)).frame(height: 1)
-                            Text("rt_new_messages".localized())
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(AppColors.textSecondary)
-                                .padding(.horizontal, 8)
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 10))
-                                .foregroundColor(AppColors.textSecondary)
-                            Rectangle().fill(Color.white.opacity(0.1)).frame(height: 1)
+                        ForEach(viewModel.messages) { message in
+                            ChatRow(
+                                name: message.userName ?? "Kullanıcı",
+                                role: "Katılımcı",
+                                roleColor: .blue,
+                                message: message.content,
+                                time: message.createdAt.formatted(date: .omitted, time: .shortened)
+                            )
                         }
-                        .padding(.vertical, 8)
+                        
+                        if viewModel.messages.isEmpty {
+                            Text("Sohbeti başlatın...")
+                                .font(.system(size: 12))
+                                .foregroundColor(.gray)
+                                .padding(.top, 40)
+                        }
                     }
                     .padding(20)
                 }
@@ -214,7 +231,12 @@ struct ActiveSessionView: View {
                     .background(Color.white.opacity(0.05))
                     .cornerRadius(24)
                     
-                    Button(action: {}) {
+                    Button(action: {
+                        Task {
+                            await viewModel.sendMessage(messageText)
+                            messageText = ""
+                        }
+                    }) {
                         ZStack {
                             Circle()
                                 .fill(AppColors.primary)
@@ -263,6 +285,9 @@ struct ActiveSessionView: View {
         }
         .background(AppColors.background.ignoresSafeArea())
         .navigationBarHidden(true)
+        .task {
+            await viewModel.setupSession()
+        }
     }
 }
 
