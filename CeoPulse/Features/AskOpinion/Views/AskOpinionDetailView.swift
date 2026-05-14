@@ -178,54 +178,58 @@ struct AskOpinionDetailView: View {
     }
     
     private func imageAttachmentView(_ attachment: OpinionAttachment) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            AsyncImage(url: URL(string: attachment.url ?? "")) { image in
-                image.resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Rectangle()
-                    .fill(Color.white.opacity(0.05))
-                    .overlay(ProgressView().tint(.white))
+        Link(destination: URL(string: attachment.url ?? "") ?? URL(string: "https://google.com")!) {
+            VStack(alignment: .leading, spacing: 8) {
+                AsyncImage(url: URL(string: attachment.url ?? "")) { image in
+                    image.resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Rectangle()
+                        .fill(Color.white.opacity(0.05))
+                        .overlay(ProgressView().tint(.white))
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 200)
+                .cornerRadius(16)
+                .clipped()
+                
+                Text(attachment.name)
+                    .font(.system(size: 12))
+                    .foregroundColor(AppColors.textSecondary)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 200)
-            .cornerRadius(16)
-            .clipped()
-            
-            Text(attachment.name)
-                .font(.system(size: 12))
-                .foregroundColor(AppColors.textSecondary)
         }
     }
     
     private func fileAttachmentView(_ attachment: OpinionAttachment, icon: String) -> some View {
-        HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.purple.opacity(0.1))
-                    .frame(width: 40, height: 40)
-                Image(systemName: icon)
-                    .foregroundColor(.purple)
-            }
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(attachment.name)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.white)
-                Text("Dosya")
-                    .font(.system(size: 11))
+        Link(destination: URL(string: attachment.url ?? "") ?? URL(string: "https://google.com")!) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.purple.opacity(0.1))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: icon)
+                        .foregroundColor(.purple)
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(attachment.name)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white)
+                    Text("Dosya")
+                        .font(.system(size: 11))
+                        .foregroundColor(AppColors.textSecondary)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "arrow.down.circle")
                     .foregroundColor(AppColors.textSecondary)
             }
-            
-            Spacer()
-            
-            Image(systemName: "arrow.down.circle")
-                .foregroundColor(AppColors.textSecondary)
+            .padding(12)
+            .background(Color.white.opacity(0.03))
+            .cornerRadius(12)
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
         }
-        .padding(12)
-        .background(Color.white.opacity(0.03))
-        .cornerRadius(12)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.05), lineWidth: 1))
     }
     
     private func linkAttachmentView(_ attachment: OpinionAttachment) -> some View {
