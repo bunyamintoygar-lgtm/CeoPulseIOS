@@ -5,6 +5,8 @@ struct AskOpinionDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel: AskOpinionDetailViewModel
     @State private var isFileImporterPresented = false
+    @State private var showDeleteAlert = false
+    @State private var responseToDelete: OpinionResponse?
     
     var body: some View {
         ZStack {
@@ -32,6 +34,16 @@ struct AskOpinionDetailView: View {
             }
         }
         .navigationBarHidden(true)
+        .alert("Yanıtı Sil", isPresented: $showDeleteAlert) {
+            Button("Sil", role: .destructive) {
+                if let response = responseToDelete {
+                    viewModel.deleteResponse(response)
+                }
+            }
+            Button("Vazgeç", role: .cancel) {}
+        } message: {
+            Text("Bu yanıtı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")
+        }
     }
     
     // MARK: - Components
@@ -458,7 +470,10 @@ struct AskOpinionDetailView: View {
                         response: response,
                         currentUserId: viewModel.currentUserId,
                         onLike: { viewModel.toggleLike(for: response) },
-                        onDelete: { viewModel.deleteResponse(response) },
+                        onDelete: {
+                            responseToDelete = response
+                            showDeleteAlert = true
+                        },
                         onEdit: {
                             viewModel.editingResponseId = response.id
                             viewModel.newResponseText = response.content
@@ -533,21 +548,25 @@ struct ResponseCard: View {
                 }
                 
                 if response.authorId == currentUserId {
-                    Menu {
+                    HStack(spacing: 8) {
                         Button(action: onEdit) {
-                            Label("Düzenle", systemImage: "pencil")
+                            Image(systemName: "pencil")
+                                .font(.system(size: 14))
+                                .foregroundColor(.purple)
+                                .padding(8)
+                                .background(Color.purple.opacity(0.1))
+                                .clipShape(Circle())
                         }
-                        Button(role: .destructive, action: onDelete) {
-                            Label("Sil", systemImage: "trash")
+                        
+                        Button(action: onDelete) {
+                            Image(systemName: "trash")
+                                .font(.system(size: 14))
+                                .foregroundColor(.red)
+                                .padding(8)
+                                .background(Color.red.opacity(0.1))
+                                .clipShape(Circle())
                         }
-                    } label: {
-                        Image(systemName: "ellipsis")
-                            .foregroundColor(AppColors.textSecondary)
-                            .padding(4)
                     }
-                } else {
-                    Image(systemName: "ellipsis")
-                        .foregroundColor(AppColors.textSecondary)
                 }
             }
             
