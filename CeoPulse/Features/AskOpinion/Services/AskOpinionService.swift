@@ -94,8 +94,9 @@ class AskOpinionService {
         // 3. Tab Filter
         if tab == 1, let userId = currentUserId {
             // Answered by me: Questions that have a response from the current user
-            // We fetch the opinion IDs from opinion_responses first
-            let responseData: [OpinionResponseDTO] = try await client
+            struct OpinionIdDTO: Codable { let opinion_id: UUID }
+            
+            let responseData: [OpinionIdDTO] = try await client
                 .from("opinion_responses")
                 .select("opinion_id")
                 .eq("author_id", value: userId)
