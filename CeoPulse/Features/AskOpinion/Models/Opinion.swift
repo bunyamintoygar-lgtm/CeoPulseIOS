@@ -27,7 +27,7 @@ struct OpinionResponse: Identifiable {
     let authorName: String
     let authorTitle: String
     let authorAvatar: String?
-    let content: String
+    var content: String
     var likeCount: Int
     let commentCount: Int
     let isBestResponse: Bool

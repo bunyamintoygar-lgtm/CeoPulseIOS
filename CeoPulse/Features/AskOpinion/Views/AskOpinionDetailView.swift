@@ -5,6 +5,9 @@ struct AskOpinionDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel: AskOpinionDetailViewModel
     @State private var isFileImporterPresented = false
+    @State private var editingResponse: OpinionResponse?
+    @State private var editContent: String = ""
+    @State private var isEditSheetPresented = false
     
     var body: some View {
         ZStack {
@@ -32,6 +35,52 @@ struct AskOpinionDetailView: View {
             }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $isEditSheetPresented) {
+            editResponseSheet
+        }
+    }
+    
+    private var editResponseSheet: some View {
+        ZStack {
+            AppColors.background.ignoresSafeArea()
+            VStack(spacing: 20) {
+                HStack {
+                    Text("Yanıtı Düzenle")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    Spacer()
+                    Button("Kapat") { isEditSheetPresented = false }
+                        .foregroundColor(.purple)
+                }
+                .padding()
+                
+                TextEditor(text: $editContent)
+                    .frame(height: 150)
+                    .padding(8)
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(12)
+                    .foregroundColor(.white)
+                
+                Button(action: {
+                    if let response = editingResponse {
+                        viewModel.editResponse(response.id, newContent: editContent)
+                    }
+                    isEditSheetPresented = false
+                }) {
+                    Text("Güncelle")
+                        .font(.bold(.system(size: 16))())
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.purple)
+                        .cornerRadius(12)
+                }
+                .disabled(editContent.isEmpty)
+                
+                Spacer()
+            }
+            .padding()
+        }
     }
     
     // MARK: - Components
@@ -442,9 +491,17 @@ struct AskOpinionDetailView: View {
             
             LazyVStack(spacing: 16) {
                 ForEach(viewModel.responses) { response in
-                    ResponseCard(response: response) {
-                        viewModel.toggleLike(for: response)
-                    }
+                    ResponseCard(
+                        response: response,
+                        currentUserId: viewModel.currentUserId,
+                        onLike: { viewModel.toggleLike(for: response) },
+                        onDelete: { viewModel.deleteResponse(response) },
+                        onEdit: {
+                            editingResponse = response
+                            editContent = response.content
+                            isEditSheetPresented = true
+                        }
+                    )
                 }
             }
         }
@@ -455,27 +512,50 @@ struct AskOpinionDetailView: View {
 
 struct ResponseCard: View {
     let response: OpinionResponse
+    let currentUserId: UUID
     let onLike: () -> Void
+    let onDelete: () -> Void
+    let onEdit: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 12) {
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 36, height: 36)
-                    .overlay(
-                        Image(systemName: "person.fill")
-                            .foregroundColor(.white.opacity(0.5))
-                            .font(.system(size: 16))
-                    )
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(response.authorName)
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.white)
-                    Text(response.authorTitle)
-                        .font(.system(size: 11))
-                        .foregroundColor(AppColors.textSecondary)
+                if response.isAnonymous {
+                    Circle()
+                        .fill(Color.purple.opacity(0.1))
+                        .frame(width: 36, height: 36)
+                        .overlay(
+                            Image(systemName: "eye.slash.fill")
+                                .foregroundColor(.purple)
+                                .font(.system(size: 16))
+                        )
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Gizli Kullanıcı")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.white)
+                        Text("CEO Pulse Üyesi")
+                            .font(.system(size: 11))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                } else {
+                    Circle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 36, height: 36)
+                        .overlay(
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.white.opacity(0.5))
+                                .font(.system(size: 16))
+                        )
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(response.authorName)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.white)
+                        Text(response.authorTitle)
+                            .font(.system(size: 11))
+                            .foregroundColor(AppColors.textSecondary)
+                    }
                 }
                 
                 Spacer()
@@ -490,8 +570,23 @@ struct ResponseCard: View {
                         .cornerRadius(6)
                 }
                 
-                Image(systemName: "ellipsis")
-                    .foregroundColor(AppColors.textSecondary)
+                if response.authorId == currentUserId {
+                    Menu {
+                        Button(action: onEdit) {
+                            Label("Düzenle", systemImage: "pencil")
+                        }
+                        Button(role: .destructive, action: onDelete) {
+                            Label("Sil", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .foregroundColor(AppColors.textSecondary)
+                            .padding(4)
+                    }
+                } else {
+                    Image(systemName: "ellipsis")
+                        .foregroundColor(AppColors.textSecondary)
+                }
             }
             
             Text("\(response.createdAt.timeAgoDisplay())")

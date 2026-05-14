@@ -11,6 +11,7 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
     @Published var attachments: [OpinionAttachment] = []
     
     private let service = AskOpinionService.shared
+    let currentUserId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
     
     init(opinion: Opinion) {
         self.opinion = opinion
@@ -43,7 +44,7 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
         let newResponse = OpinionResponse(
             id: UUID(),
             opinionId: opinion.id,
-            authorId: UUID(), // Current user ID placeholder
+            authorId: currentUserId, 
             authorName: "Siz", 
             authorTitle: "CEO",
             authorAvatar: nil,
@@ -70,6 +71,20 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
                     responses[index].likeCount += 1
                     responses[index].isLiked = true
                 }
+            }
+        }
+    }
+
+    func deleteResponse(_ response: OpinionResponse) {
+        withAnimation {
+            responses.removeAll { $0.id == response.id }
+        }
+    }
+
+    func editResponse(_ responseId: UUID, newContent: String) {
+        if let index = responses.firstIndex(where: { $0.id == responseId }) {
+            withAnimation {
+                responses[index].content = newContent
             }
         }
     }
