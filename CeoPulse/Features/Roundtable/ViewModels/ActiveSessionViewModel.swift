@@ -1,4 +1,4 @@
-// UPDATED_BY_ANTIGRAVITY_v2
+// UPDATED_BY_ANTIGRAVITY_v3
 import Foundation
 import SwiftUI
 import Combine
@@ -6,8 +6,7 @@ import Supabase
 import Realtime
 
 // ViewModel to manage active roundtable sessions and real-time updates
-@MainActor
-class ActiveSessionViewModel: ObservableObject {
+@MainActor class ActiveSessionViewModel: ObservableObject {
     let roundtable: Roundtable
     
     @Published var participants: [RoundtableParticipant] = []
