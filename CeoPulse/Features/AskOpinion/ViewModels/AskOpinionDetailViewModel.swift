@@ -32,6 +32,8 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
         responses = []
     }
     
+    @Published var editingResponseId: UUID?
+    
     @MainActor
     func submitResponse() async {
         guard !newResponseText.isEmpty else { return }
@@ -41,24 +43,41 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
         // Simulating network delay and response addition
         try? await Task.sleep(nanoseconds: 1_000_000_000) 
         
-        let newResponse = OpinionResponse(
-            id: UUID(),
-            opinionId: opinion.id,
-            authorId: currentUserId, 
-            authorName: "Siz", 
-            authorTitle: "CEO",
-            authorAvatar: nil,
-            content: newResponseText,
-            likeCount: 0,
-            commentCount: 0,
-            isBestResponse: false,
-            isAnonymous: isAnonymous,
-            createdAt: Date()
-        )
+        if let editingId = editingResponseId {
+            if let index = responses.firstIndex(where: { $0.id == editingId }) {
+                withAnimation {
+                    responses[index].content = newResponseText
+                }
+            }
+            editingResponseId = nil
+        } else {
+            let newResponse = OpinionResponse(
+                id: UUID(),
+                opinionId: opinion.id,
+                authorId: currentUserId, 
+                authorName: "Siz", 
+                authorTitle: "CEO",
+                authorAvatar: nil,
+                content: newResponseText,
+                likeCount: 0,
+                commentCount: 0,
+                isBestResponse: false,
+                isAnonymous: isAnonymous,
+                createdAt: Date()
+            )
+            
+            withAnimation {
+                responses.insert(newResponse, at: 0)
+            }
+        }
         
-        responses.insert(newResponse, at: 0)
         newResponseText = ""
         isLoading = false
+    }
+
+    func cancelEditing() {
+        editingResponseId = nil
+        newResponseText = ""
     }
 
     func toggleLike(for response: OpinionResponse) {
@@ -81,11 +100,4 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
         }
     }
 
-    func editResponse(_ responseId: UUID, newContent: String) {
-        if let index = responses.firstIndex(where: { $0.id == responseId }) {
-            withAnimation {
-                responses[index].content = newContent
-            }
-        }
-    }
 }

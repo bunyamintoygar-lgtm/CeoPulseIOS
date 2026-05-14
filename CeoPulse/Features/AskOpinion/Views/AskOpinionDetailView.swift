@@ -5,9 +5,6 @@ struct AskOpinionDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel: AskOpinionDetailViewModel
     @State private var isFileImporterPresented = false
-    @State private var editingResponse: OpinionResponse?
-    @State private var editContent: String = ""
-    @State private var isEditSheetPresented = false
     
     var body: some View {
         ZStack {
@@ -35,52 +32,6 @@ struct AskOpinionDetailView: View {
             }
         }
         .navigationBarHidden(true)
-        .sheet(isPresented: $isEditSheetPresented) {
-            editResponseSheet
-        }
-    }
-    
-    private var editResponseSheet: some View {
-        ZStack {
-            AppColors.background.ignoresSafeArea()
-            VStack(spacing: 20) {
-                HStack {
-                    Text("Yanıtı Düzenle")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    Spacer()
-                    Button("Kapat") { isEditSheetPresented = false }
-                        .foregroundColor(.purple)
-                }
-                .padding()
-                
-                TextEditor(text: $editContent)
-                    .frame(height: 150)
-                    .padding(8)
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(12)
-                    .foregroundColor(.white)
-                
-                Button(action: {
-                    if let response = editingResponse {
-                        viewModel.editResponse(response.id, newContent: editContent)
-                    }
-                    isEditSheetPresented = false
-                }) {
-                    Text("Güncelle")
-                        .font(.bold(.system(size: 16))())
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.purple)
-                        .cornerRadius(12)
-                }
-                .disabled(editContent.isEmpty)
-                
-                Spacer()
-            }
-            .padding()
-        }
     }
     
     // MARK: - Components
@@ -346,22 +297,23 @@ struct AskOpinionDetailView: View {
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.purple.opacity(0.2), lineWidth: 1))
     }
     
-    private var responseInputSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("Yanıtınızı Paylaşın")
+                Text(viewModel.editingResponseId == nil ? "Yanıtınızı Paylaşın" : "Yanıtı Düzenle")
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(viewModel.editingResponseId == nil ? .white : .purple)
                 
                 Spacer()
                 
-                HStack(spacing: 8) {
-                    Text("Anonim olarak gönder")
-                        .font(.system(size: 11))
-                        .foregroundColor(AppColors.textSecondary)
-                    Toggle("", isOn: $viewModel.isAnonymous)
-                        .labelsHidden()
-                        .scaleEffect(0.7)
+                if viewModel.editingResponseId == nil {
+                    HStack(spacing: 8) {
+                        Text("Anonim olarak gönder")
+                            .font(.system(size: 11))
+                            .foregroundColor(AppColors.textSecondary)
+                        Toggle("", isOn: $viewModel.isAnonymous)
+                            .labelsHidden()
+                            .scaleEffect(0.7)
+                    }
                 }
             }
             
@@ -409,7 +361,19 @@ struct AskOpinionDetailView: View {
                     .background(Color.white.opacity(0.02))
                 }
                 
-                HStack {
+                HStack(spacing: 12) {
+                    if viewModel.editingResponseId != nil {
+                        Button(action: { viewModel.cancelEditing() }) {
+                            Text("Vazgeç")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white.opacity(0.6))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(Color.white.opacity(0.1))
+                                .cornerRadius(10)
+                        }
+                    }
+                    
                     Button(action: { isFileImporterPresented = true }) {
                         HStack(spacing: 6) {
                             Image(systemName: "paperclip")
@@ -431,7 +395,7 @@ struct AskOpinionDetailView: View {
                         if viewModel.isLoading {
                             ProgressView().tint(.white)
                         } else {
-                            Text("Yanıtla")
+                            Text(viewModel.editingResponseId == nil ? "Yanıtla" : "Güncelle")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 24)
@@ -496,9 +460,8 @@ struct AskOpinionDetailView: View {
                         onLike: { viewModel.toggleLike(for: response) },
                         onDelete: { viewModel.deleteResponse(response) },
                         onEdit: {
-                            editingResponse = response
-                            editContent = response.content
-                            isEditSheetPresented = true
+                            viewModel.editingResponseId = response.id
+                            viewModel.newResponseText = response.content
                         }
                     )
                 }
