@@ -39,7 +39,7 @@ import Realtime
             self.messages = try await service.fetchMessages(roundtableId: roundtable.id)
             
             // 2. Setup Realtime
-            setupRealtime()
+            await setupRealtime()
             
             isLoading = false
         } catch {
@@ -48,7 +48,7 @@ import Realtime
         }
     }
     
-    private func setupRealtime() {
+    private func setupRealtime() async {
         let channelId = "roundtable:\(roundtable.id.uuidString)"
         channel = client.realtimeV2.channel(channelId)
         
@@ -102,7 +102,7 @@ import Realtime
             }
         }
         
-        channel?.subscribe()
+        await channel?.subscribe()
     }
     
     private func refreshParticipants() {
