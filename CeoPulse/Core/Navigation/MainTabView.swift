@@ -28,7 +28,7 @@ struct MainTabView: View {
                 .tag(3)
                 
                 NavigationView {
-                    ProfileView()
+                    RoundtableView()
                 }
                 .tag(4)
             }
@@ -44,7 +44,7 @@ struct MainTabView: View {
                     TabItem(icon: "chart.bar.fill", label: "Anketler", isSelected: selectedTab == 1) { selectedTab = 1 }
                     TabItem(icon: "bubble.left.and.bubble.right.fill", label: "Ask Opinion", isSelected: selectedTab == 2) { selectedTab = 2 }
                     TabItem(icon: "sparkles", label: "AI Insights", isSelected: selectedTab == 3) { selectedTab = 3 }
-                    TabItem(icon: "person.fill", label: "nav_profile".localized(), isSelected: selectedTab == 4) { selectedTab = 4 }
+                    TabItem(icon: "person.3.fill", label: "Roundtable", isSelected: selectedTab == 4) { selectedTab = 4 }
                 }
                 .padding(.top, 12)
                 .padding(.bottom, 32) // Increased for safe area
