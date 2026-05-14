@@ -19,7 +19,13 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
     }
     
     private let service = AskOpinionService.shared
-    let currentUserId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+    
+    var currentUserId: UUID {
+        // In a real app, this should come from a proper AuthManager or Session
+        // For now, we try to get it from the Supabase client session
+        // If no session, we use a fallback (which might fail FK constraints)
+        return SupabaseManager.shared.client.auth.currentSession?.user.id ?? UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+    }
     
     init(opinion: Opinion) {
         self.opinion = opinion
@@ -58,6 +64,7 @@ class AskOpinionDetailViewModel: NSObject, ObservableObject {
         guard !newResponseText.isEmpty else { return }
         
         isLoading = true
+        print("DEBUG: Submitting response for user: \(currentUserId)")
         
         do {
             if let editingId = editingResponseId {
