@@ -506,11 +506,10 @@ struct ResponseCard: View {
             
             HStack {
                 HStack(spacing: 16) {
-                    Label("\(response.likeCount)", systemImage: "hand.thumbsup")
-                    Label("\(response.commentCount)", systemImage: "bubble.left")
+                    Label("\(response.likeCount)", systemImage: response.isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
                 }
                 .font(.system(size: 11))
-                .foregroundColor(AppColors.textSecondary)
+                .foregroundColor(response.isLiked ? .purple : AppColors.textSecondary)
                 
                 Spacer()
                 
