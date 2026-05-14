@@ -191,9 +191,8 @@ struct AskOpinionDetailView: View {
     
     private var attachmentsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-                ForEach(viewModel.opinion.attachments) { attachment in
-                    attachmentView(for: attachment)
-                }
+            ForEach(viewModel.opinion.attachments) { attachment in
+                attachmentView(for: attachment)
             }
         }
         .padding(.horizontal, 20)
