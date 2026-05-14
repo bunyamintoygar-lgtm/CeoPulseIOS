@@ -309,6 +309,7 @@ struct AskOpinionDetailView: View {
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.purple.opacity(0.2), lineWidth: 1))
     }
     
+    private var responseInputSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text(viewModel.editingResponseId == nil ? "Yanıtınızı Paylaşın" : "Yanıtı Düzenle")
@@ -424,20 +425,20 @@ struct AskOpinionDetailView: View {
                 .cornerRadius(12, corners: [.bottomLeft, .bottomRight])
             }
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
-        }
-        .padding(.horizontal, 20)
-        .fileImporter(
-            isPresented: $isFileImporterPresented,
-            allowedContentTypes: [.pdf, .text, .plainText, .image],
-            allowsMultipleSelection: false
-        ) { result in
-            switch result {
-            case .success(let urls):
-                if let url = urls.first {
-                    viewModel.addAttachment(name: url.lastPathComponent, url: url.absoluteString)
+            .padding(.horizontal, 20)
+            .fileImporter(
+                isPresented: $isFileImporterPresented,
+                allowedContentTypes: [.pdf, .text, .plainText, .image],
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    if let url = urls.first {
+                        viewModel.addAttachment(name: url.lastPathComponent, url: url.absoluteString)
+                    }
+                case .failure(let error):
+                    print("File selection error: \(error)")
                 }
-            case .failure(let error):
-                print("File selection error: \(error)")
             }
         }
     }
