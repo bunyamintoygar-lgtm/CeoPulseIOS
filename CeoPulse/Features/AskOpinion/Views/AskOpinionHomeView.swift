@@ -172,90 +172,67 @@ struct AskOpinionHomeView: View {
     }
     
     private var heroSection: some View {
-        ZStack(alignment: .leading) {
-            // Background Gradient
-            RoundedRectangle(cornerRadius: 24)
-                .fill(LinearGradient(
-                    colors: [Color(hex: "2A1B54"), Color(hex: "120C28")],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Topluluğa Sorun")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                        
-                        Text("Merak ettiğiniz konuyu sorun, uzmanlar ve liderlerden farklı bakış açıları kazanın.")
-                            .font(.system(size: 13))
-                            .foregroundColor(.white.opacity(0.8))
-                            .padding(.trailing, 10)
-                        
-                        Button(action: {
-                            showCreateOpinion = true
-                        }) {
-                            HStack {
-                                Text("Yeni Soru Sor")
-                                Image(systemName: "plus.circle")
-                            }
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
-                            .background(Color(hex: "6D28D9"))
-                            .cornerRadius(14)
-                        }
-                        .padding(.top, 8)
-                    }
+        Button(action: { showCreateOpinion = true }) {
+            HStack(spacing: 16) {
+                // Icon
+                ZStack {
+                    Circle()
+                        .fill(Color.purple.opacity(0.15))
+                        .frame(width: 48, height: 48)
                     
-                    Spacer(minLength: 10)
-                    
-                    // Animated SF Symbols 3D Illustration
-                    ZStack {
-                        Circle()
-                            .fill(Color.purple.opacity(0.15))
-                            .frame(width: 120, height: 120)
-                        
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 40))
-                            .foregroundColor(.yellow.opacity(0.8))
-                            .offset(x: -35, y: -35)
-                            .symbolEffect(.variableColor.iterative.dimInactiveLayers.nonReversing, options: .repeating)
-                        
-                        Image(systemName: "bubble.left.and.bubble.right.fill")
-                            .font(.system(size: 65))
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(.purple.opacity(0.9), .blue.opacity(0.6))
-                            .offset(x: 5, y: -10)
-                            .symbolEffect(.breathe, options: .repeating) // iOS 18 Özel
-                        
-                        Image(systemName: "lightbulb.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(Color(hex: "F59E0B")) // Amber
-                            .offset(x: 35, y: 20)
-                            .symbolEffect(.wiggle, options: .repeating) // iOS 18 Özel
-                    }
-                    .offset(y: -10)
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                        .font(.system(size: 20))
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.purple, .blue.opacity(0.6))
                 }
                 
-                // Bottom Text Box 100% Width
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 12))
-                        .padding(.top, 1)
-                    Text("Burada yer alan görüş ve yanıtlar yatırım tavsiyesi niteliğinde değildir, sadece bilgi amaçlıdır.")
-                        .font(.system(size: 11))
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                // Text content
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Topluluğa Sorun")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text("Merak ettiğiniz konuyu sorun.")
+                        .font(.system(size: 13))
+                        .foregroundColor(.white.opacity(0.6))
                 }
-                .foregroundColor(.white.opacity(0.5))
-                .padding(12)
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(10)
+                
+                Spacer()
+                
+                // Compact Action Button
+                HStack(spacing: 6) {
+                    Text("Soru Sor")
+                        .font(.system(size: 14, weight: .bold))
+                    Image(systemName: "plus.circle")
+                        .font(.system(size: 16))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(
+                    LinearGradient(
+                        colors: [Color(hex: "7C3AED"), Color(hex: "6D28D9")],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .cornerRadius(12)
             }
-            .padding(24)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color(hex: "1A1138"))
+                    
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                }
+            )
         }
+        .buttonStyle(PlainButtonStyle())
         .padding(.horizontal, 20)
+        .padding(.top, 4)
     }
     
     private var tabSection: some View {
