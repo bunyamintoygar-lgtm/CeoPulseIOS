@@ -555,7 +555,7 @@
 "ao_ask_community" = "Ask the Community";
 "ao_ask_community_desc_compact" = "Ask what you're curious about.";
 "ao_ask_community_desc" = "Ask what you're curious about, gain different perspectives from experts and leaders.";
-"ao_ask_button" = "Ask a Question";
+"ao_ask_button" = "Ask Opinion";
 "ao_ask_button_new" = "Ask New Question";
 "ao_disclaimer" = "The views and responses here are not investment advice and are for informational purposes only.";
 "ao_tab_all" = "All Questions";
