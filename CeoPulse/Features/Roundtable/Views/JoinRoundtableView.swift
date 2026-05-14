@@ -282,6 +282,6 @@ struct RuleRow: View {
 
 struct JoinRoundtableView_Previews: PreviewProvider {
     static var previews: some View {
-        JoinRoundtableView()
+        JoinRoundtableView(roundtable: .mock)
     }
 }

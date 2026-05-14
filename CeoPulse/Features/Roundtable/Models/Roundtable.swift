@@ -114,3 +114,20 @@ struct RoundtableMessage: Identifiable, Codable {
         case createdAt = "created_at"
     }
 }
+
+extension Roundtable {
+    static var mock: Roundtable {
+        Roundtable(
+            id: UUID(),
+            title: "Yapay Zeka Çağında Liderlik: Stratejilerimiz Nasıl Değişmeli?",
+            description: "AI dönüşümü, liderlik yetkinliklerini ve organizasyon kültürünü nasıl yeniden şekillendiriyor?",
+            category: "Teknoloji",
+            status: .active,
+            startTime: Date(),
+            endTime: Date().addingTimeInterval(3600),
+            imageUrl: "ai_meeting",
+            moderatorId: UUID(),
+            createdAt: Date()
+        )
+    }
+}

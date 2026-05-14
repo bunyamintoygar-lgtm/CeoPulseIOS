@@ -1,10 +1,7 @@
 import SwiftUI
 
 struct FeaturedRoundtableCard: View {
-    let title: String
-    let description: String
-    let participantCount: Int
-    let imageName: String
+    let roundtable: Roundtable
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -34,12 +31,12 @@ struct FeaturedRoundtableCard: View {
                     .background(Color.purple.opacity(0.5))
                     .cornerRadius(8)
                 
-                Text(title)
+                Text(roundtable.title)
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(.white)
                     .lineLimit(3)
                 
-                Text(description)
+                Text(roundtable.description ?? "")
                     .font(.system(size: 13))
                     .foregroundColor(.white.opacity(0.8))
                     .lineLimit(2)
@@ -62,14 +59,14 @@ struct FeaturedRoundtableCard: View {
                             .clipShape(Capsule())
                     }
                     
-                    Text("\(participantCount) \("rt_participants".localized())")
+                    Text("28 \("rt_participants".localized())")
                         .font(.system(size: 12))
                         .foregroundColor(.white.opacity(0.7))
                         .padding(.leading, 8)
                     
                     Spacer()
                     
-                    NavigationLink(destination: JoinRoundtableView()) {
+                    NavigationLink(destination: JoinRoundtableView(roundtable: roundtable)) {
                         HStack {
                             Text("rt_join_discussion".localized())
                                 .font(.system(size: 14, weight: .bold))
@@ -105,12 +102,7 @@ struct FeaturedRoundtableCard: View {
 
 struct FeaturedRoundtableCard_Previews: PreviewProvider {
     static var previews: some View {
-        FeaturedRoundtableCard(
-            title: "Yapay Zeka Çağında Liderlik: Stratejilerimiz Nasıl Değişmeli?",
-            description: "AI dönüşümü, liderlik yetkinliklerini ve organizasyon kültürünü nasıl yeniden şekillendiriyor?",
-            participantCount: 28,
-            imageName: "ai_meeting"
-        )
+        FeaturedRoundtableCard(roundtable: .mock)
         .padding()
         .background(AppColors.background)
     }

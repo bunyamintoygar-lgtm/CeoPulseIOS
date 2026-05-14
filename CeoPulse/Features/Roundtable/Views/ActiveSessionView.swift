@@ -182,10 +182,10 @@ struct ActiveSessionView: View {
             VStack(spacing: 0) {
                 // Custom Tabs
                 HStack(spacing: 0) {
-                    SessionTabItem(title: "rt_tab_chat".localized(), isSelected: viewModel.selectedTab == 0) { viewModel.selectedTab = 0 }
-                    SessionTabItem(title: "rt_tab_insights".localized(), isSelected: viewModel.selectedTab == 1) { viewModel.selectedTab = 1 }
-                    SessionTabItem(title: "rt_tab_notes".localized(), isSelected: viewModel.selectedTab == 2) { viewModel.selectedTab = 2 }
-                    SessionTabItem(title: "rt_tab_surveys".localized(), isSelected: viewModel.selectedTab == 3) { viewModel.selectedTab = 3 }
+                    SessionTabItem(title: "rt_tab_chat".localized(), isSelected: true) { } // Simple mock for now
+                    SessionTabItem(title: "rt_tab_insights".localized(), isSelected: false) { }
+                    SessionTabItem(title: "rt_tab_notes".localized(), isSelected: false) { }
+                    SessionTabItem(title: "rt_tab_surveys".localized(), isSelected: false) { }
                 }
                 .padding(.horizontal, 20)
                 
@@ -441,6 +441,6 @@ struct ControlCircleButton: View {
 
 struct ActiveSessionView_Previews: PreviewProvider {
     static var previews: some View {
-        ActiveSessionView()
+        ActiveSessionView(roundtable: .mock)
     }
 }
