@@ -2,194 +2,167 @@ import SwiftUI
 
 struct RoundtableView: View {
     @StateObject private var viewModel = RoundtableViewModel()
-    
-    let categories = [
-        ("Tümü", "square.grid.2x2.fill"),
-        ("Teknoloji", "cpu"),
-        ("Ekonomi", "chart.line.uptrend.xyaxis"),
-        ("İK & Organizasyon", "person.3.fill"),
-        ("Strateji", "target")
-    ]
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 24) {
                 // Header
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("rt_title".localized())
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(.white)
-                        Text("rt_subtitle".localized())
-                            .font(.system(size: 14))
-                            .foregroundColor(AppColors.textSecondary)
-                    }
-                    Spacer()
-                    HStack(spacing: 20) {
-                        Image(systemName: "magnifyingglass")
-                        Image(systemName: "line.3.horizontal.decrease")
-                    }
-                    .font(.system(size: 20))
-                    .foregroundColor(.white)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-                
-                // Category Chips
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(categories, id: \.0) { cat in
-                            EventCategoryChip(
-                                title: cat.0,
-                                iconName: cat.1,
-                                isSelected: viewModel.selectedCategory == cat.0
-                            ) {
-                                viewModel.selectedCategory = cat.0
-                            }
-                        }
-                    }
+                headerSection
                     .padding(.horizontal, 20)
-                }
+                    .padding(.top, 10)
                 
-                // Featured Card (Static for now or first active)
+                // Featured Card (Hero)
                 if let featured = viewModel.roundtables.first {
                     FeaturedRoundtableCard(roundtable: featured)
                         .padding(.horizontal, 20)
                 }
                 
-                // AI Summary Card
-                AISummaryCard()
-                    .padding(.horizontal, 20)
-                
-                // Secondary Tabs
-                HStack(spacing: 24) {
-                    TabItemSmall(title: "rt_tab_my_discussions".localized(), isSelected: viewModel.selectedTab == 0) { viewModel.selectedTab = 0 }
-                    TabItemSmall(title: "rt_tab_following".localized(), isSelected: viewModel.selectedTab == 1) { viewModel.selectedTab = 1 }
-                    TabItemSmall(title: "rt_tab_completed".localized(), isSelected: viewModel.selectedTab == 2) { viewModel.selectedTab = 2 }
-                    Spacer()
-                    HStack(spacing: 4) {
-                        Text("rt_sort".localized())
-                        Image(systemName: "arrow.up.arrow.down")
+                // Upcoming Section
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Text("Yaklaşan Yuvarlak Masalar")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Button("Tümünü Gör") { }
+                            .font(.system(size: 13))
+                            .foregroundColor(AppColors.primaryAccent)
                     }
-                    .font(.system(size: 12))
-                    .foregroundColor(AppColors.textSecondary)
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
-                
-                // List
-                VStack(spacing: 12) {
-                    if viewModel.isLoading {
-                        ProgressView()
-                            .tint(.purple)
-                            .padding()
-                    } else if viewModel.roundtables.isEmpty {
-                        VStack(spacing: 12) {
-                            Image(systemName: "calendar.badge.exclamationmark")
-                                .font(.system(size: 40))
-                                .foregroundColor(.gray)
-                            Text("Henüz bu kategoride tartışma bulunmuyor.")
-                                .font(.system(size: 14))
-                                .foregroundColor(.gray)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 40)
-                    } else {
-                        ForEach(viewModel.roundtables) { roundtable in
-                            NavigationLink(destination: JoinRoundtableView(roundtable: roundtable)) {
-                                RoundtableRow(roundtable: roundtable)
+                    .padding(.horizontal, 20)
+                    
+                    VStack(spacing: 16) {
+                        if viewModel.isLoading {
+                            ProgressView().tint(AppColors.primaryAccent)
+                        } else {
+                            ForEach(viewModel.roundtables.prefix(3)) { roundtable in
+                                NavigationLink(destination: JoinRoundtableView(roundtable: roundtable)) {
+                                    RoundtableRow(roundtable: roundtable)
+                                }
                             }
                         }
                     }
+                    .padding(.horizontal, 20)
                 }
-                .padding(.horizontal, 20)
                 
-                // Start New Roundtable Button
-                startNewRoundtableButton
+                // Past Section
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Text("Geçmiş Yuvarlak Masalar")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Button("Tümünü Gör") { }
+                            .font(.system(size: 13))
+                            .foregroundColor(AppColors.primaryAccent)
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 16) {
+                            PastRoundtableCard(
+                                title: "Yeni Nesil Liderlik Anlayışı",
+                                date: "18 Mayıs 2025",
+                                category: "Liderlik",
+                                duration: "01:25:30",
+                                imageName: "past_1"
+                            )
+                            
+                            PastRoundtableCard(
+                                title: "Dijital Dönüşümde Başarı",
+                                date: "11 Mayıs 2025",
+                                category: "İnovasyon",
+                                duration: "01:12:45",
+                                imageName: "past_2"
+                            )
+                            
+                            PastRoundtableCard(
+                                title: "Piyasa Trendleri ve Tahminler",
+                                date: "4 Mayıs 2025",
+                                category: "Finans",
+                                duration: "01:08:12",
+                                imageName: "past_3"
+                            )
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                }
+                
+                // Info Section
+                infoCardSection
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 100)
             }
         }
         .background(AppColors.background.ignoresSafeArea())
+        .navigationBarHidden(true)
         .refreshable {
             await viewModel.refresh()
         }
     }
     
-    private var startNewRoundtableButton: some View {
+    private var headerSection: some View {
+        VStack(spacing: 20) {
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "arrow.left")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white.opacity(0.1))
+                        .clipShape(Circle())
+                }
+                
+                Spacer()
+            }
+            
+            VStack(spacing: 4) {
+                HStack(spacing: 10) {
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(AppColors.primaryAccent)
+                    
+                    Text("Yuvarlak Masa")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                
+                Text("Fikirler, deneyimler ve vizyonlar buluşuyor.")
+                    .font(.system(size: 14))
+                    .foregroundColor(AppColors.textSecondary)
+            }
+        }
+    }
+    
+    private var infoCardSection: some View {
         HStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(AppColors.primary.opacity(0.2))
+                    .fill(AppColors.primaryAccent.opacity(0.1))
                     .frame(width: 48, height: 48)
-                Image(systemName: "person.3.fill")
-                    .foregroundColor(AppColors.primary)
+                Image(systemName: "person.2.fill")
+                    .foregroundColor(AppColors.primaryAccent)
             }
             
-            VStack(alignment: .leading, spacing: 2) {
-                Text("rt_start_new_title".localized())
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Yuvarlak Masa Nedir?")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
-                Text("rt_start_new_desc".localized())
+                    .foregroundColor(AppColors.primaryAccent)
+                
+                Text("Farklı sektörlerden liderler, girişimciler ve uzmanların bir araya geldiği, fikir alışverişinde bulunduğu özel oturumlardır.")
                     .font(.system(size: 11))
                     .foregroundColor(AppColors.textSecondary)
                     .lineLimit(2)
             }
             
             Spacer()
-            
-            Button(action: {}) {
-                HStack(spacing: 4) {
-                    Text("rt_start_button".localized())
-                    Image(systemName: "plus")
-                }
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(AppColors.primary)
-                .cornerRadius(20)
-            }
         }
         .padding(16)
         .background(AppColors.surface.opacity(0.3))
-        .cornerRadius(24)
+        .cornerRadius(20)
         .overlay(
-            RoundedRectangle(cornerRadius: 24)
+            RoundedRectangle(cornerRadius: 20)
                 .stroke(Color.white.opacity(0.05), lineWidth: 1)
         )
-        .padding(.horizontal, 20)
-        .padding(.bottom, 100)
-    }
-}
-
-struct TabItemSmall: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                Text(title)
-                    .font(.system(size: 13, weight: isSelected ? .bold : .medium))
-                    .foregroundColor(isSelected ? .white : AppColors.textSecondary)
-                
-                if isSelected {
-                    Rectangle()
-                        .fill(AppColors.primary)
-                        .frame(height: 2)
-                        .cornerRadius(1)
-                } else {
-                    Rectangle()
-                        .fill(Color.clear)
-                        .frame(height: 2)
-                }
-            }
-        }
-    }
-}
-
-struct RoundtableView_Previews: PreviewProvider {
-    static var previews: some View {
-        RoundtableView()
     }
 }
