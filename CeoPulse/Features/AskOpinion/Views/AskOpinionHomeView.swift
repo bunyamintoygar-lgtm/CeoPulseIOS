@@ -244,7 +244,7 @@ struct AskOpinionHomeView: View {
                     Image(systemName: "info.circle")
                         .font(.system(size: 12))
                         .padding(.top, 1)
-                    Text("Sorularınız topluluğumuzda yayınlanır ve ilgili kişiler tarafından yanıtlanır.")
+                    Text("Burada yer alan görüş ve yanıtlar yatırım tavsiyesi niteliğinde değildir, sadece bilgi amaçlıdır.")
                         .font(.system(size: 11))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
