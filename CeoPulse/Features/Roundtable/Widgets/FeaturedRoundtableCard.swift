@@ -38,40 +38,32 @@ struct FeaturedRoundtableCard: View {
             
             // Content
             VStack(alignment: .leading, spacing: 12) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Yuvarlak Masaya Katıl")
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Yeni bir yuvarlak masa oluşturun")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
                     
-                    Text("Uzmanlar ve liderlerle bir araya gelin, fikir alışverişinde bulunun, yeni bakış açıları kazanın.")
+                    Text("Uzmanları ve liderleri bir araya getirerek fikir alışverişinde bulunun, yeni bakış açıları kazanın.")
                         .font(.system(size: 13))
                         .foregroundColor(.white.opacity(0.7))
                         .lineLimit(3)
-                        .frame(maxWidth: 200)
+                        .frame(maxWidth: 220)
                 }
+                .padding(.bottom, 8)
                 
-                NavigationLink(destination: JoinRoundtableView(roundtable: roundtable)) {
+                Button(action: { /* Create action */ }) {
                     HStack(spacing: 8) {
-                        Text("Masaya Katıl")
-                        Image(systemName: "chevron.right")
+                        Text("Yuvarlak Masa Oluştur")
+                        Image(systemName: "plus.circle")
                     }
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.white)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
-                    .background(AppColors.primaryAccent)
+                    .background(Color.purple)
                     .cornerRadius(12)
-                    .shadow(color: AppColors.primaryAccent.opacity(0.3), radius: 10, y: 5)
+                    .shadow(color: Color.purple.opacity(0.3), radius: 10, y: 5)
                 }
-                
-                HStack(spacing: 6) {
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 12))
-                    Text("Katılım kontenjanla sınırlıdır. Erken katıl, yerini ayırt!")
-                        .font(.system(size: 10))
-                }
-                .foregroundColor(AppColors.primaryAccent.opacity(0.8))
-                .padding(.top, 4)
             }
             .padding(24)
         }

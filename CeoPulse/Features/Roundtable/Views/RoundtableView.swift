@@ -3,6 +3,9 @@ import SwiftUI
 struct RoundtableView: View {
     @StateObject private var viewModel = RoundtableViewModel()
     @Environment(\.dismiss) var dismiss
+    @State private var selectedTab = 0
+    
+    private let tabs = ["Tüm Masalar", "Kendi Açtıklarım", "Devam Edenler", "Geçmiş Masalar"]
     
     var body: some View {
         ScrollView {
@@ -18,75 +21,17 @@ struct RoundtableView: View {
                         .padding(.horizontal, 20)
                 }
                 
-                // Upcoming Section
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Text("Yaklaşan Yuvarlak Masalar")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                        Spacer()
-                        Button("Tümünü Gör") { }
-                            .font(.system(size: 13))
-                            .foregroundColor(AppColors.primaryAccent)
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    VStack(spacing: 16) {
-                        if viewModel.isLoading {
-                            ProgressView().tint(AppColors.primaryAccent)
-                        } else {
-                            ForEach(viewModel.roundtables.prefix(3)) { roundtable in
-                                NavigationLink(destination: JoinRoundtableView(roundtable: roundtable)) {
-                                    RoundtableRow(roundtable: roundtable)
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                }
+                // Tabs
+                tabsSection
                 
-                // Past Section
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Text("Geçmiş Yuvarlak Masalar")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
-                        Spacer()
-                        Button("Tümünü Gör") { }
-                            .font(.system(size: 13))
-                            .foregroundColor(AppColors.primaryAccent)
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 16) {
-                            PastRoundtableCard(
-                                title: "Yeni Nesil Liderlik Anlayışı",
-                                date: "18 Mayıs 2025",
-                                category: "Liderlik",
-                                duration: "01:25:30",
-                                imageName: "past_1"
-                            )
-                            
-                            PastRoundtableCard(
-                                title: "Dijital Dönüşümde Başarı",
-                                date: "11 Mayıs 2025",
-                                category: "İnovasyon",
-                                duration: "01:12:45",
-                                imageName: "past_2"
-                            )
-                            
-                            PastRoundtableCard(
-                                title: "Piyasa Trendleri ve Tahminler",
-                                date: "4 Mayıs 2025",
-                                category: "Finans",
-                                duration: "01:08:12",
-                                imageName: "past_3"
-                            )
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                }
+                // Kendi Açtıklarım
+                roundtableSection(title: "Kendi Açtıklarım", roundtables: viewModel.roundtables.prefix(1))
+                
+                // Açılmış Masalar
+                roundtableSection(title: "Açılmış Masalar", roundtables: viewModel.roundtables.suffix(3))
+                
+                // Geçmiş Masalar
+                roundtableSection(title: "Geçmiş Masalar", roundtables: viewModel.roundtables.prefix(2), isPast: true)
                 
                 // Info Section
                 infoCardSection
@@ -98,6 +43,53 @@ struct RoundtableView: View {
         .navigationBarHidden(true)
         .refreshable {
             await viewModel.refresh()
+        }
+    }
+    
+    private var tabsSection: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(tabs.indices, id: \.self) { index in
+                    Button(action: { selectedTab = index }) {
+                        Text(tabs[index])
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(selectedTab == index ? .white : .white.opacity(0.6))
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(selectedTab == index ? Color.purple : Color.white.opacity(0.05))
+                            .cornerRadius(20)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                            )
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+    
+    private func roundtableSection(title: String, roundtables: ArraySlice<Roundtable>, isPast: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text(title)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.white)
+                Spacer()
+                Button("Tümünü Gör") { }
+                    .font(.system(size: 13))
+                    .foregroundColor(.purple)
+            }
+            .padding(.horizontal, 20)
+            
+            VStack(spacing: 16) {
+                ForEach(roundtables) { roundtable in
+                    NavigationLink(destination: JoinRoundtableView(roundtable: roundtable)) {
+                        RoundtableRow(roundtable: roundtable)
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
         }
     }
     
