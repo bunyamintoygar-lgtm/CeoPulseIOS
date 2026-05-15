@@ -27,7 +27,7 @@ class RoundtableService {
         }
         
         if let searchText = searchText, !searchText.isEmpty {
-            query = query.ilike(column: "title", value: "%\(searchText)%")
+            query = query.ilike("title", value: "%\(searchText)%")
         }
         
         let roundtables: [Roundtable] = try await query.order("start_time", ascending: true).execute().value
