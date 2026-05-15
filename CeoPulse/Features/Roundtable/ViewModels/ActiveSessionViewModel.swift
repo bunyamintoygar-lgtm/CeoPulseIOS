@@ -149,7 +149,7 @@ import AgoraRtcKit
             Task { @MainActor in self.refreshParticipants() }
         }
         
-        await channel?.subscribeWithError()
+        try await channel?.subscribeWithError()
     }
     
     private func refreshParticipants() {
