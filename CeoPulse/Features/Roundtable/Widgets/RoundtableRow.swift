@@ -6,19 +6,67 @@ struct RoundtableRow: View {
     
     init(roundtable: Roundtable) {
         self.roundtable = roundtable
-        self._viewModel = StateObject(wrappedValue: RoundtableRowViewModel(roundtableId: roundtable.id))
+        self._viewModel = StateObject(wrappedValue: RoundtableRowViewModel(roundtable: roundtable))
     }
     
     var body: some View {
-        HStack(spacing: 16) {
-            dateBlock
-            contentSection
+        HStack(spacing: 0) {
+            // Date Card
+            dateCard
+            
+            // Content
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(roundtable.category)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.purple)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.purple.opacity(0.1))
+                        .cornerRadius(6)
+                    
+                    Spacer()
+                    
+                    Image(systemName: "bookmark")
+                        .font(.system(size: 14))
+                        .foregroundColor(.white.opacity(0.4))
+                }
+                
+                Text(roundtable.title)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.white)
+                    .lineLimit(2)
+                
+                // Participants
+                participantsView
+                
+                // Bottom Row: Status and Action
+                HStack {
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(statusColor)
+                            .frame(width: 6, height: 6)
+                        Text(statusText)
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(statusColor)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(statusColor.opacity(0.1))
+                    .cornerRadius(6)
+                    
+                    Spacer()
+                    
+                    actionButton
+                }
+            }
+            .padding(.leading, 16)
         }
-        .padding(12)
-        .background(AppColors.surface.opacity(0.4))
-        .cornerRadius(24)
+        .padding(16)
+        .background(Color.white.opacity(0.03))
+        .cornerRadius(20)
         .overlay(
-            RoundedRectangle(cornerRadius: 24)
+            RoundedRectangle(cornerRadius: 20)
                 .stroke(Color.white.opacity(0.05), lineWidth: 1)
         )
         .onAppear {
@@ -28,148 +76,117 @@ struct RoundtableRow: View {
         }
     }
     
-    private var dateBlock: some View {
+    private var dateCard: some View {
         VStack(spacing: 4) {
-            Text(roundtable.startTime.formatted(.dateTime.day()))
+            Text(dayString)
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(.white)
-            
-            Text(roundtable.startTime.formatted(.dateTime.month()))
-                .font(.system(size: 11))
-                .foregroundColor(AppColors.textSecondary)
-            
-            Text(roundtable.startTime.formatted(.dateTime.year()))
+            Text(monthString)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(.white.opacity(0.4))
+            Text(yearString)
                 .font(.system(size: 10))
-                .foregroundColor(AppColors.textSecondary.opacity(0.6))
+                .foregroundColor(.white.opacity(0.2))
             
-            Text(roundtable.startTime.formatted(.dateTime.weekday()))
-                .font(.system(size: 10))
-                .foregroundColor(AppColors.textSecondary.opacity(0.6))
+            Spacer()
             
-            Text(roundtable.startTime.formatted(date: .omitted, time: .shortened))
-                .font(.system(size: 11, weight: .bold))
+            Text(timeString)
+                .font(.system(size: 12, weight: .bold))
                 .foregroundColor(.white)
-                .padding(.horizontal, 8)
                 .padding(.vertical, 4)
+                .padding(.horizontal, 8)
                 .background(Color.white.opacity(0.05))
-                .cornerRadius(8)
-                .padding(.top, 4)
+                .cornerRadius(6)
         }
-        .frame(width: 85)
-        .padding(.vertical, 12)
+        .frame(width: 70, height: 120)
+        .padding(.vertical, 8)
         .background(Color.white.opacity(0.02))
         .cornerRadius(16)
     }
     
-    private var contentSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(roundtable.category)
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(.purple)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.purple.opacity(0.1))
-                    .cornerRadius(6)
-                
-                Spacer()
-                
-                Image(systemName: "bookmark")
-                    .font(.system(size: 14))
-                    .foregroundColor(.white.opacity(0.4))
-            }
-            
-            Text(roundtable.title)
-                .font(.system(size: 15, weight: .bold))
-                .foregroundColor(.white)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
-            
-            participantsSection
-            
-            HStack {
-                statusBadge
-                Spacer()
-                actionButton
-            }
-        }
-    }
-    
-    private var participantsSection: some View {
-        HStack(spacing: 12) {
-            HStack(spacing: -8) {
-                let displayCount = min(viewModel.participants.count, 4)
-                ForEach(0..<displayCount, id: \.self) { index in
-                    let p = viewModel.participants[index]
-                    AsyncImage(url: URL(string: p.avatar_url ?? "")) { image in
-                        image.resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Circle().fill(Color.gray.opacity(0.3))
-                    }
-                    .frame(width: 28, height: 28)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(AppColors.background, lineWidth: 1.5))
-                }
-                
-                if viewModel.participants.count > 4 {
-                    Text("+\(viewModel.participants.count - 4)")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(width: 28, height: 28)
-                        .background(Color(hex: "2D2F3C"))
+    private var participantsView: some View {
+        HStack(spacing: -8) {
+            ForEach(viewModel.participants.prefix(4)) { participant in
+                AsyncImage(url: URL(string: "https://i.pravatar.cc/100?u=\(participant.userId)")) { image in
+                    image.resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 24, height: 24)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(AppColors.background, lineWidth: 1.5))
+                        .overlay(Circle().stroke(Color(hex: "13141C"), lineWidth: 1.5))
+                } placeholder: {
+                    Circle()
+                        .fill(Color.gray)
+                        .frame(width: 24, height: 24)
                 }
             }
             
-            Text("\(viewModel.participants.first?.fullName ?? "Katılımcı") ve \(max(viewModel.participants.count - 1, 0)) diğer uzman")
-                .font(.system(size: 10))
-                .foregroundColor(AppColors.textSecondary)
-        }
-    }
-    
-    private var statusBadge: some View {
-        HStack(spacing: 4) {
-            if roundtable.status == .active {
-                Circle()
-                    .fill(Color.green)
-                    .frame(width: 6, height: 6)
-                Text("Devam Ediyor")
-            } else {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.gray)
-                Text("Tamamlandı")
+            if viewModel.participants.count > 4 {
+                Text("+\(viewModel.participants.count - 4)")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white.opacity(0.6))
+                    .padding(.leading, 12)
             }
+            
+            Text(viewModel.participants.isEmpty ? "Henüz katılımcı yok" : "Ali Yılmaz ve \(viewModel.participants.count) diğer uzman")
+                .font(.system(size: 10))
+                .foregroundColor(.white.opacity(0.4))
+                .padding(.leading, 8)
         }
-        .font(.system(size: 10, weight: .medium))
-        .foregroundColor(roundtable.status == .active ? .green : .gray)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(roundtable.status == .active ? Color.green.opacity(0.1) : Color.white.opacity(0.05))
-        .cornerRadius(20)
     }
     
     private var actionButton: some View {
         HStack(spacing: 4) {
-            Text(actionButtonTitle)
-            Image(systemName: "chevron.right")
+            Text(roundtable.status == .completed ? "Özeti Gör" : "Masaya Katıl")
+            Image(systemName: roundtable.status == .completed ? "doc.text" : "chevron.right")
         }
         .font(.system(size: 12, weight: .bold))
-        .foregroundColor(.white.opacity(0.8))
-        .padding(.horizontal, 16)
+        .foregroundColor(.white)
+        .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(12)
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
+        .background(roundtable.status == .completed ? Color.white.opacity(0.1) : Color.purple)
+        .cornerRadius(10)
     }
     
-    private var actionButtonTitle: String {
-        if roundtable.status == .active {
-            // Using moderatorId for checking ownership
-            return roundtable.moderatorId == UUID() /* CurrentUser placeholder */ ? "Masaya Git" : "Masaya Katıl"
-        } else {
-            return "Özeti Gör"
+    // MARK: - Helpers
+    
+    private var dayString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd"
+        return formatter.string(from: roundtable.startTime)
+    }
+    
+    private var monthString: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "tr_TR")
+        formatter.dateFormat = "MMM"
+        return formatter.string(from: roundtable.startTime).uppercased()
+    }
+    
+    private var yearString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy"
+        return formatter.string(from: roundtable.startTime)
+    }
+    
+    private var timeString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: roundtable.startTime)
+    }
+    
+    private var statusText: String {
+        switch roundtable.status {
+        case .active: return "Devam Ediyor"
+        case .upcoming: return "Gelecek"
+        case .completed: return "Tamamlandı"
+        }
+    }
+    
+    private var statusColor: Color {
+        switch roundtable.status {
+        case .active: return .green
+        case .upcoming: return .blue
+        case .completed: return .orange
         }
     }
 }

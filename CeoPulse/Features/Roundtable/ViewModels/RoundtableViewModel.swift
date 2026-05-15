@@ -15,7 +15,7 @@ class RoundtableViewModel: ObservableObject {
     
     // Upcoming filter (Today and future)
     var upcomingRoundtables: [Roundtable] {
-        roundtables.filter { $0.startTime >= Date().addingTimeInterval(-3600) } // Including very recently started
+        roundtables.filter { $0.startTime >= Date().addingTimeInterval(-3600) }
             .sorted(by: { $0.startTime < $1.startTime })
     }
     
@@ -27,8 +27,15 @@ class RoundtableViewModel: ObservableObject {
     }
     
     private func setupSubscribers() {
-        // Refresh when category, tab or search text changes
-        Publishers.CombineLatest3($selectedCategory, $selectedTab, $searchText)
+        // Refresh when category or tab changes
+        Publishers.CombineLatest($selectedCategory, $selectedTab)
+            .sink { [weak self] _ in
+                Task { await self?.loadRoundtables() }
+            }
+            .store(in: &cancellables)
+            
+        // Separate search handling to handle Turkish casing better on client side if needed
+        $searchText
             .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
             .sink { [weak self] _ in
                 Task { await self?.loadRoundtables() }
@@ -64,12 +71,24 @@ class RoundtableViewModel: ObservableObject {
                 status = nil
             }
             
+            // Use Turkish-aware casing for search if possible, or handle on client side
+            // For now, we use server-side ilike which is generally case-insensitive
             self.roundtables = try await service.fetchRoundtables(
                 status: status,
                 category: selectedCategory,
                 searchText: searchText,
                 moderatorId: moderatorId
             )
+            
+            // Optional: Client side filtering for better Turkish character support
+            if !searchText.isEmpty {
+                let lowerSearch = searchText.lowercased(with: Locale(identifier: "tr_TR"))
+                self.roundtables = self.roundtables.filter { roundtable in
+                    roundtable.title.lowercased(with: Locale(identifier: "tr_TR")).contains(lowerSearch) ||
+                    (roundtable.description?.lowercased(with: Locale(identifier: "tr_TR")).contains(lowerSearch) ?? false)
+                }
+            }
+            
             isLoading = false
         } catch {
             print("Error loading roundtables: \(error)")

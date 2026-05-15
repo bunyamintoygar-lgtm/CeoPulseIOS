@@ -9,18 +9,12 @@ struct RoundtableView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 24) {
-                // Header
+                // Header & Inline Search
                 headerSection
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
                 
-                // Search Bar (Conditional)
-                if viewModel.isSearching {
-                    searchBarSection
-                        .padding(.horizontal, 20)
-                }
-                
-                // Featured Card (Hero)
+                // Featured Card (Hero) - Only if not searching
                 if let featured = viewModel.roundtables.first, viewModel.searchText.isEmpty {
                     FeaturedRoundtableCard(roundtable: featured)
                         .padding(.horizontal, 20)
@@ -56,36 +50,78 @@ struct RoundtableView: View {
         }
     }
     
-    private var searchBarSection: some View {
-        HStack {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.white.opacity(0.4))
-                TextField("Masa başlığı ile ara...", text: $viewModel.searchText)
-                    .foregroundColor(.white)
-                    .font(.system(size: 14))
-                    .autocorrectionDisabled()
-                
-                if !viewModel.searchText.isEmpty {
-                    Button(action: { viewModel.searchText = "" }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.white.opacity(0.4))
+    private var headerSection: some View {
+        HStack(alignment: .center, spacing: 12) {
+            if viewModel.isSearching {
+                // Sliding Inline Search Bar
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.white.opacity(0.4))
+                    
+                    TextField("Masa başlığı ile ara...", text: $viewModel.searchText)
+                        .foregroundColor(.white)
+                        .font(.system(size: 14))
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.none)
+                    
+                    if !viewModel.searchText.isEmpty {
+                        Button(action: { viewModel.searchText = "" }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.white.opacity(0.4))
+                        }
                     }
                 }
-            }
-            .padding(12)
-            .background(Color.white.opacity(0.05))
-            .cornerRadius(12)
-            
-            Button("İptal") {
-                withAnimation {
-                    viewModel.isSearching = false
-                    viewModel.searchText = ""
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(Color.white.opacity(0.08))
+                .cornerRadius(12)
+                .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .move(edge: .trailing).combined(with: .opacity)))
+                
+                Button("İptal") {
+                    withAnimation(.spring()) {
+                        viewModel.isSearching = false
+                        viewModel.searchText = ""
+                    }
                 }
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.purple)
+            } else {
+                // Normal Header
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "bubble.left.and.bubble.right.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(AppColors.primaryAccent)
+                        
+                        Text("Yuvarlak Masa")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    
+                    Text("Fikirler, deneyimler ve vizyonlar buluşuyor.")
+                        .font(.system(size: 14))
+                        .foregroundColor(AppColors.textSecondary)
+                }
+                .transition(.asymmetric(insertion: .move(edge: .leading).combined(with: .opacity), removal: .move(edge: .leading).combined(with: .opacity)))
+                
+                Spacer()
+                
+                Button(action: { 
+                    withAnimation(.spring()) {
+                        viewModel.isSearching = true
+                    }
+                }) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.white.opacity(0.1))
+                        .clipShape(Circle())
+                }
+                .transition(.opacity)
             }
-            .font(.system(size: 14, weight: .bold))
-            .foregroundColor(.purple)
         }
+        .frame(height: 60)
     }
     
     private var tabsSection: some View {
@@ -118,7 +154,7 @@ struct RoundtableView: View {
     private var mainContentSection: some View {
         VStack(alignment: .leading, spacing: 24) {
             if viewModel.selectedTab == 0 && viewModel.searchText.isEmpty {
-                // Yaklaşan Masalar (Sorted and filtered by future)
+                // Yaklaşan Masalar
                 if !viewModel.upcomingRoundtables.isEmpty {
                     roundtableSection(title: "Yaklaşan Masalar", roundtables: Array(viewModel.upcomingRoundtables.prefix(3)))
                 }
@@ -147,12 +183,21 @@ struct RoundtableView: View {
             
             VStack(spacing: 16) {
                 ForEach(roundtables) { roundtable in
-                    NavigationLink(destination: JoinRoundtableView(roundtable: roundtable)) {
+                    NavigationLink(destination: destinationView(for: roundtable)) {
                         RoundtableRow(roundtable: roundtable)
                     }
                 }
             }
             .padding(.horizontal, 20)
+        }
+    }
+    
+    @ViewBuilder
+    private func destinationView(for roundtable: Roundtable) -> some View {
+        if roundtable.status == .completed {
+            RoundtableSummaryView(roundtable: roundtable)
+        } else {
+            JoinRoundtableView(roundtable: roundtable)
         }
     }
     
@@ -172,41 +217,6 @@ struct RoundtableView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
         .padding(.horizontal, 40)
-    }
-    
-    private var headerSection: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 10) {
-                    Image(systemName: "bubble.left.and.bubble.right.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(AppColors.primaryAccent)
-                    
-                    Text("Yuvarlak Masa")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.white)
-                }
-                
-                Text("Fikirler, deneyimler ve vizyonlar buluşuyor.")
-                    .font(.system(size: 14))
-                    .foregroundColor(AppColors.textSecondary)
-            }
-            
-            Spacer()
-            
-            Button(action: { 
-                withAnimation {
-                    viewModel.isSearching.toggle()
-                }
-            }) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.1))
-                    .clipShape(Circle())
-            }
-        }
     }
     
     private var infoCardSection: some View {
