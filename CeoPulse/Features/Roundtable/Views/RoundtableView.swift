@@ -111,16 +111,16 @@ struct RoundtableView: View {
         VStack(alignment: .leading, spacing: 24) {
             if viewModel.selectedTab == 0 && viewModel.searchText.isEmpty {
                 // Sectioned view for "Tüm Masalar"
-                roundtableSection(title: "Öne Çıkanlar", roundtables: viewModel.roundtables.prefix(2))
+                roundtableSection(title: "Öne Çıkanlar", roundtables: Array(viewModel.roundtables.prefix(2)))
                 roundtableSection(title: "Tüm Masalar", roundtables: viewModel.roundtables)
             } else {
                 // List view for specific tabs or search
-                roundtableSection(title: tabs[viewModel.selectedTab], roundtables: ArraySlice(viewModel.roundtables))
+                roundtableSection(title: tabs[viewModel.selectedTab], roundtables: viewModel.roundtables)
             }
         }
     }
     
-    private func roundtableSection(title: String, roundtables: ArraySlice<Roundtable>) -> some View {
+    private func roundtableSection(title: String, roundtables: [Roundtable]) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text(title)

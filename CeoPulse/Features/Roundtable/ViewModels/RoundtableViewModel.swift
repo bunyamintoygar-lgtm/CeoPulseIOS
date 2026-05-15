@@ -1,6 +1,7 @@
-import Foundation
 import SwiftUI
 import Combine
+import Auth
+import Supabase
 
 class RoundtableViewModel: ObservableObject {
     @Published var roundtables: [Roundtable] = []
