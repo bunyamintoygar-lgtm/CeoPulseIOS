@@ -18,7 +18,6 @@ struct RoundtableView: View {
                 if viewModel.isSearching {
                     searchBarSection
                         .padding(.horizontal, 20)
-                        .transition(.move(edge: .top).combined(with: .opacity))
                 }
                 
                 // Featured Card (Hero)
@@ -49,7 +48,9 @@ struct RoundtableView: View {
         }
         .background(AppColors.background.ignoresSafeArea())
         .navigationBarHidden(true)
-        .animation(.spring(), value: viewModel.isSearching)
+        .onAppear {
+            Task { await viewModel.refresh() }
+        }
         .refreshable {
             await viewModel.refresh()
         }
@@ -63,6 +64,7 @@ struct RoundtableView: View {
                 TextField("Masa başlığı ile ara...", text: $viewModel.searchText)
                     .foregroundColor(.white)
                     .font(.system(size: 14))
+                    .autocorrectionDisabled()
                 
                 if !viewModel.searchText.isEmpty {
                     Button(action: { viewModel.searchText = "" }) {
@@ -76,8 +78,10 @@ struct RoundtableView: View {
             .cornerRadius(12)
             
             Button("İptal") {
-                viewModel.isSearching = false
-                viewModel.searchText = ""
+                withAnimation {
+                    viewModel.isSearching = false
+                    viewModel.searchText = ""
+                }
             }
             .font(.system(size: 14, weight: .bold))
             .foregroundColor(.purple)
@@ -88,7 +92,11 @@ struct RoundtableView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
                 ForEach(tabs.indices, id: \.self) { index in
-                    Button(action: { viewModel.selectedTab = index }) {
+                    Button(action: { 
+                        withAnimation {
+                            viewModel.selectedTab = index 
+                        }
+                    }) {
                         Text(tabs[index])
                             .font(.system(size: 13, weight: .bold))
                             .foregroundColor(viewModel.selectedTab == index ? .white : .white.opacity(0.6))
@@ -110,11 +118,15 @@ struct RoundtableView: View {
     private var mainContentSection: some View {
         VStack(alignment: .leading, spacing: 24) {
             if viewModel.selectedTab == 0 && viewModel.searchText.isEmpty {
-                // Sectioned view for "Tüm Masalar"
-                roundtableSection(title: "Öne Çıkanlar", roundtables: Array(viewModel.roundtables.prefix(2)))
+                // Yaklaşan Masalar (Sorted and filtered by future)
+                if !viewModel.upcomingRoundtables.isEmpty {
+                    roundtableSection(title: "Yaklaşan Masalar", roundtables: Array(viewModel.upcomingRoundtables.prefix(3)))
+                }
+                
+                // Diğer Masalar
                 roundtableSection(title: "Tüm Masalar", roundtables: viewModel.roundtables)
             } else {
-                // List view for specific tabs or search
+                // List view for specific tabs or search results
                 roundtableSection(title: tabs[viewModel.selectedTab], roundtables: viewModel.roundtables)
             }
         }

@@ -37,7 +37,7 @@ struct FeaturedRoundtableCard: View {
             )
             
             // Content
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 0) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Yeni bir yuvarlak masa oluşturun")
                         .font(.system(size: 20, weight: .bold))
@@ -49,6 +49,8 @@ struct FeaturedRoundtableCard: View {
                         .lineLimit(3)
                         .frame(maxWidth: 220)
                 }
+                
+                Spacer(minLength: 24)
                 
                 NavigationLink(destination: CreateRoundtableView()) {
                     HStack(spacing: 8) {
@@ -64,7 +66,8 @@ struct FeaturedRoundtableCard: View {
                     .shadow(color: Color.purple.opacity(0.3), radius: 10, y: 5)
                 }
             }
-            .padding(.top, 32)
+            .padding(.top, 24)
+            .padding(.bottom, 24)
             .padding(.horizontal, 24)
         }
     }

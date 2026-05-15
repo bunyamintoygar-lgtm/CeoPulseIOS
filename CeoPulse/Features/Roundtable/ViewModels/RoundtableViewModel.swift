@@ -13,6 +13,12 @@ class RoundtableViewModel: ObservableObject {
     @Published var searchText = ""
     @Published var isSearching = false
     
+    // Upcoming filter (Today and future)
+    var upcomingRoundtables: [Roundtable] {
+        roundtables.filter { $0.startTime >= Date().addingTimeInterval(-3600) } // Including very recently started
+            .sorted(by: { $0.startTime < $1.startTime })
+    }
+    
     private let service = RoundtableService.shared
     private var cancellables = Set<AnyCancellable>()
     
@@ -44,8 +50,12 @@ class RoundtableViewModel: ObservableObject {
             case 0: // Tüm Masalar
                 status = nil
             case 1: // Kendi Açtıklarım
-                let session = try? await SupabaseManager.shared.client.auth.session
-                moderatorId = session?.user.id
+                do {
+                    let session = try await SupabaseManager.shared.client.auth.session
+                    moderatorId = session.user.id
+                } catch {
+                    print("Session error: \(error)")
+                }
             case 2: // Devam Edenler
                 status = .active
             case 3: // Geçmiş Masalar
