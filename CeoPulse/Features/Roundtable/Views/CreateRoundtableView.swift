@@ -56,28 +56,6 @@ struct CreateRoundtableView: View {
                                     }
                                 }
                                 
-                                Text("Masa Türü")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundColor(.white.opacity(0.8))
-                                
-                                HStack(spacing: 12) {
-                                    TableTypeCard(
-                                        title: "Açık Masa",
-                                        subtitle: "Herkese açık, herkes katılabilir.",
-                                        icon: "network",
-                                        isSelected: viewModel.tableType == .open,
-                                        action: { viewModel.tableType = .open }
-                                    )
-                                    
-                                    TableTypeCard(
-                                        title: "Davetli Masa",
-                                        subtitle: "Sadece davet ettiğiniz kişiler katılabilir.",
-                                        icon: "lock",
-                                        isSelected: viewModel.tableType == .invited,
-                                        action: { viewModel.tableType = .invited }
-                                    )
-                                }
-                                
                                 VStack(alignment: .leading, spacing: 12) {
                                     Text("Kimler Katılabilir?")
                                         .font(.system(size: 13, weight: .semibold))
@@ -89,7 +67,7 @@ struct CreateRoundtableView: View {
                                         RadioButtonField(label: "Davetliler", isSelected: viewModel.whoCanJoin == .invitedOnly, action: { viewModel.whoCanJoin = .invitedOnly })
                                     }
                                 }
-                                .padding(.top, 4)
+                                .padding(.top, 8)
                             }
                         }
                         
@@ -112,7 +90,7 @@ struct CreateRoundtableView: View {
                                 }
                                 
                                 VStack(spacing: 8) {
-                                    ForEach(Array(viewModel.discussionQuestions.enumerated()), id: \.offset) { index, question in
+                                    ForEach(Array(viewModel.discussionQuestions.enumerated()), id: \.self.offset) { index, question in
                                         QuestionRow(number: index + 1, question: question) {
                                             viewModel.removeQuestion(at: index)
                                         }
@@ -165,19 +143,6 @@ struct CreateRoundtableView: View {
                             .foregroundColor(.white)
                     }
                     Spacer()
-                    
-                    HStack(spacing: 4) {
-                        Image(systemName: "crown.fill")
-                            .font(.system(size: 10))
-                        Text("PREMIUM")
-                            .font(.system(size: 10, weight: .black))
-                    }
-                    .foregroundColor(Color(hex: "FFB800"))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color(hex: "FFB800").opacity(0.1))
-                    .cornerRadius(8)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(hex: "FFB800").opacity(0.5), lineWidth: 1))
                 }
                 
                 Text("Yuvarlak Masa Oluştur")
@@ -322,52 +287,6 @@ struct DropdownField: View {
             Spacer()
             Image(systemName: "chevron.down")
                 .foregroundColor(.white.opacity(0.4))
-        }
-    }
-}
-
-struct TableTypeCard: View {
-    let title: String
-    let subtitle: String
-    let icon: String
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    ZStack {
-                        Circle()
-                            .fill(isSelected ? Color.purple.opacity(0.2) : Color.white.opacity(0.05))
-                            .frame(width: 32, height: 32)
-                        Image(systemName: icon)
-                            .foregroundColor(isSelected ? .purple : .white.opacity(0.4))
-                            .font(.system(size: 14))
-                    }
-                    Spacer()
-                    if isSelected {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.purple)
-                    }
-                }
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.white)
-                    Text(subtitle)
-                        .font(.system(size: 10))
-                        .foregroundColor(.white.opacity(0.5))
-                        .multilineTextAlignment(.leading)
-                        .lineLimit(2)
-                }
-            }
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(isSelected ? Color.purple.opacity(0.05) : Color.white.opacity(0.02))
-            .cornerRadius(16)
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(isSelected ? Color.purple : Color.white.opacity(0.1), lineWidth: 1))
         }
     }
 }
