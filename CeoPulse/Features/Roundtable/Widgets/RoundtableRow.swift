@@ -22,7 +22,9 @@ struct RoundtableRow: View {
                 .stroke(Color.white.opacity(0.05), lineWidth: 1)
         )
         .onAppear {
-            viewModel.fetchParticipants()
+            Task {
+                viewModel.fetchParticipants()
+            }
         }
     }
     
