@@ -4,8 +4,8 @@ import AgoraRtcKit
 class AgoraManager: NSObject, ObservableObject {
     static let shared = AgoraManager()
     
-    // Replace with your Agora App ID
-    private let appId = "YOUR_AGORA_APP_ID"
+    // Agora App ID
+    private let appId = "15f411d8387c4e5f84e3d41bab1e621d"
     
     @Published var isJoined = false
     @Published var remoteUserIds: Set<UInt> = []
