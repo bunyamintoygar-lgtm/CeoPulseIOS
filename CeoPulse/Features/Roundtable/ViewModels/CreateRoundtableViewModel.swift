@@ -19,9 +19,17 @@ class CreateRoundtableViewModel: ObservableObject {
     // Step 2: Oturum Ayarları
     @Published var selectedDate: Date = Date()
     @Published var selectedTime: Date = Date()
-    @Published var estimatedDuration: String = "90 dakika"
+    @Published var estimatedDuration: String = "60 dakika"
     @Published var participantCount: String = "6 - 12 kişi"
     @Published var tableType: RoundtableType = .open
+    
+    var participantCounts: [String] {
+        ConfigManager.shared.roundtableParticipantCounts.map { ConfigManager.shared.getLocalizedValue($0) }
+    }
+    
+    var durations: [String] {
+        ConfigManager.shared.roundtableDurations.map { ConfigManager.shared.getLocalizedValue($0) }
+    }
     @Published var whoCanJoin: JoinPermission = .everyone
     
     // Step 3: Konuşma Çerçevesi

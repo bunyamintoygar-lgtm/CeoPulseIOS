@@ -49,10 +49,10 @@ struct CreateRoundtableView: View {
                                 
                                 HStack(spacing: 16) {
                                     FormField(label: "Tahmini Süre") {
-                                        DropdownField(selection: $viewModel.estimatedDuration, icon: "clock")
+                                        DropdownField(selection: $viewModel.estimatedDuration, icon: "clock", options: viewModel.durations)
                                     }
                                     FormField(label: "Katılımcı Sayısı") {
-                                        DropdownField(selection: $viewModel.participantCount, icon: "person.2")
+                                        DropdownField(selection: $viewModel.participantCount, icon: "person.2", options: viewModel.participantCounts)
                                     }
                                 }
                                 
@@ -270,20 +270,26 @@ struct DatePickerField: View {
     var mode: DatePickerComponents = .date
     
     var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(.white.opacity(0.4))
-            Text(mode == .date ? date.formatted(date: .long, time: .omitted) : date.formatted(date: .omitted, time: .shortened))
-                .font(.system(size: 14))
-                .foregroundColor(.white)
-            Spacer()
-            if mode == .date {
-                Image(systemName: "calendar")
+        ZStack {
+            HStack {
+                Image(systemName: icon)
                     .foregroundColor(.white.opacity(0.4))
-            } else {
-                Image(systemName: "chevron.down")
-                    .foregroundColor(.white.opacity(0.4))
+                Text(mode == .date ? date.formatted(date: .long, time: .omitted) : date.formatted(date: .omitted, time: .shortened))
+                    .font(.system(size: 14))
+                    .foregroundColor(.white)
+                Spacer()
+                if mode == .date {
+                    Image(systemName: "calendar")
+                        .foregroundColor(.white.opacity(0.4))
+                } else {
+                    Image(systemName: "chevron.down")
+                        .foregroundColor(.white.opacity(0.4))
+                }
             }
+            
+            DatePicker("", selection: $date, displayedComponents: mode == .date ? .date : .hourAndMinute)
+                .labelsHidden()
+                .opacity(0.011)
         }
     }
 }
@@ -291,17 +297,26 @@ struct DatePickerField: View {
 struct DropdownField: View {
     @Binding var selection: String
     let icon: String
+    let options: [String]
     
     var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(.white.opacity(0.4))
-            Text(selection)
-                .font(.system(size: 14))
-                .foregroundColor(.white)
-            Spacer()
-            Image(systemName: "chevron.down")
-                .foregroundColor(.white.opacity(0.4))
+        Menu {
+            ForEach(options, id: \.self) { option in
+                Button(action: { selection = option }) {
+                    Text(option)
+                }
+            }
+        } label: {
+            HStack {
+                Image(systemName: icon)
+                    .foregroundColor(.white.opacity(0.4))
+                Text(selection)
+                    .font(.system(size: 14))
+                    .foregroundColor(.white)
+                Spacer()
+                Image(systemName: "chevron.down")
+                    .foregroundColor(.white.opacity(0.4))
+            }
         }
     }
 }
