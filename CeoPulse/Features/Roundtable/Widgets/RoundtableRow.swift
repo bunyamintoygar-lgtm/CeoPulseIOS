@@ -128,11 +128,21 @@ struct RoundtableRow: View {
                     .padding(.leading, 12)
             }
             
-            let participantNames = viewModel.participants.prefix(1).map { "\($0.first_name) \($0.last_name)" }.joined()
-            Text(viewModel.participants.isEmpty ? "Henüz katılımcı yok" : "\(participantNames) ve \(viewModel.participants.count) diğer uzman")
-                .font(.system(size: 10))
-                .foregroundColor(.white.opacity(0.4))
-                .padding(.leading, 8)
+            if let firstParticipant = viewModel.participants.first {
+                let name = "\(firstParticipant.first_name) \(firstParticipant.last_name)"
+                let othersCount = viewModel.participants.count - 1
+                let text = othersCount > 0 ? "\(name) ve \(othersCount) diğer uzman" : name
+                
+                Text(text)
+                    .font(.system(size: 10))
+                    .foregroundColor(.white.opacity(0.4))
+                    .padding(.leading, 8)
+            } else {
+                Text("Henüz katılımcı yok")
+                    .font(.system(size: 10))
+                    .foregroundColor(.white.opacity(0.4))
+                    .padding(.leading, 8)
+            }
         }
     }
     
