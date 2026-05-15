@@ -14,6 +14,10 @@ import AgoraRtcKit
     @Published var errorMessage: String?
     @Published var currentUserId: UUID?
     
+    var isRequestingFloor: Bool {
+        participants.first(where: { $0.userId == currentUserId })?.isRequestingFloor ?? false
+    }
+    
     // RTC States observed from AgoraManager
     @ObservedObject var agoraManager = AgoraManager.shared
     
@@ -164,8 +168,19 @@ import AgoraRtcKit
     }
     
     func requestFloor() {
-        // Here we would update the roundtable_participants table status to 'requesting_floor'
-        // And notify others via Realtime.
+        guard let userId = currentUserId else { return }
+        
+        // Find current participant status
+        if let participant = participants.first(where: { $0.userId == userId }) {
+            let newState = !participant.isRequestingFloor
+            Task {
+                do {
+                    try await service.requestFloor(roundtableId: roundtable.id, isRequesting: newState)
+                } catch {
+                    print("Error requesting floor: \(error)")
+                }
+            }
+        }
     }
     
     func leaveSession() {

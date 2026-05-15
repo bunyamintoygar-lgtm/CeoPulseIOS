@@ -61,6 +61,7 @@ struct RoundtableParticipant: Identifiable, Codable {
     let userId: UUID
     var role: RoundtableRole
     var isMuted: Bool
+    var isRequestingFloor: Bool = false
     let joinedAt: Date
     
     // Joined profile data (for UI)
@@ -74,6 +75,7 @@ struct RoundtableParticipant: Identifiable, Codable {
         case userId = "user_id"
         case role
         case isMuted = "is_muted"
+        case isRequestingFloor = "is_requesting_floor"
         case joinedAt = "joined_at"
     }
 }

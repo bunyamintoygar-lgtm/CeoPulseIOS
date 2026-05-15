@@ -93,4 +93,15 @@ class RoundtableService {
         
         try await client.from("roundtable_messages").insert(message).execute()
     }
+    
+    func requestFloor(roundtableId: UUID, isRequesting: Bool) async throws {
+        let session = try await client.auth.session
+        let userId = session.user.id
+        
+        try await client.from("roundtable_participants")
+            .update(["is_requesting_floor": isRequesting])
+            .eq("roundtable_id", value: roundtableId.uuidString)
+            .eq("user_id", value: userId.uuidString)
+            .execute()
+    }
 }

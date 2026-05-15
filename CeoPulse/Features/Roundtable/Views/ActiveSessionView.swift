@@ -168,8 +168,8 @@ struct ActiveSessionView: View {
                         ZStack {
                             Circle().fill(Color.purple.opacity(0.3))
                             Circle().stroke(Color.purple, lineWidth: 2)
-                                .scaleEffect(isFloorRequested ? 1.2 : 1.0)
-                                .opacity(isFloorRequested ? 0 : 1)
+                                .scaleEffect(viewModel.isRequestingFloor ? 1.2 : 1.0)
+                                .opacity(viewModel.isRequestingFloor ? 0 : 1)
                         }
                     )
                 }
@@ -182,8 +182,9 @@ struct ActiveSessionView: View {
                         role: participant.role.title,
                         roleColor: participant.role.color,
                         isMuted: participant.isMuted,
+                        isRequestingFloor: participant.isRequestingFloor,
                         angle: angle,
-                        isSpeaking: false, // In a real app, bind to Agora's speaking detection
+                        isSpeaking: false,
                         isMe: participant.userId == viewModel.currentUserId
                     )
                 }
@@ -193,7 +194,7 @@ struct ActiveSessionView: View {
             // Legend
             HStack(spacing: 24) {
                 Label("Konuşmacı", systemImage: "mic.fill").foregroundColor(.purple)
-                Label("Söz Hakkı Sırada", systemImage: "circle.dotted").foregroundColor(.green)
+                Label("Söz Hakkı İstiyor", systemImage: "hand.raised.fill").foregroundColor(.green)
                 Label("Sessizde", systemImage: "mic.slash.fill").foregroundColor(.gray)
             }
             .font(.system(size: 10))
@@ -325,20 +326,19 @@ struct ActiveSessionView: View {
             
             // Main Söz İste
             Button(action: {
-                withAnimation { isFloorRequested.toggle() }
                 viewModel.requestFloor()
             }) {
                 VStack(spacing: 4) {
                     Image(systemName: "hand.raised.fill")
                         .font(.system(size: 24))
-                        .foregroundColor(isFloorRequested ? .green : .purple)
+                        .foregroundColor(viewModel.isRequestingFloor ? .green : .purple)
                         .frame(width: 56, height: 56)
-                        .background((isFloorRequested ? Color.green : Color.purple).opacity(0.1))
+                        .background((viewModel.isRequestingFloor ? Color.green : Color.purple).opacity(0.1))
                         .clipShape(Circle())
-                        .overlay(Circle().stroke((isFloorRequested ? Color.green : Color.purple).opacity(0.3), lineWidth: 1))
+                        .overlay(Circle().stroke((viewModel.isRequestingFloor ? Color.green : Color.purple).opacity(0.3), lineWidth: 1))
                     Text("Söz İste")
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(isFloorRequested ? .green : .purple)
+                        .foregroundColor(viewModel.isRequestingFloor ? .green : .purple)
                 }
             }
             .frame(maxWidth: .infinity)
