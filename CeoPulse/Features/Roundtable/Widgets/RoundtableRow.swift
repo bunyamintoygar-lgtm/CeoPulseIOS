@@ -96,9 +96,10 @@ struct RoundtableRow: View {
     private var participantsSection: some View {
         HStack(spacing: 12) {
             HStack(spacing: -8) {
-                ForEach(0..<min(viewModel.participants.count, 4), id: \.self) { index in
+                let displayCount = min(viewModel.participants.count, 4)
+                ForEach(0..<displayCount, id: \.self) { index in
                     let p = viewModel.participants[index]
-                    AsyncImage(url: URL(string: p.avatar ?? "")) { image in
+                    AsyncImage(url: URL(string: p.avatar_url ?? "")) { image in
                         image.resizable()
                             .aspectRatio(contentMode: .fill)
                     } placeholder: {
@@ -120,7 +121,7 @@ struct RoundtableRow: View {
                 }
             }
             
-            Text("\(viewModel.participants.first?.name ?? "Katılımcı") ve \(max(viewModel.participants.count - 1, 0)) diğer uzman")
+            Text("\(viewModel.participants.first?.fullName ?? "Katılımcı") ve \(max(viewModel.participants.count - 1, 0)) diğer uzman")
                 .font(.system(size: 10))
                 .foregroundColor(AppColors.textSecondary)
         }
