@@ -51,7 +51,7 @@ struct FeaturedRoundtableCard: View {
                 }
                 .padding(.bottom, 8)
                 
-                Button(action: { /* Create action */ }) {
+                NavigationLink(destination: CreateRoundtableView()) {
                     HStack(spacing: 8) {
                         Text("Yuvarlak Masa Oluştur")
                         Image(systemName: "plus.circle")
