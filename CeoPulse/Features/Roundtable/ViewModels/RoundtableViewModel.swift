@@ -13,9 +13,12 @@ class RoundtableViewModel: ObservableObject {
     @Published var searchText = ""
     @Published var isSearching = false
     
-    // Upcoming filter (Today and future)
+    // Upcoming filter: All roundtables from today (00:00) onwards
     var upcomingRoundtables: [Roundtable] {
-        roundtables.filter { $0.startTime >= Date().addingTimeInterval(-3600) }
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        
+        return roundtables.filter { $0.startTime >= today }
             .sorted(by: { $0.startTime < $1.startTime })
     }
     
@@ -34,7 +37,7 @@ class RoundtableViewModel: ObservableObject {
             }
             .store(in: &cancellables)
             
-        // Separate search handling to handle Turkish casing better on client side if needed
+        // Separate search handling
         $searchText
             .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
             .sink { [weak self] _ in
@@ -54,7 +57,7 @@ class RoundtableViewModel: ObservableObject {
             
             // tabs = ["Tüm Masalar", "Kendi Açtıklarım", "Devam Edenler", "Geçmiş Masalar"]
             switch selectedTab {
-            case 0: // Tüm Masalar
+            case 0: // Tüm Masalar -> We fetch everything and filter by 'upcoming' in view
                 status = nil
             case 1: // Kendi Açtıklarım
                 do {
@@ -71,24 +74,23 @@ class RoundtableViewModel: ObservableObject {
                 status = nil
             }
             
-            // Use Turkish-aware casing for search if possible, or handle on client side
-            // For now, we use server-side ilike which is generally case-insensitive
-            self.roundtables = try await service.fetchRoundtables(
+            var fetched = try await service.fetchRoundtables(
                 status: status,
                 category: selectedCategory,
                 searchText: searchText,
                 moderatorId: moderatorId
             )
             
-            // Optional: Client side filtering for better Turkish character support
+            // Client side filtering for better Turkish character support
             if !searchText.isEmpty {
                 let lowerSearch = searchText.lowercased(with: Locale(identifier: "tr_TR"))
-                self.roundtables = self.roundtables.filter { roundtable in
+                fetched = fetched.filter { roundtable in
                     roundtable.title.lowercased(with: Locale(identifier: "tr_TR")).contains(lowerSearch) ||
                     (roundtable.description?.lowercased(with: Locale(identifier: "tr_TR")).contains(lowerSearch) ?? false)
                 }
             }
             
+            self.roundtables = fetched
             isLoading = false
         } catch {
             print("Error loading roundtables: \(error)")

@@ -62,9 +62,8 @@ struct RoundtableView: View {
     private var headerSection: some View {
         HStack(alignment: .center, spacing: 12) {
             if viewModel.isSearching {
-                // Expanded Search View (Ask Opinion Style)
+                // Expanded Search View
                 HStack(spacing: 12) {
-                    // Search Field
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.white.opacity(0.4))
@@ -181,29 +180,17 @@ struct RoundtableView: View {
     }
     
     private var mainContentSection: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 16) {
             let headerTitle = viewModel.selectedTab == 0 ? "Yaklaşan Masalar" : tabs[viewModel.selectedTab]
             let displayList = viewModel.selectedTab == 0 ? viewModel.upcomingRoundtables : viewModel.roundtables
             
-            roundtableSection(title: headerTitle, roundtables: displayList)
-        }
-    }
-    
-    private func roundtableSection(title: String, roundtables: [Roundtable]) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text(title)
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(.white)
-                Spacer()
-                Button("Tümünü Gör") { }
-                    .font(.system(size: 13))
-                    .foregroundColor(.purple)
-            }
-            .padding(.horizontal, 20)
+            Text(headerTitle)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
             
             VStack(spacing: 16) {
-                ForEach(roundtables) { roundtable in
+                ForEach(displayList) { roundtable in
                     NavigationLink(destination: destinationView(for: roundtable)) {
                         RoundtableRow(roundtable: roundtable)
                     }
@@ -235,7 +222,6 @@ struct RoundtableView: View {
             AppColors.background.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Sheet Header
                 HStack {
                     Text("Kategori Seçin")
                         .font(.system(size: 18, weight: .bold))
