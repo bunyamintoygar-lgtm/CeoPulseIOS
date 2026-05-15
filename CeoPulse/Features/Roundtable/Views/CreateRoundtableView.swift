@@ -30,7 +30,7 @@ struct CreateRoundtableView: View {
                                 }
                                 
                                 FormField(label: "Kategori") {
-                                    CategoryPicker(selected: $viewModel.selectedCategory)
+                                    CategoryPicker(selected: $viewModel.selectedCategory, categories: viewModel.categories)
                                 }
                             }
                         }
@@ -234,18 +234,27 @@ struct FormField<Content: View>: View {
 
 struct CategoryPicker: View {
     @Binding var selected: String
+    let categories: [String]
     
     var body: some View {
-        HStack {
-            Image(systemName: "square.and.pencil")
-                .foregroundColor(.white.opacity(0.4))
-            Text(selected.isEmpty ? "Kategori seçin" : selected)
-                .foregroundColor(selected.isEmpty ? .white.opacity(0.4) : .white)
-            Spacer()
-            Image(systemName: "chevron.down")
-                .foregroundColor(.white.opacity(0.4))
+        Menu {
+            ForEach(categories, id: \.self) { category in
+                Button(action: { selected = category }) {
+                    Text(category)
+                }
+            }
+        } label: {
+            HStack {
+                Image(systemName: "square.and.pencil")
+                    .foregroundColor(.white.opacity(0.4))
+                Text(selected.isEmpty ? "Kategori seçin" : selected)
+                    .foregroundColor(selected.isEmpty ? .white.opacity(0.4) : .white)
+                Spacer()
+                Image(systemName: "chevron.down")
+                    .foregroundColor(.white.opacity(0.4))
+            }
+            .font(.system(size: 14))
         }
-        .font(.system(size: 14))
     }
 }
 

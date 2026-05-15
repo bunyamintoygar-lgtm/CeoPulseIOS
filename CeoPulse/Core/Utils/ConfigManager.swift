@@ -13,6 +13,7 @@ class ConfigManager: ObservableObject {
     @Published var interestsList: [LocalizedValue] = []
     @Published var surveyCategories: [SurveyCategory] = []
     @Published var opinionCategories: [SurveyCategory] = []
+    @Published var roundtableCategories: [LocalizedValue] = []
     @Published var isLoading = false
     
     private init() {}
@@ -48,6 +49,7 @@ class ConfigManager: ObservableObject {
                 case "company_sizes": self.companySizes = (try? decoder.decode([LocalizedValue].self, from: valueData)) ?? []
                 case "survey_categories": self.surveyCategories = (try? decoder.decode([SurveyCategory].self, from: valueData)) ?? []
                 case "opinion_categories": self.opinionCategories = (try? decoder.decode([SurveyCategory].self, from: valueData)) ?? []
+                case "roundtable_categories": self.roundtableCategories = (try? decoder.decode([LocalizedValue].self, from: valueData)) ?? []
                 default: break
                 }
             }

@@ -8,6 +8,10 @@ class CreateRoundtableViewModel: ObservableObject {
     @Published var description: String = ""
     @Published var selectedCategory: String = ""
     
+    var categories: [String] {
+        ConfigManager.shared.roundtableCategories.map { ConfigManager.shared.getLocalizedValue($0) }
+    }
+    
     // Step 2: Oturum Ayarları
     @Published var selectedDate: Date = Date()
     @Published var selectedTime: Date = Date()
