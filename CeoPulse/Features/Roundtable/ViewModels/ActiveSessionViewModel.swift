@@ -3,7 +3,7 @@ import SwiftUI
 import Combine
 import Supabase
 import Realtime
-import AgoraRtcKit
+import RtcBasic
 
 @MainActor class ActiveSessionViewModel: ObservableObject {
     let roundtable: Roundtable

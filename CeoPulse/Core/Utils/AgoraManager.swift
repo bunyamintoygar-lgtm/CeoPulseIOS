@@ -1,5 +1,5 @@
 import Foundation
-import AgoraRtcKit
+import RtcBasic
 
 class AgoraManager: NSObject, ObservableObject {
     static let shared = AgoraManager()
