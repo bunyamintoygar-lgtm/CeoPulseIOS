@@ -105,8 +105,10 @@ class RoundtableService {
     }
     
     func updateCurrentSpeaker(roundtableId: UUID, userId: UUID?) async throws {
+        let data: [String: String?] = ["current_speaker_id": userId?.uuidString]
+        
         try await client.from("roundtables")
-            .update(["current_speaker_id": userId?.uuidString as Any])
+            .update(data)
             .eq("id", value: roundtableId.uuidString)
             .execute()
     }

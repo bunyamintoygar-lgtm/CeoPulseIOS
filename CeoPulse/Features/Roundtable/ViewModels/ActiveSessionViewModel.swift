@@ -96,9 +96,15 @@ import AgoraRtcKit
             filter: "id=eq.\(roundtable.id.uuidString)"
         ) { [weak self] action in
             guard let self = self else { return }
-            if let updatedRoundtable = try? action.decode(as: Roundtable.self) {
+            // Get current_speaker_id from the record
+            if let speakerIdString = action.record["current_speaker_id"]?.value as? String,
+               let speakerId = UUID(uuidString: speakerIdString) {
                 Task { @MainActor in
-                    self.roundtable.currentSpeakerId = updatedRoundtable.currentSpeakerId
+                    self.roundtable.currentSpeakerId = speakerId
+                }
+            } else {
+                Task { @MainActor in
+                    self.roundtable.currentSpeakerId = nil
                 }
             }
         }
