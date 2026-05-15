@@ -11,7 +11,7 @@ class RoundtableService {
     
     // MARK: - Fetching
     
-    func fetchRoundtables(status: RoundtableStatus? = nil, category: String? = nil) async throws -> [Roundtable] {
+    func fetchRoundtables(status: RoundtableStatus? = nil, category: String? = nil, searchText: String? = nil, moderatorId: UUID? = nil) async throws -> [Roundtable] {
         var query = client.from("roundtables").select()
         
         if let status = status {
@@ -20,6 +20,14 @@ class RoundtableService {
         
         if let category = category, category != "Tümü" {
             query = query.eq("category", value: category)
+        }
+        
+        if let moderatorId = moderatorId {
+            query = query.eq("moderator_id", value: moderatorId.uuidString)
+        }
+        
+        if let searchText = searchText, !searchText.isEmpty {
+            query = query.ilike("title", query: "%\(searchText)%")
         }
         
         let roundtables: [Roundtable] = try await query.order("start_time", ascending: true).execute().value

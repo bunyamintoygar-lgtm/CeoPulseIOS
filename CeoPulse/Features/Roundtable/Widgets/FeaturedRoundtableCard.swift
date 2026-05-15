@@ -4,7 +4,7 @@ struct FeaturedRoundtableCard: View {
     let roundtable: Roundtable
     
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
+        ZStack(alignment: .topLeading) {
             // Background Image/Gradient
             ZStack {
                 RoundedRectangle(cornerRadius: 24)
@@ -37,8 +37,8 @@ struct FeaturedRoundtableCard: View {
             )
             
             // Content
-            VStack(alignment: .leading, spacing: 12) {
-                VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Yeni bir yuvarlak masa oluşturun")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
@@ -49,7 +49,6 @@ struct FeaturedRoundtableCard: View {
                         .lineLimit(3)
                         .frame(maxWidth: 220)
                 }
-                .padding(.bottom, 8)
                 
                 NavigationLink(destination: CreateRoundtableView()) {
                     HStack(spacing: 8) {
@@ -58,14 +57,15 @@ struct FeaturedRoundtableCard: View {
                     }
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
                     .background(Color.purple)
                     .cornerRadius(12)
                     .shadow(color: Color.purple.opacity(0.3), radius: 10, y: 5)
                 }
             }
-            .padding(24)
+            .padding(.top, 32)
+            .padding(.horizontal, 24)
         }
     }
 }

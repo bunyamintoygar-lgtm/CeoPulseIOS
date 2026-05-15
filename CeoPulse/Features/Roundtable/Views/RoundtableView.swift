@@ -3,20 +3,26 @@ import SwiftUI
 struct RoundtableView: View {
     @StateObject private var viewModel = RoundtableViewModel()
     @Environment(\.dismiss) var dismiss
-    @State private var selectedTab = 0
     
     private let tabs = ["Tüm Masalar", "Kendi Açtıklarım", "Devam Edenler", "Geçmiş Masalar"]
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            LazyVStack(alignment: .leading, spacing: 24) {
                 // Header
                 headerSection
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
                 
+                // Search Bar (Conditional)
+                if viewModel.isSearching {
+                    searchBarSection
+                        .padding(.horizontal, 20)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
+                
                 // Featured Card (Hero)
-                if let featured = viewModel.roundtables.first {
+                if let featured = viewModel.roundtables.first, viewModel.searchText.isEmpty {
                     FeaturedRoundtableCard(roundtable: featured)
                         .padding(.horizontal, 20)
                 }
@@ -24,14 +30,16 @@ struct RoundtableView: View {
                 // Tabs
                 tabsSection
                 
-                // Kendi Açtıklarım
-                roundtableSection(title: "Kendi Açtıklarım", roundtables: viewModel.roundtables.prefix(1))
-                
-                // Açılmış Masalar
-                roundtableSection(title: "Açılmış Masalar", roundtables: viewModel.roundtables.suffix(3))
-                
-                // Geçmiş Masalar
-                roundtableSection(title: "Geçmiş Masalar", roundtables: viewModel.roundtables.prefix(2), isPast: true)
+                // Content based on selected tab or search
+                if viewModel.isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                } else if viewModel.roundtables.isEmpty {
+                    emptyStateSection
+                } else {
+                    mainContentSection
+                }
                 
                 // Info Section
                 infoCardSection
@@ -41,8 +49,38 @@ struct RoundtableView: View {
         }
         .background(AppColors.background.ignoresSafeArea())
         .navigationBarHidden(true)
+        .animation(.spring(), value: viewModel.isSearching)
         .refreshable {
             await viewModel.refresh()
+        }
+    }
+    
+    private var searchBarSection: some View {
+        HStack {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.white.opacity(0.4))
+                TextField("Masa başlığı ile ara...", text: $viewModel.searchText)
+                    .foregroundColor(.white)
+                    .font(.system(size: 14))
+                
+                if !viewModel.searchText.isEmpty {
+                    Button(action: { viewModel.searchText = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.white.opacity(0.4))
+                    }
+                }
+            }
+            .padding(12)
+            .background(Color.white.opacity(0.05))
+            .cornerRadius(12)
+            
+            Button("İptal") {
+                viewModel.isSearching = false
+                viewModel.searchText = ""
+            }
+            .font(.system(size: 14, weight: .bold))
+            .foregroundColor(.purple)
         }
     }
     
@@ -50,13 +88,13 @@ struct RoundtableView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
                 ForEach(tabs.indices, id: \.self) { index in
-                    Button(action: { selectedTab = index }) {
+                    Button(action: { viewModel.selectedTab = index }) {
                         Text(tabs[index])
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(selectedTab == index ? .white : .white.opacity(0.6))
+                            .foregroundColor(viewModel.selectedTab == index ? .white : .white.opacity(0.6))
                             .padding(.horizontal, 20)
                             .padding(.vertical, 10)
-                            .background(selectedTab == index ? Color.purple : Color.white.opacity(0.05))
+                            .background(viewModel.selectedTab == index ? Color.purple : Color.white.opacity(0.05))
                             .cornerRadius(20)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 20)
@@ -69,7 +107,20 @@ struct RoundtableView: View {
         }
     }
     
-    private func roundtableSection(title: String, roundtables: ArraySlice<Roundtable>, isPast: Bool = false) -> some View {
+    private var mainContentSection: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            if viewModel.selectedTab == 0 && viewModel.searchText.isEmpty {
+                // Sectioned view for "Tüm Masalar"
+                roundtableSection(title: "Öne Çıkanlar", roundtables: viewModel.roundtables.prefix(2))
+                roundtableSection(title: "Tüm Masalar", roundtables: viewModel.roundtables)
+            } else {
+                // List view for specific tabs or search
+                roundtableSection(title: tabs[viewModel.selectedTab], roundtables: ArraySlice(viewModel.roundtables))
+            }
+        }
+    }
+    
+    private func roundtableSection(title: String, roundtables: ArraySlice<Roundtable>) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text(title)
@@ -93,6 +144,24 @@ struct RoundtableView: View {
         }
     }
     
+    private var emptyStateSection: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "bubble.left.and.exclamationmark.bubble.right")
+                .font(.system(size: 48))
+                .foregroundColor(.white.opacity(0.2))
+            Text("Sonuç bulunamadı")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.white)
+            Text("Farklı bir arama yapmayı veya filtreleri değiştirmeyi deneyin.")
+                .font(.system(size: 13))
+                .foregroundColor(.white.opacity(0.4))
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+        .padding(.horizontal, 40)
+    }
+    
     private var headerSection: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 6) {
@@ -113,7 +182,11 @@ struct RoundtableView: View {
             
             Spacer()
             
-            Button(action: { /* Arama aksiyonu buraya gelecek */ }) {
+            Button(action: { 
+                withAnimation {
+                    viewModel.isSearching.toggle()
+                }
+            }) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
