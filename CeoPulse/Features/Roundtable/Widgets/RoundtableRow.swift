@@ -106,8 +106,9 @@ struct RoundtableRow: View {
     
     private var participantsView: some View {
         HStack(spacing: -8) {
-            ForEach(Array(viewModel.participants.prefix(4))) { participant in
-                AsyncImage(url: URL(string: "https://i.pravatar.cc/100?u=\(participant.userId)")) { image in
+            let participantsToDisplay = Array(viewModel.participants.prefix(4))
+            ForEach(participantsToDisplay, id: \.id) { participant in
+                AsyncImage(url: URL(string: participant.avatar_url ?? "https://i.pravatar.cc/100?u=\(participant.id)")) { image in
                     image.resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 24, height: 24)
@@ -127,7 +128,8 @@ struct RoundtableRow: View {
                     .padding(.leading, 12)
             }
             
-            Text(viewModel.participants.isEmpty ? "Henüz katılımcı yok" : "Ali Yılmaz ve \(viewModel.participants.count) diğer uzman")
+            let participantNames = viewModel.participants.prefix(1).map { "\($0.first_name) \($0.last_name)" }.joined()
+            Text(viewModel.participants.isEmpty ? "Henüz katılımcı yok" : "\(participantNames) ve \(viewModel.participants.count) diğer uzman")
                 .font(.system(size: 10))
                 .foregroundColor(.white.opacity(0.4))
                 .padding(.leading, 8)
