@@ -145,21 +145,11 @@ struct ActiveSessionView: View {
             
             // The 3D-ish Circular Table
             ZStack {
-                // Table Base Glow
-                Circle()
-                    .fill(RadialGradient(colors: [Color.purple.opacity(0.3), Color.clear], center: .center, startRadius: 0, endRadius: 150))
-                    .frame(width: 300, height: 300)
-                
-                // Table Rim
-                Circle()
-                    .stroke(LinearGradient(colors: [.purple.opacity(0.5), .clear], startPoint: .top, endPoint: .bottom), lineWidth: 2)
-                    .frame(width: 200, height: 200)
-                
-                // Table Inner
+                // Table Inner (Reduced Glow)
                 Circle()
                     .fill(Color(hex: "0F0F1A"))
-                    .frame(width: 180, height: 180)
-                    .shadow(color: .purple.opacity(0.5), radius: 20)
+                    .frame(width: 200, height: 200)
+                    .shadow(color: .purple.opacity(0.3), radius: 30)
                 
                 // Central "Söz İste" Button
                 Button(action: { withAnimation { isFloorRequested.toggle() } }) {
