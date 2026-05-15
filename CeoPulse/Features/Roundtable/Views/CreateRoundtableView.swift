@@ -101,25 +101,39 @@ struct CreateRoundtableView: View {
                         // Step 3: Konuşma Çerçevesi
                         StepSection(number: 3, title: "Konuşma Çerçevesi") {
                             VStack(alignment: .leading, spacing: 16) {
-                                HStack {
-                                    Text("Tartışma Soruları (İsteğe bağlı)")
-                                        .font(.system(size: 13, weight: .semibold))
-                                        .foregroundColor(.white.opacity(0.8))
-                                    Spacer()
-                                    Button(action: { /* Add question logic */ }) {
-                                        HStack(spacing: 4) {
-                                            Image(systemName: "plus")
-                                            Text("Soru Ekle")
+                                VStack(alignment: .leading, spacing: 12) {
+                                    HStack {
+                                        Text("Tartışma Soruları (İsteğe bağlı)")
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .foregroundColor(.white.opacity(0.8))
+                                        Spacer()
+                                        Button(action: { viewModel.addQuestion() }) {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "plus")
+                                                Text("Soru Ekle")
+                                            }
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(.purple)
                                         }
-                                        .font(.system(size: 12, weight: .bold))
-                                        .foregroundColor(.purple)
+                                        .disabled(viewModel.newQuestion.isEmpty)
+                                        .opacity(viewModel.newQuestion.isEmpty ? 0.5 : 1.0)
                                     }
+                                    
+                                    TextField("Sorunuzu buraya yazın...", text: $viewModel.newQuestion)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.white)
+                                        .padding(12)
+                                        .background(Color.white.opacity(0.03))
+                                        .cornerRadius(12)
+                                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.08), lineWidth: 1))
                                 }
                                 
-                                VStack(spacing: 8) {
-                                    ForEach(Array(viewModel.discussionQuestions.enumerated()), id: \.self.offset) { index, question in
-                                        QuestionRow(number: index + 1, question: question) {
-                                            viewModel.removeQuestion(at: index)
+                                if !viewModel.discussionQuestions.isEmpty {
+                                    VStack(spacing: 8) {
+                                        ForEach(Array(viewModel.discussionQuestions.enumerated()), id: \.self.offset) { index, question in
+                                            QuestionRow(number: index + 1, question: question) {
+                                                viewModel.removeQuestion(at: index)
+                                            }
                                         }
                                     }
                                 }

@@ -40,10 +40,7 @@ class CreateRoundtableViewModel: ObservableObject {
     @Published var whoCanJoin: JoinPermission = .everyone
     
     // Step 3: Konuşma Çerçevesi
-    @Published var discussionQuestions: [String] = [
-        "2026'da liderlerin karşılaşacağı en büyük zorluklar neler olacak?",
-        "Bu zorluklara karşı hangi stratejiler en etkili olabilir?"
-    ]
+    @Published var discussionQuestions: [String] = []
     @Published var newQuestion: String = ""
     
     @Published var isLoading: Bool = false
