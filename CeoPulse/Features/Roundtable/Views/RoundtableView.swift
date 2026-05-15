@@ -18,12 +18,12 @@ struct RoundtableView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 24) {
                     // Featured Card (Hero) - Only if not searching
-                    if let featured = viewModel.roundtables.first, viewModel.searchText.isEmpty {
+                    if let featured = viewModel.roundtables.first, viewModel.searchText.isEmpty && viewModel.selectedCategory == "Tümü" {
                         FeaturedRoundtableCard(roundtable: featured)
                             .padding(.horizontal, 20)
                     }
                     
-                    // Tabs
+                    // Tabs (Categories)
                     tabsSection
                     
                     // Content based on selected tab or search
@@ -58,39 +58,71 @@ struct RoundtableView: View {
     private var headerSection: some View {
         HStack(alignment: .center, spacing: 12) {
             if viewModel.isSearching {
-                // Sliding Inline Search Bar
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.white.opacity(0.4))
-                    
-                    TextField("Masa başlığı ile ara...", text: $viewModel.searchText)
-                        .foregroundColor(.white)
-                        .font(.system(size: 14))
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.none)
-                    
-                    if !viewModel.searchText.isEmpty {
-                        Button(action: { viewModel.searchText = "" }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.white.opacity(0.4))
+                // Sliding Inline Search Bar with Category Filter
+                HStack(spacing: 8) {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.white.opacity(0.4))
+                        
+                        TextField("Masa başlığı ile ara...", text: $viewModel.searchText)
+                            .foregroundColor(.white)
+                            .font(.system(size: 14))
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.none)
+                        
+                        if !viewModel.searchText.isEmpty {
+                            Button(action: { viewModel.searchText = "" }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.white.opacity(0.4))
+                            }
+                        }
+                        
+                        Divider()
+                            .frame(height: 20)
+                            .background(Color.white.opacity(0.1))
+                            .padding(.horizontal, 4)
+                        
+                        // Category Selector within Search Bar
+                        Menu {
+                            Button("Tümü") { viewModel.selectedCategory = "Tümü" }
+                            ForEach(ConfigManager.shared.roundtableCategories, id: \.id) { category in
+                                Button(ConfigManager.shared.getLocalizedValue(category)) {
+                                    viewModel.selectedCategory = ConfigManager.shared.getLocalizedValue(category)
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: getCategoryIcon(viewModel.selectedCategory))
+                                    .font(.system(size: 14))
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 8))
+                            }
+                            .foregroundColor(.purple)
+                            .frame(width: 40)
                         }
                     }
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(Color.white.opacity(0.08))
-                .cornerRadius(12)
-                .transition(.move(edge: .trailing).combined(with: .opacity))
-                
-                Button("İptal") {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                        viewModel.isSearching = false
-                        viewModel.searchText = ""
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(Color.white.opacity(0.08))
+                    .cornerRadius(12)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    
+                    Button(action: {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            viewModel.isSearching = false
+                            viewModel.searchText = ""
+                            viewModel.selectedCategory = "Tümü"
+                        }
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.purple)
+                            .frame(width: 40, height: 40)
+                            .background(Color.white.opacity(0.05))
+                            .clipShape(Circle())
                     }
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(.purple)
-                .transition(.move(edge: .trailing).combined(with: .opacity))
             } else {
                 // Normal Header
                 VStack(alignment: .leading, spacing: 4) {
@@ -159,18 +191,11 @@ struct RoundtableView: View {
     
     private var mainContentSection: some View {
         VStack(alignment: .leading, spacing: 24) {
-            if viewModel.selectedTab == 0 && viewModel.searchText.isEmpty {
-                // Yaklaşan Masalar
-                if !viewModel.upcomingRoundtables.isEmpty {
-                    roundtableSection(title: "Yaklaşan Masalar", roundtables: Array(viewModel.upcomingRoundtables.prefix(3)))
-                }
-                
-                // Tüm Masalar
-                roundtableSection(title: "Tüm Masalar", roundtables: viewModel.roundtables)
-            } else {
-                // List view for specific tabs or search results
-                roundtableSection(title: tabs[viewModel.selectedTab], roundtables: viewModel.roundtables)
-            }
+            // Simplified List: All sessions under "Yaklaşan Masalar" (or the selected tab name)
+            let headerTitle = viewModel.selectedTab == 0 ? "Yaklaşan Masalar" : tabs[viewModel.selectedTab]
+            let displayList = viewModel.selectedTab == 0 ? viewModel.upcomingRoundtables : viewModel.roundtables
+            
+            roundtableSection(title: headerTitle, roundtables: displayList)
         }
     }
     
@@ -205,6 +230,13 @@ struct RoundtableView: View {
         } else {
             JoinRoundtableView(roundtable: roundtable)
         }
+    }
+    
+    private func getCategoryIcon(_ categoryName: String) -> String {
+        if let category = ConfigManager.shared.roundtableCategories.first(where: { ConfigManager.shared.getLocalizedValue($0) == categoryName }) {
+            return category.icon ?? "tag.fill"
+        }
+        return "tag.fill"
     }
     
     private var emptyStateSection: some View {
