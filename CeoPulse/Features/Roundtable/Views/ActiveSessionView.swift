@@ -43,6 +43,9 @@ struct ActiveSessionView: View {
         .task {
             await viewModel.setupSession()
         }
+        .onDisappear {
+            viewModel.leaveSession()
+        }
     }
     
     // MARK: - Sections
@@ -90,7 +93,7 @@ struct ActiveSessionView: View {
             HStack(spacing: 8) {
                 Image(systemName: "calendar")
                     .foregroundColor(.white.opacity(0.6))
-                Text("24 Mayıs 2025, Cumartesi") // Mock for design
+                Text(viewModel.roundtable.startTime.formatted(date: .long, time: .omitted))
                     .font(.system(size: 11))
             }
             .padding(.trailing, 16)
@@ -98,7 +101,7 @@ struct ActiveSessionView: View {
             HStack(spacing: 8) {
                 Image(systemName: "clock")
                     .foregroundColor(.white.opacity(0.6))
-                Text("20:30 - 22:00 (90 dk)")
+                Text(viewModel.roundtable.startTime.formatted(date: .omitted, time: .shortened))
                     .font(.system(size: 11))
             }
             
@@ -125,7 +128,7 @@ struct ActiveSessionView: View {
             HStack {
                 HStack(spacing: 4) {
                     Image(systemName: "person.2.fill")
-                    Text("34 / 40 Katılımcı")
+                    Text("\(viewModel.participants.count) / 40 Katılımcı")
                 }
                 .font(.system(size: 12))
                 .foregroundColor(AppColors.textSecondary)
@@ -143,16 +146,16 @@ struct ActiveSessionView: View {
             }
             .padding(.horizontal, 20)
             
-            // The 3D-ish Circular Table
             ZStack {
-                // Table Inner (Reduced Glow)
                 Circle()
                     .fill(Color(hex: "0F0F1A"))
                     .frame(width: 200, height: 200)
                     .shadow(color: .purple.opacity(0.3), radius: 30)
                 
-                // Central "Söz İste" Button
-                Button(action: { withAnimation { isFloorRequested.toggle() } }) {
+                Button(action: { 
+                    withAnimation { isFloorRequested.toggle() } 
+                    viewModel.requestFloor()
+                }) {
                     VStack(spacing: 8) {
                         Image(systemName: "hand.raised.fill")
                             .font(.system(size: 32))
@@ -171,31 +174,19 @@ struct ActiveSessionView: View {
                     )
                 }
                 
-                // Avatars around the table
-                // Speakers (Top)
-                participantAvatar(name: "Ali Yılmaz", role: "Moderatör", roleColor: .purple, isMuted: false, angle: -90, isSpeaking: true)
-                participantAvatar(name: "Zeynep K.", role: "Konuşmacı", roleColor: .purple, isMuted: false, angle: -140)
-                participantAvatar(name: "Murat A.", role: "Konuşmacı", roleColor: .purple, isMuted: false, angle: -40)
-                
-                // Listeners (Bottom)
-                participantAvatar(name: "Ayşe T.", role: "Dinleyici", roleColor: .gray, isMuted: true, angle: 20)
-                participantAvatar(name: "Deniz Y.", role: "Dinleyici", roleColor: .gray, isMuted: true, angle: 70)
-                participantAvatar(name: "Sen", role: "Dinleyici", roleColor: .green, isMuted: true, angle: 90, isMe: true)
-                participantAvatar(name: "Mehmet D.", role: "Dinleyici", roleColor: .gray, isMuted: true, angle: 110)
-                participantAvatar(name: "Selin A.", role: "Konuşmacı", roleColor: .purple, isMuted: false, angle: 160)
-                
-                // Extra participants indicator
-                VStack(spacing: 2) {
-                    Text("+25")
-                        .font(.system(size: 14, weight: .bold))
-                    Text("Diğer")
-                        .font(.system(size: 8))
+                // Dynamic Avatars
+                ForEach(Array(viewModel.participants.enumerated()), id: \.element.id) { index, participant in
+                    let angle = Double(index) * (360.0 / Double(max(1, viewModel.participants.count))) - 90
+                    participantAvatar(
+                        name: participant.userName ?? "Lider",
+                        role: participant.role.title,
+                        roleColor: participant.role.color,
+                        isMuted: participant.isMuted,
+                        angle: angle,
+                        isSpeaking: false, // In a real app, bind to Agora's speaking detection
+                        isMe: participant.userId == viewModel.currentUserId
+                    )
                 }
-                .foregroundColor(.white)
-                .frame(width: 44, height: 44)
-                .background(Color.white.opacity(0.1))
-                .clipShape(Circle())
-                .offset(x: 90, y: 70)
             }
             .frame(height: 340)
             
@@ -212,18 +203,20 @@ struct ActiveSessionView: View {
     private var participantStrip: some View {
         VStack(spacing: 12) {
             HStack(spacing: -8) {
-                ForEach(0..<12) { _ in
+                ForEach(viewModel.participants.prefix(12)) { _ in
                     Circle()
                         .fill(Color.gray.opacity(0.3))
                         .frame(width: 32, height: 32)
                         .overlay(Circle().stroke(AppColors.background, lineWidth: 2))
                 }
-                ZStack {
-                    Circle()
-                        .fill(Color.white.opacity(0.1))
-                        .frame(width: 32, height: 32)
-                    Text("+19")
-                        .font(.system(size: 10, weight: .bold))
+                if viewModel.participants.count > 12 {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white.opacity(0.1))
+                            .frame(width: 32, height: 32)
+                        Text("+\(viewModel.participants.count - 12)")
+                            .font(.system(size: 10, weight: .bold))
+                    }
                 }
             }
             
@@ -245,7 +238,6 @@ struct ActiveSessionView: View {
     
     private var contentSection: some View {
         VStack(spacing: 0) {
-            // Tabs
             HStack(spacing: 0) {
                 tabButton(title: "Sohbet", index: 0)
                 tabButton(title: "İçgörüler", index: 1)
@@ -256,38 +248,58 @@ struct ActiveSessionView: View {
             
             Divider().background(Color.white.opacity(0.1))
             
-            // Chat List
-            VStack(spacing: 20) {
-                chatRow(name: "Ali Yılmaz", role: "Moderatör", color: .purple, message: "Hoş geldiniz! Harika bir sohbet bizi bekliyor.", time: "20:31")
-                chatRow(name: "Zeynep K.", role: "Konuşmacı", color: .purple, message: "Sürdürülebilir büyüme için en kritik önceliğiniz sizce nedir?", time: "20:32")
-                chatRow(name: "Mehmet D.", role: "Dinleyici", color: .gray, message: "Teknoloji yatırımlarının etkisi hakkında ne düşünüyorsunuz?", time: "20:33")
-            }
-            .padding(20)
-            
-            // Message Input
-            HStack(spacing: 12) {
-                HStack {
-                    TextField("Mesajınızı yazın...", text: $messageText)
-                        .foregroundColor(.white)
-                        .font(.system(size: 14))
-                    Image(systemName: "paperclip")
-                        .foregroundColor(.white.opacity(0.4))
+            if selectedTab == 0 {
+                // Chat List
+                ScrollView {
+                    VStack(spacing: 20) {
+                        ForEach(viewModel.messages) { message in
+                            chatRow(
+                                name: message.userName ?? "Kullanıcı",
+                                role: "Katılımcı",
+                                color: .blue,
+                                message: message.content,
+                                time: message.createdAt.formatted(date: .omitted, time: .shortened)
+                            )
+                        }
+                    }
+                    .padding(20)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Color.white.opacity(0.05))
-                .cornerRadius(24)
                 
-                Button(action: {}) {
-                    Image(systemName: "paperplane.fill")
-                        .foregroundColor(.white)
-                        .frame(width: 44, height: 44)
-                        .background(AppColors.primary)
-                        .clipShape(Circle())
+                // Message Input
+                HStack(spacing: 12) {
+                    HStack {
+                        TextField("Mesajınızı yazın...", text: $messageText)
+                            .foregroundColor(.white)
+                            .font(.system(size: 14))
+                        Image(systemName: "paperclip")
+                            .foregroundColor(.white.opacity(0.4))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(24)
+                    
+                    Button(action: {
+                        Task {
+                            await viewModel.sendMessage(messageText)
+                            messageText = ""
+                        }
+                    }) {
+                        Image(systemName: "paperplane.fill")
+                            .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
+                            .background(AppColors.primary)
+                            .clipShape(Circle())
+                    }
                 }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+            } else {
+                Spacer().frame(height: 200)
+                Text("Çok yakında...")
+                    .foregroundColor(.gray)
+                Spacer()
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
         }
         .background(Color.white.opacity(0.02))
         .cornerRadius(32, corners: [.topLeft, .topRight])
@@ -295,27 +307,45 @@ struct ActiveSessionView: View {
     
     private var bottomActionBar: some View {
         HStack {
-            bottomBarButton(icon: "mic.slash.fill", label: "Mikrofon")
-            bottomBarButton(icon: "video.slash.fill", label: "Kamera")
+            bottomBarButton(
+                icon: viewModel.agoraManager.isMuted ? "mic.slash.fill" : "mic.fill",
+                label: "Mikrofon",
+                active: !viewModel.agoraManager.isMuted
+            ) {
+                viewModel.toggleMute()
+            }
+            
+            bottomBarButton(
+                icon: viewModel.agoraManager.isCameraOn ? "video.fill" : "video.slash.fill",
+                label: "Kamera",
+                active: viewModel.agoraManager.isCameraOn
+            ) {
+                viewModel.toggleCamera()
+            }
             
             // Main Söz İste
-            Button(action: {}) {
+            Button(action: {
+                withAnimation { isFloorRequested.toggle() }
+                viewModel.requestFloor()
+            }) {
                 VStack(spacing: 4) {
                     Image(systemName: "hand.raised.fill")
                         .font(.system(size: 24))
-                        .foregroundColor(.purple)
+                        .foregroundColor(isFloorRequested ? .green : .purple)
                         .frame(width: 56, height: 56)
-                        .background(Color.purple.opacity(0.1))
+                        .background((isFloorRequested ? Color.green : Color.purple).opacity(0.1))
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.purple.opacity(0.3), lineWidth: 1))
+                        .overlay(Circle().stroke((isFloorRequested ? Color.green : Color.purple).opacity(0.3), lineWidth: 1))
                     Text("Söz İste")
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.purple)
+                        .foregroundColor(isFloorRequested ? .green : .purple)
                 }
             }
             .frame(maxWidth: .infinity)
             
-            bottomBarButton(icon: "face.smiling", label: "Tepki")
+            bottomBarButton(icon: "face.smiling", label: "Tepki", active: false) {
+                // Tepki logic
+            }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
@@ -411,26 +441,21 @@ struct ActiveSessionView: View {
         }
     }
     
-    private func bottomBarButton(icon: String, label: String) -> some View {
-        Button(action: {}) {
+    private func bottomBarButton(icon: String, label: String, active: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
             VStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 20))
-                    .foregroundColor(.white)
+                    .foregroundColor(active ? .purple : .white)
                     .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.05))
+                    .background(active ? Color.purple.opacity(0.1) : Color.white.opacity(0.05))
                     .clipShape(Circle())
+                    .overlay(Circle().stroke(active ? Color.purple.opacity(0.3) : Color.clear, lineWidth: 1))
                 Text(label)
                     .font(.system(size: 10))
-                    .foregroundColor(.gray)
+                    .foregroundColor(active ? .purple : .gray)
             }
         }
         .frame(maxWidth: .infinity)
     }
-
-
-
-
-
-
 }
