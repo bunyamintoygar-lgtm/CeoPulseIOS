@@ -102,21 +102,8 @@ struct RoundtableView: View {
     }
     
     private var headerSection: some View {
-        VStack(spacing: 20) {
-            HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "arrow.left")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(width: 44, height: 44)
-                        .background(Color.white.opacity(0.1))
-                        .clipShape(Circle())
-                }
-                
-                Spacer()
-            }
-            
-            VStack(spacing: 4) {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 10) {
                     Image(systemName: "bubble.left.and.bubble.right.fill")
                         .font(.system(size: 24))
@@ -130,6 +117,17 @@ struct RoundtableView: View {
                 Text("Fikirler, deneyimler ve vizyonlar buluşuyor.")
                     .font(.system(size: 14))
                     .foregroundColor(AppColors.textSecondary)
+            }
+            
+            Spacer()
+            
+            Button(action: { /* Arama aksiyonu buraya gelecek */ }) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.white.opacity(0.1))
+                    .clipShape(Circle())
             }
         }
     }

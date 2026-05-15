@@ -17,21 +17,17 @@ struct FeaturedRoundtableCard: View {
                     .blur(radius: 60)
                     .offset(x: 100, y: -50)
                 
-                // Use the generated image if available, else a gradient placeholder
-                Image("roundtable_hero_render_1778791841770") // Use the actual generated image name
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 400, height: 220)
-                    .clipped()
-                    .opacity(0.8)
-                    .mask(
-                        LinearGradient(
-                            colors: [.black, .black, .clear],
-                            startPoint: .trailing,
-                            endPoint: .leading
-                        )
-                    )
-                    .offset(x: 60)
+                // Supabase Image for Roundtable
+                AsyncImage(url: URL(string: "https://wvsbpsahpshgmrgcxpmq.supabase.co/storage/v1/object/public/app_assets/roundtable.png")) { image in
+                    image.resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 160)
+                } placeholder: {
+                    Color.clear
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .offset(x: 10)
+                .opacity(0.9)
             }
             .frame(height: 220)
             .cornerRadius(24)
