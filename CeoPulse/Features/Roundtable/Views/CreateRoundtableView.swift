@@ -62,9 +62,9 @@ struct CreateRoundtableView: View {
                                         .foregroundColor(.white.opacity(0.8))
                                     
                                     HStack(spacing: 20) {
-                                        RadioButtonField(label: "Herkes (Açık)", isSelected: viewModel.whoCanJoin == .everyone, action: { viewModel.whoCanJoin = .everyone })
-                                        RadioButtonField(label: "Premium Üyeler", isSelected: viewModel.whoCanJoin == .premium, action: { viewModel.whoCanJoin = .premium })
-                                        RadioButtonField(label: "Davetliler", isSelected: viewModel.whoCanJoin == .invitedOnly, action: { viewModel.whoCanJoin = .invitedOnly })
+                                        RoundtableRadioButtonField(label: "Herkes (Açık)", isSelected: viewModel.whoCanJoin == .everyone, action: { viewModel.whoCanJoin = .everyone })
+                                        RoundtableRadioButtonField(label: "Premium Üyeler", isSelected: viewModel.whoCanJoin == .premium, action: { viewModel.whoCanJoin = .premium })
+                                        RoundtableRadioButtonField(label: "Davetliler", isSelected: viewModel.whoCanJoin == .invitedOnly, action: { viewModel.whoCanJoin = .invitedOnly })
                                     }
                                 }
                                 .padding(.top, 8)
@@ -306,7 +306,7 @@ struct DropdownField: View {
     }
 }
 
-struct RadioButtonField: View {
+struct RoundtableRadioButtonField: View {
     let label: String
     let isSelected: Bool
     let action: () -> Void
