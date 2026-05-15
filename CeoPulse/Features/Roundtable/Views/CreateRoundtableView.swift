@@ -4,6 +4,9 @@ struct CreateRoundtableView: View {
     @StateObject private var viewModel = CreateRoundtableViewModel()
     @Environment(\.dismiss) var dismiss
     
+    @State private var showDatePicker = false
+    @State private var showTimePicker = false
+    
     var body: some View {
         ZStack {
             AppColors.background.ignoresSafeArea()
@@ -18,12 +21,14 @@ struct CreateRoundtableView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 FormField(label: "Masa Başlığı", count: "\(viewModel.title.count)/80") {
                                     TextField("Örneğin: 2026'da Yapay Zeka ve Liderlik", text: $viewModel.title)
+                                        .foregroundColor(.white)
                                         .limitCharacters($viewModel.title, limit: 80)
                                 }
                                 
                                 FormField(label: "Masa Açıklaması", count: "\(viewModel.description.count)/500") {
                                     TextEditor(text: $viewModel.description)
                                         .frame(height: 100)
+                                        .foregroundColor(.white)
                                         .limitCharacters($viewModel.description, limit: 500)
                                         .scrollContentBackground(.hidden)
                                         .background(Color.white.opacity(0.02))
@@ -40,10 +45,32 @@ struct CreateRoundtableView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack(spacing: 16) {
                                     FormField(label: "Tarih") {
-                                        DatePickerField(date: $viewModel.selectedDate, icon: "calendar")
+                                        Button(action: { showDatePicker = true }) {
+                                            HStack {
+                                                Image(systemName: "calendar")
+                                                    .foregroundColor(.white.opacity(0.4))
+                                                Text(viewModel.selectedDate.formatted(date: .long, time: .omitted))
+                                                    .font(.system(size: 14))
+                                                    .foregroundColor(.white)
+                                                Spacer()
+                                                Image(systemName: "calendar")
+                                                    .foregroundColor(.white.opacity(0.4))
+                                            }
+                                        }
                                     }
                                     FormField(label: "Başlangıç Saati") {
-                                        DatePickerField(date: $viewModel.selectedTime, icon: "clock", mode: .hourAndMinute)
+                                        Button(action: { showTimePicker = true }) {
+                                            HStack {
+                                                Image(systemName: "clock")
+                                                    .foregroundColor(.white.opacity(0.4))
+                                                Text(viewModel.selectedTime.formatted(date: .omitted, time: .shortened))
+                                                    .font(.system(size: 14))
+                                                    .foregroundColor(.white)
+                                                Spacer()
+                                                Image(systemName: "chevron.down")
+                                                    .foregroundColor(.white.opacity(0.4))
+                                            }
+                                        }
                                     }
                                 }
                                 
@@ -131,6 +158,20 @@ struct CreateRoundtableView: View {
             }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showDatePicker) {
+            PickerSheet(title: "Tarih Seçin", isPresented: $showDatePicker) {
+                DatePicker("", selection: $viewModel.selectedDate, in: Date()..., displayedComponents: .date)
+                    .datePickerStyle(.wheel)
+                    .labelsHidden()
+            }
+        }
+        .sheet(isPresented: $showTimePicker) {
+            PickerSheet(title: "Başlangıç Saati Seçin", isPresented: $showTimePicker) {
+                DatePicker("", selection: $viewModel.selectedTime, displayedComponents: .hourAndMinute)
+                    .datePickerStyle(.wheel)
+                    .labelsHidden()
+            }
+        }
     }
     
     private var headerView: some View {
@@ -160,6 +201,44 @@ struct CreateRoundtableView: View {
 }
 
 // MARK: - Supporting Views
+
+struct PickerSheet<Content: View>: View {
+    let title: String
+    @Binding var isPresented: Bool
+    let content: Content
+    
+    init(title: String, isPresented: Binding<Bool>, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self._isPresented = isPresented
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Spacer()
+                Button("Tamam") {
+                    isPresented = false
+                }
+                .font(.bold(.system(size: 16))())
+                .foregroundColor(.purple)
+            }
+            .padding()
+            .background(Color(hex: "1F222F"))
+            
+            content
+                .padding()
+                .background(AppColors.background)
+            
+            Spacer()
+        }
+        .presentationDetents([.height(350)])
+        .background(AppColors.background)
+    }
+}
 
 struct StepSection<Content: View>: View {
     let number: Int
@@ -262,38 +341,6 @@ struct CategoryPicker: View {
             .font(.system(size: 14))
             .contentShape(Rectangle())
         }
-    }
-}
-
-struct DatePickerField: View {
-    @Binding var date: Date
-    let icon: String
-    var mode: DatePickerComponents = .date
-    
-    var body: some View {
-        ZStack {
-            HStack {
-                Image(systemName: icon)
-                    .foregroundColor(.white.opacity(0.4))
-                Text(mode == .date ? date.formatted(date: .long, time: .omitted) : date.formatted(date: .omitted, time: .shortened))
-                    .font(.system(size: 14))
-                    .foregroundColor(.white)
-                Spacer()
-                if mode == .date {
-                    Image(systemName: "calendar")
-                        .foregroundColor(.white.opacity(0.4))
-                } else {
-                    Image(systemName: "chevron.down")
-                        .foregroundColor(.white.opacity(0.4))
-                }
-            }
-            
-            DatePicker("", selection: $date, displayedComponents: mode == .date ? .date : .hourAndMinute)
-                .labelsHidden()
-                .opacity(0.015)
-                .scaleEffect(x: 10, y: 1.5) // Stretches the native picker to cover more area
-        }
-        .contentShape(Rectangle())
     }
 }
 
