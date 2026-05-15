@@ -6,7 +6,7 @@ struct RoundtableRow: View {
     
     init(roundtable: Roundtable) {
         self.roundtable = roundtable
-        self._viewModel = StateObject(wrappedValue: RoundtableRowViewModel(roundtable: roundtable))
+        self._viewModel = StateObject(wrappedValue: RoundtableRowViewModel(roundtableId: roundtable.id))
     }
     
     var body: some View {
@@ -106,7 +106,7 @@ struct RoundtableRow: View {
     
     private var participantsView: some View {
         HStack(spacing: -8) {
-            ForEach(viewModel.participants.prefix(4)) { participant in
+            ForEach(Array(viewModel.participants.prefix(4))) { participant in
                 AsyncImage(url: URL(string: "https://i.pravatar.cc/100?u=\(participant.userId)")) { image in
                     image.resizable()
                         .aspectRatio(contentMode: .fill)
@@ -179,6 +179,7 @@ struct RoundtableRow: View {
         case .active: return "Devam Ediyor"
         case .upcoming: return "Gelecek"
         case .completed: return "Tamamlandı"
+        case .archived: return "Arşivlendi"
         }
     }
     
@@ -187,6 +188,7 @@ struct RoundtableRow: View {
         case .active: return .green
         case .upcoming: return .blue
         case .completed: return .orange
+        case .archived: return .gray
         }
     }
 }
