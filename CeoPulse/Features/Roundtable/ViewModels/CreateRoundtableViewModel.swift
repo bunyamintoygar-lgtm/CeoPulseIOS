@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import Supabase
 
 class CreateRoundtableViewModel: ObservableObject {
     // Step 1: Masa Bilgileri
@@ -71,6 +72,21 @@ class CreateRoundtableViewModel: ObservableObject {
         discussionQuestions.remove(at: index)
     }
     
+    // Internal struct for Supabase insertion to avoid AnyJSON issues
+    struct CreateRoundtableRequest: Encodable {
+        let title: String
+        let description: String
+        let category: String
+        let status: String
+        let start_time: Date
+        let estimated_duration: String
+        let participant_limit: String
+        let join_policy: String
+        let table_type: String
+        let questions: [String]
+        let moderator_id: UUID
+    }
+    
     @MainActor
     func createRoundtable() async {
         guard validate() else { return }
@@ -91,23 +107,23 @@ class CreateRoundtableViewModel: ObservableObject {
             
             let startTime = calendar.date(from: components) ?? selectedDate
             
-            let data: [String: AnyJSON] = [
-                "title": .string(title),
-                "description": .string(description),
-                "category": .string(selectedCategory),
-                "status": .string("upcoming"),
-                "start_time": .string(ISO8601DateFormatter().string(from: startTime)),
-                "estimated_duration": .string(estimatedDuration),
-                "participant_limit": .string(participantCount),
-                "join_policy": .string(whoCanJoin.rawValue),
-                "table_type": .string(tableType.rawValue),
-                "questions": .array(discussionQuestions.map { .string($0) }),
-                "moderator_id": .string(userId.uuidString)
-            ]
+            let request = CreateRoundtableRequest(
+                title: title,
+                description: description,
+                category: selectedCategory,
+                status: "upcoming",
+                start_time: startTime,
+                estimated_duration: estimatedDuration,
+                participant_limit: participantCount,
+                join_policy: whoCanJoin.rawValue,
+                table_type: tableType.rawValue,
+                questions: discussionQuestions,
+                moderator_id: userId
+            )
             
             try await SupabaseManager.shared.client
                 .from("roundtables")
-                .insert(data)
+                .insert(request)
                 .execute()
             
             isSuccess = true
