@@ -9,7 +9,12 @@ class CreateRoundtableViewModel: ObservableObject {
     @Published var selectedCategory: String = ""
     
     var categories: [LocalizedValue] {
-        ConfigManager.shared.roundtableCategories
+        let items = ConfigManager.shared.roundtableCategories
+        return items.isEmpty ? [
+            LocalizedValue(id: "1", tr: "Liderlik", en: "Leadership", icon: "person.fill"),
+            LocalizedValue(id: "2", tr: "Teknoloji", en: "Technology", icon: "cpu"),
+            LocalizedValue(id: "3", tr: "Finans", en: "Finance", icon: "chart.line.uptrend.xyaxis")
+        ] : items
     }
     
     func getCategoryName(_ category: LocalizedValue) -> String {
@@ -24,11 +29,13 @@ class CreateRoundtableViewModel: ObservableObject {
     @Published var tableType: RoundtableType = .open
     
     var participantCounts: [String] {
-        ConfigManager.shared.roundtableParticipantCounts.map { ConfigManager.shared.getLocalizedValue($0) }
+        let counts = ConfigManager.shared.roundtableParticipantCounts.map { ConfigManager.shared.getLocalizedValue($0) }
+        return counts.isEmpty ? ["3 - 6 kişi", "6 - 12 kişi", "12 - 20 kişi", "20+ kişi"] : counts
     }
     
     var durations: [String] {
-        ConfigManager.shared.roundtableDurations.map { ConfigManager.shared.getLocalizedValue($0) }
+        let items = ConfigManager.shared.roundtableDurations.map { ConfigManager.shared.getLocalizedValue($0) }
+        return items.isEmpty ? ["45 dakika", "60 dakika", "90 dakika", "120 dakika"] : items
     }
     @Published var whoCanJoin: JoinPermission = .everyone
     

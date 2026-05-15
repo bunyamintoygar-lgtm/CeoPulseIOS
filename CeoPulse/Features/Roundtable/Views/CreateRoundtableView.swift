@@ -260,6 +260,7 @@ struct CategoryPicker: View {
                     .foregroundColor(.white.opacity(0.4))
             }
             .font(.system(size: 14))
+            .contentShape(Rectangle())
         }
     }
 }
@@ -289,8 +290,10 @@ struct DatePickerField: View {
             
             DatePicker("", selection: $date, displayedComponents: mode == .date ? .date : .hourAndMinute)
                 .labelsHidden()
-                .opacity(0.011)
+                .opacity(0.015)
+                .scaleEffect(x: 10, y: 1.5) // Stretches the native picker to cover more area
         }
+        .contentShape(Rectangle())
     }
 }
 
@@ -317,6 +320,7 @@ struct DropdownField: View {
                 Image(systemName: "chevron.down")
                     .foregroundColor(.white.opacity(0.4))
             }
+            .contentShape(Rectangle())
         }
     }
 }
