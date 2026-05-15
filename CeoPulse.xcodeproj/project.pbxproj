@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5AB09BEC2FB7BB740018DA69 /* RtcBasic in Frameworks */ = {isa = PBXBuildFile; productRef = 5AB09BEB2FB7BB740018DA69 /* RtcBasic */; };
 		5AB9C54D2FABD25E00C7D9C1 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 5AB9C54C2FABD25E00C7D9C1 /* Supabase */; };
 		5AB9C54F2FABD26500C7D9C1 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 5AB9C54E2FABD26500C7D9C1 /* Auth */; };
 		5AB9C5512FABD26C00C7D9C1 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 5AB9C5502FABD26C00C7D9C1 /* PostgREST */; };
@@ -65,6 +66,7 @@
 				5AB9C54F2FABD26500C7D9C1 /* Auth in Frameworks */,
 				5AB9C5552FABD27B00C7D9C1 /* Realtime in Frameworks */,
 				5AB9C54D2FABD25E00C7D9C1 /* Supabase in Frameworks */,
+				5AB09BEC2FB7BB740018DA69 /* RtcBasic in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,6 +140,7 @@
 				5AB9C5502FABD26C00C7D9C1 /* PostgREST */,
 				5AB9C5522FABD27300C7D9C1 /* Storage */,
 				5AB9C5542FABD27B00C7D9C1 /* Realtime */,
+				5AB09BEB2FB7BB740018DA69 /* RtcBasic */,
 			);
 			productName = CeoPulse;
 			productReference = 5AB9B7412FAB58BC00C7D9C1 /* CeoPulse.app */;
@@ -671,6 +674,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		5AB09BEB2FB7BB740018DA69 /* RtcBasic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5AB099152FB79D250018DA69 /* XCRemoteSwiftPackageReference "AgoraRtcEngine_iOS" */;
+			productName = RtcBasic;
+		};
 		5AB9C54C2FABD25E00C7D9C1 /* Supabase */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 5AB9C54A2FABD24300C7D9C1 /* XCRemoteSwiftPackageReference "supabase-swift" */;
