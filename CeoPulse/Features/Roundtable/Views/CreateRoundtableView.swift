@@ -186,6 +186,16 @@ struct CreateRoundtableView: View {
                     .labelsHidden()
             }
         }
+        .onChange(of: viewModel.isSuccess) { success in
+            if success {
+                dismiss()
+            }
+        }
+        .alert("Hata", isPresented: $viewModel.showError) {
+            Button("Tamam", role: .cancel) { }
+        } message: {
+            Text(viewModel.errorMessage)
+        }
     }
     
     private var headerView: some View {

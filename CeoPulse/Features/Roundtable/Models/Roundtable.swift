@@ -8,7 +8,11 @@ struct Roundtable: Identifiable, Codable {
     let category: String
     var status: RoundtableStatus
     let startTime: Date
-    let endTime: Date?
+    let estimatedDuration: String?
+    let participantLimit: String?
+    let joinPolicy: String?
+    let questions: [String]?
+    let tableType: String?
     let imageUrl: String?
     let moderatorId: UUID?
     let createdAt: Date
@@ -16,7 +20,10 @@ struct Roundtable: Identifiable, Codable {
     enum CodingKeys: String, CodingKey {
         case id, title, description, category, status
         case startTime = "start_time"
-        case endTime = "end_time"
+        case estimatedDuration = "estimated_duration"
+        case participantLimit = "participant_limit"
+        case joinPolicy = "join_policy"
+        case questions, tableType = "table_type"
         case imageUrl = "image_url"
         case moderatorId = "moderator_id"
         case createdAt = "created_at"
@@ -124,7 +131,11 @@ extension Roundtable {
             category: "Teknoloji",
             status: .active,
             startTime: Date(),
-            endTime: Date().addingTimeInterval(3600),
+            estimatedDuration: "60 dakika",
+            participantLimit: "6 - 12 kişi",
+            joinPolicy: "everyone",
+            questions: ["2026'da liderlerin karşılaşacağı en büyük zorluklar neler olacak?"],
+            tableType: "open",
             imageUrl: "ai_meeting",
             moderatorId: UUID(),
             createdAt: Date()

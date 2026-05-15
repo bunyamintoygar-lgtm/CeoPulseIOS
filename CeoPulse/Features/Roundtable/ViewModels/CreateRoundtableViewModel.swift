@@ -37,6 +37,7 @@ class CreateRoundtableViewModel: ObservableObject {
         let items = ConfigManager.shared.roundtableDurations.map { ConfigManager.shared.getLocalizedValue($0) }
         return items.isEmpty ? ["45 dakika", "60 dakika", "90 dakika", "120 dakika"] : items
     }
+    
     @Published var whoCanJoin: JoinPermission = .everyone
     
     // Step 3: Konuşma Çerçevesi
@@ -46,13 +47,17 @@ class CreateRoundtableViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
+    @Published var isSuccess: Bool = false
     
-    enum RoundtableType {
-        case open, invited
+    enum RoundtableType: String {
+        case open = "open"
+        case invited = "invited"
     }
     
-    enum JoinPermission {
-        case everyone, premium, invitedOnly
+    enum JoinPermission: String {
+        case everyone = "everyone"
+        case premium = "premium"
+        case invitedOnly = "invitedOnly"
     }
     
     func addQuestion() {
@@ -66,10 +71,64 @@ class CreateRoundtableViewModel: ObservableObject {
         discussionQuestions.remove(at: index)
     }
     
+    @MainActor
     func createRoundtable() async {
+        guard validate() else { return }
+        
         isLoading = true
-        // Logic to save to Supabase would go here
-        try? await Task.sleep(nanoseconds: 2 * 1_000_000_000)
-        isLoading = false
+        defer { isLoading = false }
+        
+        do {
+            let session = try await SupabaseManager.shared.client.auth.session
+            let userId = session.user.id
+            
+            // Combine date and time
+            let calendar = Calendar.current
+            var components = calendar.dateComponents([.year, .month, .day], from: selectedDate)
+            let timeComponents = calendar.dateComponents([.hour, .minute], from: selectedTime)
+            components.hour = timeComponents.hour
+            components.minute = timeComponents.minute
+            
+            let startTime = calendar.date(from: components) ?? selectedDate
+            
+            let data: [String: AnyJSON] = [
+                "title": .string(title),
+                "description": .string(description),
+                "category": .string(selectedCategory),
+                "status": .string("upcoming"),
+                "start_time": .string(ISO8601DateFormatter().string(from: startTime)),
+                "estimated_duration": .string(estimatedDuration),
+                "participant_limit": .string(participantCount),
+                "join_policy": .string(whoCanJoin.rawValue),
+                "table_type": .string(tableType.rawValue),
+                "questions": .array(discussionQuestions.map { .string($0) }),
+                "moderator_id": .string(userId.uuidString)
+            ]
+            
+            try await SupabaseManager.shared.client
+                .from("roundtables")
+                .insert(data)
+                .execute()
+            
+            isSuccess = true
+        } catch {
+            print("Roundtable creation error: \(error)")
+            showError = true
+            errorMessage = error.localizedDescription
+        }
+    }
+    
+    private func validate() -> Bool {
+        if title.isEmpty {
+            errorMessage = "Lütfen bir başlık girin."
+            showError = true
+            return false
+        }
+        if selectedCategory.isEmpty {
+            errorMessage = "Lütfen bir kategori seçin."
+            showError = true
+            return false
+        }
+        return true
     }
 }
