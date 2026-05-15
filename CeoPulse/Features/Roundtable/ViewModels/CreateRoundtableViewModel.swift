@@ -72,13 +72,13 @@ class CreateRoundtableViewModel: ObservableObject {
         discussionQuestions.remove(at: index)
     }
     
-    // Internal struct for Supabase insertion to avoid AnyJSON issues
+    // Internal struct for Supabase insertion with explicit ISO8601 date string
     struct CreateRoundtableRequest: Encodable {
         let title: String
         let description: String
         let category: String
         let status: String
-        let start_time: Date
+        let start_time: String // Using String to ensure ISO8601
         let estimated_duration: String
         let participant_limit: String
         let join_policy: String
@@ -89,10 +89,13 @@ class CreateRoundtableViewModel: ObservableObject {
     
     @MainActor
     func createRoundtable() async {
-        guard validate() else { return }
+        guard validate() else { 
+            print("Validation failed: \(errorMessage)")
+            return 
+        }
         
         isLoading = true
-        defer { isLoading = false }
+        showError = false
         
         do {
             let session = try await SupabaseManager.shared.client.auth.session
@@ -105,14 +108,16 @@ class CreateRoundtableViewModel: ObservableObject {
             components.hour = timeComponents.hour
             components.minute = timeComponents.minute
             
-            let startTime = calendar.date(from: components) ?? selectedDate
+            let startTimeDate = calendar.date(from: components) ?? selectedDate
+            let isoFormatter = ISO8601DateFormatter()
+            let startTimeString = isoFormatter.string(from: startTimeDate)
             
             let request = CreateRoundtableRequest(
                 title: title,
                 description: description,
                 category: selectedCategory,
                 status: "upcoming",
-                start_time: startTime,
+                start_time: startTimeString,
                 estimated_duration: estimatedDuration,
                 participant_limit: participantCount,
                 join_policy: whoCanJoin.rawValue,
@@ -127,16 +132,18 @@ class CreateRoundtableViewModel: ObservableObject {
                 .execute()
             
             isSuccess = true
+            isLoading = false
         } catch {
             print("Roundtable creation error: \(error)")
+            errorMessage = "Kayıt sırasında bir hata oluştu: \(error.localizedDescription)"
             showError = true
-            errorMessage = error.localizedDescription
+            isLoading = false
         }
     }
     
     private func validate() -> Bool {
-        if title.isEmpty {
-            errorMessage = "Lütfen bir başlık girin."
+        if title.trimmingCharacters(in: .whitespaces).isEmpty {
+            errorMessage = "Lütfen masa başlığını girin."
             showError = true
             return false
         }
