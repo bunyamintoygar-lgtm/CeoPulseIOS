@@ -8,8 +8,12 @@ class CreateRoundtableViewModel: ObservableObject {
     @Published var description: String = ""
     @Published var selectedCategory: String = ""
     
-    var categories: [String] {
-        ConfigManager.shared.roundtableCategories.map { ConfigManager.shared.getLocalizedValue($0) }
+    var categories: [LocalizedValue] {
+        ConfigManager.shared.roundtableCategories
+    }
+    
+    func getCategoryName(_ category: LocalizedValue) -> String {
+        ConfigManager.shared.getLocalizedValue(category)
     }
     
     // Step 2: Oturum Ayarları

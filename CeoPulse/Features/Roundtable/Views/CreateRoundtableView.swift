@@ -234,13 +234,19 @@ struct FormField<Content: View>: View {
 
 struct CategoryPicker: View {
     @Binding var selected: String
-    let categories: [String]
+    let categories: [LocalizedValue]
     
     var body: some View {
         Menu {
             ForEach(categories, id: \.self) { category in
-                Button(action: { selected = category }) {
-                    Text(category)
+                let name = ConfigManager.shared.getLocalizedValue(category)
+                Button(action: { selected = name }) {
+                    HStack {
+                        Text(name)
+                        if let icon = category.icon {
+                            Image(systemName: icon)
+                        }
+                    }
                 }
             }
         } label: {

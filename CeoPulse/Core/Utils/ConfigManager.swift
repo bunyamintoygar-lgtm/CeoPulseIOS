@@ -76,4 +76,5 @@ struct LocalizedValue: Codable, Hashable {
     let id: String
     let tr: String
     let en: String
+    let icon: String?
 }
