@@ -1,5 +1,7 @@
 import Foundation
 import AgoraRtcKit
+import Combine
+import SwiftUI
 
 class AgoraManager: NSObject, ObservableObject {
     static let shared = AgoraManager()
@@ -81,7 +83,7 @@ class AgoraManager: NSObject, ObservableObject {
         agoraKit?.setClientRole(role)
         let options = AgoraRtcChannelMediaOptions()
         options.publishMicrophoneTrack = (role == .broadcaster)
-        agoraKit?.updateChannelWith(options)
+        agoraKit?.updateChannel(with: options)
     }
 }
 
