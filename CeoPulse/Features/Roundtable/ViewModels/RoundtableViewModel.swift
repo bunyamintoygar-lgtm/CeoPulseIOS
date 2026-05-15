@@ -27,6 +27,13 @@ class RoundtableViewModel: ObservableObject {
     
     init() {
         setupSubscribers()
+        
+        // Ensure configs are loaded
+        Task {
+            if ConfigManager.shared.roundtableCategories.isEmpty {
+                await ConfigManager.shared.fetchConfigs()
+            }
+        }
     }
     
     private func setupSubscribers() {
@@ -44,6 +51,14 @@ class RoundtableViewModel: ObservableObject {
                 Task { await self?.loadRoundtables() }
             }
             .store(in: &cancellables)
+            
+        // Observe ConfigManager for category updates
+        ConfigManager.shared.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
     
     @MainActor
@@ -57,21 +72,17 @@ class RoundtableViewModel: ObservableObject {
             
             // tabs = ["Tüm Masalar", "Kendi Açtıklarım", "Devam Edenler", "Geçmiş Masalar"]
             switch selectedTab {
-            case 0: // Tüm Masalar -> We fetch everything and filter by 'upcoming' in view
-                status = nil
-            case 1: // Kendi Açtıklarım
+            case 0: status = nil
+            case 1:
                 do {
                     let session = try await SupabaseManager.shared.client.auth.session
                     moderatorId = session.user.id
                 } catch {
                     print("Session error: \(error)")
                 }
-            case 2: // Devam Edenler
-                status = .active
-            case 3: // Geçmiş Masalar
-                status = .completed
-            default:
-                status = nil
+            case 2: status = .active
+            case 3: status = .completed
+            default: status = nil
             }
             
             var fetched = try await service.fetchRoundtables(
@@ -81,7 +92,6 @@ class RoundtableViewModel: ObservableObject {
                 moderatorId: moderatorId
             )
             
-            // Client side filtering for better Turkish character support
             if !searchText.isEmpty {
                 let lowerSearch = searchText.lowercased(with: Locale(identifier: "tr_TR"))
                 fetched = fetched.filter { roundtable in
