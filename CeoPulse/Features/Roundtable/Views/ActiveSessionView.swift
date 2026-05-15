@@ -7,7 +7,7 @@ struct ActiveSessionView: View {
     @StateObject private var viewModel: ActiveSessionViewModel
     @State private var messageText = ""
     @State private var selectedTab = 0
-    @State private var isFloorRequested = false
+    @State private var isPTTPressing = false
     
     init(roundtable: Roundtable) {
         _viewModel = StateObject(wrappedValue: ActiveSessionViewModel(roundtable: roundtable))
@@ -18,22 +18,25 @@ struct ActiveSessionView: View {
             // Header
             headerSection
             
-            // Event Details Bar
-            eventDetailsBar
+            // Event Info Bar
+            eventInfoBar
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
-                    // Circular Roundtable Area
-                    roundtableArea
+                    // Participant Cards Grid
+                    participantGrid
                     
-                    // Participant Thumbnail Strip
-                    participantStrip
+                    // Central Control Center (PTT)
+                    pttControlCenter
                     
-                    // Main Content (Tabs & Chat)
-                    contentSection
+                    // Chat & Insights Tabs
+                    tabsSection
                 }
-                .padding(.top, 10)
+                .padding(.top, 16)
             }
+            
+            // Current Speaker Notification Bar
+            currentSpeakerBar
             
             // Bottom Action Bar
             bottomActionBar
@@ -43,42 +46,29 @@ struct ActiveSessionView: View {
         .task {
             await viewModel.setupSession()
         }
-        .onDisappear {
-            viewModel.leaveSession()
-        }
     }
     
     // MARK: - Sections
     
     private var headerSection: some View {
         HStack {
-            Button(action: { 
-                viewModel.leaveSession()
-                presentationMode.wrappedValue.dismiss() 
-            }) {
+            Button(action: { presentationMode.wrappedValue.dismiss() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
             }
-            
             Spacer()
-            
             VStack(spacing: 2) {
                 Text("Masaya Katıl")
                     .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(.white)
                 Text(viewModel.roundtable.title)
-                    .font(.system(size: 12))
+                    .font(.system(size: 11))
                     .foregroundColor(AppColors.textSecondary)
-                    .lineLimit(1)
             }
-            
             Spacer()
-            
             Button(action: {}) {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
+                    .font(.system(size: 20))
                     .padding(8)
                     .background(Color.white.opacity(0.1))
                     .clipShape(Circle())
@@ -88,34 +78,18 @@ struct ActiveSessionView: View {
         .padding(.vertical, 12)
     }
     
-    private var eventDetailsBar: some View {
-        HStack(spacing: 0) {
-            HStack(spacing: 8) {
-                Image(systemName: "calendar")
-                    .foregroundColor(.white.opacity(0.6))
-                Text(viewModel.roundtable.startTime.formatted(date: .long, time: .omitted))
-                    .font(.system(size: 11))
-            }
-            .padding(.trailing, 16)
-            
-            HStack(spacing: 8) {
-                Image(systemName: "clock")
-                    .foregroundColor(.white.opacity(0.6))
-                Text(viewModel.roundtable.startTime.formatted(date: .omitted, time: .shortened))
-                    .font(.system(size: 11))
-            }
-            
+    private var eventInfoBar: some View {
+        HStack {
+            Label("24 Mayıs 2025, Cumartesi", systemImage: "calendar")
             Spacer()
-            
+            Label("20:30 - 22:00 (90 dk)", systemImage: "clock")
+            Spacer()
             HStack(spacing: 4) {
-                Circle()
-                    .fill(Color.green)
-                    .frame(width: 6, height: 6)
+                Circle().fill(Color.green).frame(width: 6, height: 6)
                 Text("Canlı")
-                    .font(.system(size: 11, weight: .bold))
             }
         }
-        .foregroundColor(.white.opacity(0.9))
+        .font(.system(size: 11))
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(Color.white.opacity(0.05))
@@ -123,339 +97,276 @@ struct ActiveSessionView: View {
         .padding(.horizontal, 20)
     }
     
-    private var roundtableArea: some View {
+    private var participantGrid: some View {
         VStack(spacing: 16) {
             HStack {
-                HStack(spacing: 4) {
-                    Image(systemName: "person.2.fill")
-                    Text("\(viewModel.participants.count) / 40 Katılımcı")
-                }
-                .font(.system(size: 12))
-                .foregroundColor(AppColors.textSecondary)
-                
+                Label("\(viewModel.participants.count) / 40 Katılımcı", systemImage: "person.2.fill")
                 Spacer()
-                
-                Button(action: {}) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "person.3.sequence.fill")
-                        Text("Katılımcıları Gör")
-                    }
-                    .font(.system(size: 12))
-                    .foregroundColor(.purple)
-                }
+                Button("Katılımcıları Gör") {}.foregroundColor(.purple)
             }
+            .font(.system(size: 12))
             .padding(.horizontal, 20)
             
-            ZStack {
-                Circle()
-                    .fill(Color(hex: "0F0F1A"))
-                    .frame(width: 200, height: 200)
-                    .shadow(color: .purple.opacity(0.3), radius: 30)
-                
-                Button(action: { 
-                    withAnimation { isFloorRequested.toggle() } 
-                    viewModel.requestFloor()
-                }) {
-                    VStack(spacing: 8) {
-                        Image(systemName: "hand.raised.fill")
-                            .font(.system(size: 32))
-                        Text("Söz İste")
-                            .font(.system(size: 12, weight: .bold))
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(viewModel.participants) { participant in
+                        ParticipantCard(
+                            name: participant.userName ?? "Lider",
+                            role: participant.role.title,
+                            isMe: participant.userId == viewModel.currentUserId,
+                            isSpeaking: false // To be linked to volume detection
+                        )
                     }
-                    .foregroundColor(.white)
-                    .frame(width: 100, height: 100)
-                    .background(
-                        ZStack {
-                            Circle().fill(Color.purple.opacity(0.3))
-                            Circle().stroke(Color.purple, lineWidth: 2)
-                                .scaleEffect(viewModel.isRequestingFloor ? 1.2 : 1.0)
-                                .opacity(viewModel.isRequestingFloor ? 0 : 1)
-                        }
-                    )
                 }
-                
-                // Dynamic Avatars
-                ForEach(Array(viewModel.participants.enumerated()), id: \.element.id) { index, participant in
-                    let angle = Double(index) * (360.0 / Double(max(1, viewModel.participants.count))) - 90
-                    participantAvatar(
-                        name: participant.userName ?? "Lider",
-                        role: participant.role.title,
-                        roleColor: participant.role.color,
-                        isMuted: participant.isMuted,
-                        isRequestingFloor: participant.isRequestingFloor,
-                        angle: angle,
-                        isSpeaking: false,
-                        isMe: participant.userId == viewModel.currentUserId
-                    )
-                }
+                .padding(.horizontal, 20)
             }
-            .frame(height: 340)
-            
-            // Legend
-            HStack(spacing: 24) {
-                Label("Konuşmacı", systemImage: "mic.fill").foregroundColor(.purple)
-                Label("Söz Hakkı İstiyor", systemImage: "hand.raised.fill").foregroundColor(.green)
-                Label("Sessizde", systemImage: "mic.slash.fill").foregroundColor(.gray)
-            }
-            .font(.system(size: 10))
         }
     }
     
-    private var participantStrip: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: -8) {
-                ForEach(viewModel.participants.prefix(12)) { _ in
-                    Circle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 32, height: 32)
-                        .overlay(Circle().stroke(AppColors.background, lineWidth: 2))
+    private var pttControlCenter: some View {
+        HStack(spacing: 20) {
+            // Söz İste
+            VStack(spacing: 8) {
+                Button(action: { viewModel.requestFloor() }) {
+                    Image(systemName: "hand.raised.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.white)
+                        .frame(width: 80, height: 80)
+                        .background(Color.white.opacity(0.05))
+                        .cornerRadius(16)
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
                 }
-                if viewModel.participants.count > 12 {
-                    ZStack {
-                        Circle()
-                            .fill(Color.white.opacity(0.1))
-                            .frame(width: 32, height: 32)
-                        Text("+\(viewModel.participants.count - 12)")
-                            .font(.system(size: 10, weight: .bold))
+                Text("Söz İste")
+                    .font(.system(size: 12, weight: .bold))
+                Text("Sıraya girmek için tıkla")
+                    .font(.system(size: 10))
+                    .foregroundColor(AppColors.textSecondary)
+            }
+            
+            // Bas-Konuş
+            VStack(spacing: 12) {
+                ZStack {
+                    // Outer rings for animation
+                    Circle()
+                        .stroke(Color.purple.opacity(0.2), lineWidth: 2)
+                        .frame(width: 180, height: 180)
+                        .scaleEffect(isPTTPressing ? 1.1 : 1.0)
+                    
+                    Circle()
+                        .fill(
+                            RadialGradient(colors: [Color.purple.opacity(0.3), Color.clear], center: .center, startRadius: 0, endRadius: 90)
+                        )
+                        .frame(width: 160, height: 160)
+                    
+                    Circle()
+                        .fill(LinearGradient(colors: [Color(hex: "2A2A40"), Color(hex: "1A1A2E")], startPoint: .top, endPoint: .bottom))
+                        .frame(width: 140, height: 140)
+                        .shadow(color: .purple.opacity(0.5), radius: 20)
+                    
+                    VStack(spacing: 8) {
+                        Image(systemName: "mic.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(.white)
+                        Text("Bas - Konuş")
+                            .font(.system(size: 14, weight: .bold))
+                        Text("Konuşmak için basılı tutun")
+                            .font(.system(size: 10))
+                            .foregroundColor(AppColors.textSecondary)
                     }
                 }
+                .onLongPressGesture(minimumDuration: 0, pressing: { isPressing in
+                    withAnimation(.spring()) {
+                        isPTTPressing = isPressing
+                    }
+                    if isPressing {
+                        viewModel.toggleMute() // Agora Unmute
+                    } else {
+                        viewModel.toggleMute() // Agora Mute
+                    }
+                }, perform: {})
             }
             
-            Text("Tüm katılımcıları görmek için listeyi açın.")
-                .font(.system(size: 11))
-                .foregroundColor(AppColors.textSecondary)
-            
-            Button(action: {}) {
-                HStack(spacing: 4) {
-                    Text("Tüm Katılımcılar")
-                    Image(systemName: "chevron.down")
+            // Sadece Dinle
+            VStack(spacing: 8) {
+                Button(action: {}) {
+                    Image(systemName: "headphones")
+                        .font(.system(size: 24))
+                        .foregroundColor(.white)
+                        .frame(width: 80, height: 80)
+                        .background(Color.white.opacity(0.05))
+                        .cornerRadius(16)
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
                 }
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.purple)
+                Text("Sadece Dinle")
+                    .font(.system(size: 12, weight: .bold))
+                Text("Mikrofonu kapat")
+                    .font(.system(size: 10))
+                    .foregroundColor(AppColors.textSecondary)
             }
+        }
+        .padding(.vertical, 20)
+    }
+    
+    private var currentSpeakerBar: some View {
+        HStack(spacing: 12) {
+            // Waveform animation placeholder
+            HStack(spacing: 3) {
+                ForEach(0..<4) { i in
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.purple)
+                        .frame(width: 3, height: CGFloat.random(in: 10...20))
+                }
+            }
+            
+            Text("Zeynep K. şu anda konuşuyor")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.white)
+            
+            Spacer()
+            
+            Circle()
+                .fill(Color.green)
+                .frame(width: 8, height: 8)
+                .shadow(color: .green, radius: 4)
         }
         .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(16)
+        .padding(.horizontal, 20)
+        .padding(.bottom, 8)
     }
     
-    private var contentSection: some View {
+    private var tabsSection: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 0) {
+            HStack(spacing: 24) {
                 tabButton(title: "Sohbet", index: 0)
                 tabButton(title: "İçgörüler", index: 1)
-                tabButton(title: "Notlar", index: 2)
-                tabButton(title: "Anketler", index: 3)
+                Spacer()
             }
             .padding(.horizontal, 20)
             
             Divider().background(Color.white.opacity(0.1))
             
             if selectedTab == 0 {
-                // Chat List
-                ScrollView {
-                    VStack(spacing: 20) {
-                        ForEach(viewModel.messages) { message in
-                            chatRow(
-                                name: message.userName ?? "Kullanıcı",
-                                role: "Katılımcı",
-                                color: .blue,
-                                message: message.content,
-                                time: message.createdAt.formatted(date: .omitted, time: .shortened)
-                            )
+                VStack(spacing: 16) {
+                    // Mini Chat List
+                    ForEach(viewModel.messages.prefix(3)) { message in
+                        HStack(spacing: 12) {
+                            Circle().fill(Color.gray).frame(width: 32, height: 32)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(message.userName ?? "Kullanıcı").font(.system(size: 12, weight: .bold))
+                                Text(message.content).font(.system(size: 12)).foregroundColor(.white.opacity(0.8))
+                            }
                         }
                     }
-                    .padding(20)
                 }
-                
-                // Message Input
-                HStack(spacing: 12) {
-                    HStack {
-                        TextField("Mesajınızı yazın...", text: $messageText)
-                            .foregroundColor(.white)
-                            .font(.system(size: 14))
-                        Image(systemName: "paperclip")
-                            .foregroundColor(.white.opacity(0.4))
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(24)
-                    
-                    Button(action: {
-                        Task {
-                            await viewModel.sendMessage(messageText)
-                            messageText = ""
-                        }
-                    }) {
-                        Image(systemName: "paperplane.fill")
-                            .foregroundColor(.white)
-                            .frame(width: 44, height: 44)
-                            .background(AppColors.primary)
-                            .clipShape(Circle())
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
-            } else {
-                Spacer().frame(height: 200)
-                Text("Çok yakında...")
-                    .foregroundColor(.gray)
-                Spacer()
+                .padding(20)
             }
         }
-        .background(Color.white.opacity(0.02))
-        .cornerRadius(32, corners: [.topLeft, .topRight])
     }
     
     private var bottomActionBar: some View {
-        HStack {
-            bottomBarButton(
-                icon: viewModel.agoraManager.isMuted ? "mic.slash.fill" : "mic.fill",
-                label: "Mikrofon",
-                active: !viewModel.agoraManager.isMuted
-            ) {
-                viewModel.toggleMute()
-            }
-            
-            bottomBarButton(
-                icon: viewModel.agoraManager.isCameraOn ? "video.fill" : "video.slash.fill",
-                label: "Kamera",
-                active: viewModel.agoraManager.isCameraOn
-            ) {
-                viewModel.toggleCamera()
-            }
-            
-            // Main Söz İste
-            Button(action: {
-                viewModel.requestFloor()
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "hand.raised.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(viewModel.isRequestingFloor ? .green : .purple)
-                        .frame(width: 56, height: 56)
-                        .background((viewModel.isRequestingFloor ? Color.green : Color.purple).opacity(0.1))
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke((viewModel.isRequestingFloor ? Color.green : Color.purple).opacity(0.3), lineWidth: 1))
-                    Text("Söz İste")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(viewModel.isRequestingFloor ? .green : .purple)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            
-            bottomBarButton(icon: "face.smiling", label: "Tepki", active: false) {
-                // Tepki logic
-            }
+        HStack(spacing: 40) {
+            actionButton(icon: "mic.slash.fill", label: "Mikrofon", sub: "Kapalı", color: .red)
+            actionButton(icon: "video.slash.fill", label: "Kamera", sub: "Kapalı", color: .red)
+            actionButton(icon: "face.smiling", label: "Tepki Gönder", sub: "", color: .white)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-        .background(AppColors.background)
+        .padding(.top, 12)
+        .padding(.bottom, 24)
+        .frame(maxWidth: .infinity)
+        .background(Color(hex: "0A0A0F"))
     }
     
-    // MARK: - Helper Views
-    
-    private func participantAvatar(name: String, role: String, roleColor: Color, isMuted: Bool, angle: Double, isSpeaking: Bool = false, isMe: Bool = false) -> some View {
-        VStack(spacing: 4) {
-            ZStack {
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 52, height: 52)
-                    .overlay(
-                        Circle()
-                            .stroke(isSpeaking ? Color.purple : (isMe ? Color.green : Color.clear), lineWidth: 2)
-                    )
-                
-                if isSpeaking {
-                    Circle()
-                        .stroke(Color.purple.opacity(0.5), lineWidth: 4)
-                        .scaleEffect(1.2)
-                }
-                
-                // Mic Status
-                ZStack {
-                    Circle()
-                        .fill(isMuted ? Color.gray : Color.purple)
-                        .frame(width: 18, height: 18)
-                        .overlay(Circle().stroke(AppColors.background, lineWidth: 2))
-                    Image(systemName: isMuted ? "mic.slash.fill" : "mic.fill")
-                        .font(.system(size: 8))
-                        .foregroundColor(.white)
-                }
-                .offset(x: 18, y: 18)
-            }
-            
-            VStack(spacing: 0) {
-                Text(name)
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(isMe ? .green : .white)
-                Text(role)
-                    .font(.system(size: 8))
-                    .foregroundColor(roleColor)
-            }
-        }
-        .offset(x: 110 * cos(angle * .pi / 180), y: 110 * sin(angle * .pi / 180))
-    }
+    // MARK: - Helpers
     
     private func tabButton(title: String, index: Int) -> some View {
         Button(action: { selectedTab = index }) {
             VStack(spacing: 12) {
                 Text(title)
                     .font(.system(size: 14, weight: selectedTab == index ? .bold : .medium))
-                    .foregroundColor(selectedTab == index ? .purple : .gray)
-                
+                    .foregroundColor(selectedTab == index ? .white : .gray)
                 Rectangle()
                     .fill(selectedTab == index ? Color.purple : Color.clear)
                     .frame(height: 2)
             }
         }
-        .frame(maxWidth: .infinity)
     }
     
-    private func chatRow(name: String, role: String, color: Color, message: String, time: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Circle()
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 36, height: 36)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(name)
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.white)
-                    Text(role)
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(color)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(color.opacity(0.1))
-                        .cornerRadius(4)
-                    Spacer()
-                    Text(time)
-                        .font(.system(size: 11))
-                        .foregroundColor(.gray)
-                }
-                Text(message)
-                    .font(.system(size: 13))
-                    .foregroundColor(.white.opacity(0.8))
-            }
-        }
-    }
-    
-    private func bottomBarButton(icon: String, label: String, active: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+    private func actionButton(icon: String, label: String, sub: String, color: Color) -> some View {
+        Button(action: {}) {
             VStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 20))
-                    .foregroundColor(active ? .purple : .white)
-                    .frame(width: 44, height: 44)
-                    .background(active ? Color.purple.opacity(0.1) : Color.white.opacity(0.05))
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(active ? Color.purple.opacity(0.3) : Color.clear, lineWidth: 1))
+                    .foregroundColor(color)
                 Text(label)
-                    .font(.system(size: 10))
-                    .foregroundColor(active ? .purple : .gray)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.white)
+                if !sub.isEmpty {
+                    Text(sub)
+                        .font(.system(size: 9))
+                        .foregroundColor(color.opacity(0.8))
+                }
             }
         }
-        .frame(maxWidth: .infinity)
+    }
+}
+
+struct ParticipantCard: View {
+    let name: String
+    let role: String
+    let isMe: Bool
+    let isSpeaking: Bool
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Spacer()
+                Circle()
+                    .fill(Color.green)
+                    .frame(width: 6, height: 6)
+            }
+            .padding(.top, 8)
+            .padding(.trailing, 8)
+            
+            VStack(spacing: 4) {
+                Text(name)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(isMe ? .green : .white)
+                Text(role)
+                    .font(.system(size: 10))
+                    .foregroundColor(.purple)
+            }
+            
+            ZStack {
+                Circle()
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 64, height: 64)
+                Image(systemName: "person.fill")
+                    .font(.system(size: 32))
+                    .foregroundColor(.white.opacity(0.5))
+            }
+            
+            Image(systemName: "mic.fill")
+                .foregroundColor(.green)
+                .font(.system(size: 12))
+            
+            // Equalizer
+            HStack(spacing: 2) {
+                ForEach(0..<6) { i in
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(i < 4 ? Color.purple : Color.white.opacity(0.1))
+                        .frame(width: 10, height: 4)
+                }
+            }
+            .padding(.bottom, 12)
+        }
+        .frame(width: 120)
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(20)
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(isMe ? Color.purple.opacity(0.5) : Color.clear, lineWidth: 1)
+        )
     }
 }
