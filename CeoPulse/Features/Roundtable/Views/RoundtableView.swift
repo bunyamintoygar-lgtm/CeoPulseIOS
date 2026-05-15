@@ -7,37 +7,42 @@ struct RoundtableView: View {
     private let tabs = ["Tüm Masalar", "Kendi Açtıklarım", "Devam Edenler", "Geçmiş Masalar"]
     
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 24) {
-                // Header & Inline Search
-                headerSection
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
-                
-                // Featured Card (Hero) - Only if not searching
-                if let featured = viewModel.roundtables.first, viewModel.searchText.isEmpty {
-                    FeaturedRoundtableCard(roundtable: featured)
+        VStack(spacing: 0) {
+            // Sticky Header & Inline Search
+            headerSection
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(AppColors.background.ignoresSafeArea())
+                .zIndex(10)
+            
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 24) {
+                    // Featured Card (Hero) - Only if not searching
+                    if let featured = viewModel.roundtables.first, viewModel.searchText.isEmpty {
+                        FeaturedRoundtableCard(roundtable: featured)
+                            .padding(.horizontal, 20)
+                    }
+                    
+                    // Tabs
+                    tabsSection
+                    
+                    // Content based on selected tab or search
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else if viewModel.roundtables.isEmpty {
+                        emptyStateSection
+                    } else {
+                        mainContentSection
+                    }
+                    
+                    // Info Section
+                    infoCardSection
                         .padding(.horizontal, 20)
+                        .padding(.bottom, 100)
                 }
-                
-                // Tabs
-                tabsSection
-                
-                // Content based on selected tab or search
-                if viewModel.isLoading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                } else if viewModel.roundtables.isEmpty {
-                    emptyStateSection
-                } else {
-                    mainContentSection
-                }
-                
-                // Info Section
-                infoCardSection
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 100)
+                .padding(.top, 10)
             }
         }
         .background(AppColors.background.ignoresSafeArea())
@@ -75,53 +80,54 @@ struct RoundtableView: View {
                 .padding(.vertical, 10)
                 .background(Color.white.opacity(0.08))
                 .cornerRadius(12)
-                .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .move(edge: .trailing).combined(with: .opacity)))
+                .transition(.move(edge: .trailing).combined(with: .opacity))
                 
                 Button("İptal") {
-                    withAnimation(.spring()) {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         viewModel.isSearching = false
                         viewModel.searchText = ""
                     }
                 }
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.purple)
+                .transition(.move(edge: .trailing).combined(with: .opacity))
             } else {
                 // Normal Header
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 10) {
                         Image(systemName: "bubble.left.and.bubble.right.fill")
                             .font(.system(size: 24))
                             .foregroundColor(AppColors.primaryAccent)
                         
                         Text("Yuvarlak Masa")
-                            .font(.system(size: 28, weight: .bold))
+                            .font(.system(size: 24, weight: .bold))
                             .foregroundColor(.white)
                     }
                     
                     Text("Fikirler, deneyimler ve vizyonlar buluşuyor.")
-                        .font(.system(size: 14))
+                        .font(.system(size: 12))
                         .foregroundColor(AppColors.textSecondary)
                 }
-                .transition(.asymmetric(insertion: .move(edge: .leading).combined(with: .opacity), removal: .move(edge: .leading).combined(with: .opacity)))
+                .transition(.move(edge: .leading).combined(with: .opacity))
                 
                 Spacer()
                 
                 Button(action: { 
-                    withAnimation(.spring()) {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         viewModel.isSearching = true
                     }
                 }) {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
-                        .frame(width: 44, height: 44)
+                        .frame(width: 40, height: 40)
                         .background(Color.white.opacity(0.1))
                         .clipShape(Circle())
                 }
                 .transition(.opacity)
             }
         }
-        .frame(height: 60)
+        .frame(height: 50)
     }
     
     private var tabsSection: some View {
@@ -159,7 +165,7 @@ struct RoundtableView: View {
                     roundtableSection(title: "Yaklaşan Masalar", roundtables: Array(viewModel.upcomingRoundtables.prefix(3)))
                 }
                 
-                // Diğer Masalar
+                // Tüm Masalar
                 roundtableSection(title: "Tüm Masalar", roundtables: viewModel.roundtables)
             } else {
                 // List view for specific tabs or search results
