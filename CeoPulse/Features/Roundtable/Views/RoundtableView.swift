@@ -3,6 +3,7 @@ import SwiftUI
 struct RoundtableView: View {
     @StateObject private var viewModel = RoundtableViewModel()
     @Environment(\.dismiss) var dismiss
+    @State private var isCategorySheetPresented = false
     
     private let tabs = ["Tüm Masalar", "Kendi Açtıklarım", "Devam Edenler", "Geçmiş Masalar"]
     
@@ -23,7 +24,7 @@ struct RoundtableView: View {
                             .padding(.horizontal, 20)
                     }
                     
-                    // Tabs (Categories)
+                    // Tabs
                     tabsSection
                     
                     // Content based on selected tab or search
@@ -47,6 +48,9 @@ struct RoundtableView: View {
         }
         .background(AppColors.background.ignoresSafeArea())
         .navigationBarHidden(true)
+        .sheet(isPresented: $isCategorySheetPresented) {
+            categorySelectionSheet
+        }
         .onAppear {
             Task { await viewModel.refresh() }
         }
@@ -58,8 +62,9 @@ struct RoundtableView: View {
     private var headerSection: some View {
         HStack(alignment: .center, spacing: 12) {
             if viewModel.isSearching {
-                // Sliding Inline Search Bar with Category Filter
-                HStack(spacing: 8) {
+                // Expanded Search View (Ask Opinion Style)
+                HStack(spacing: 12) {
+                    // Search Field
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.white.opacity(0.4))
@@ -76,37 +81,23 @@ struct RoundtableView: View {
                                     .foregroundColor(.white.opacity(0.4))
                             }
                         }
-                        
-                        Divider()
-                            .frame(height: 20)
-                            .background(Color.white.opacity(0.1))
-                            .padding(.horizontal, 4)
-                        
-                        // Category Selector within Search Bar
-                        Menu {
-                            Button("Tümü") { viewModel.selectedCategory = "Tümü" }
-                            ForEach(ConfigManager.shared.roundtableCategories, id: \.id) { category in
-                                Button(ConfigManager.shared.getLocalizedValue(category)) {
-                                    viewModel.selectedCategory = ConfigManager.shared.getLocalizedValue(category)
-                                }
-                            }
-                        } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: getCategoryIcon(viewModel.selectedCategory))
-                                    .font(.system(size: 14))
-                                Image(systemName: "chevron.down")
-                                    .font(.system(size: 8))
-                            }
-                            .foregroundColor(.purple)
-                            .frame(width: 40)
-                        }
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
                     .background(Color.white.opacity(0.08))
                     .cornerRadius(12)
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
                     
+                    // Separate Category Filter Button
+                    Button(action: { isCategorySheetPresented = true }) {
+                        Image(systemName: getCategoryIcon(viewModel.selectedCategory))
+                            .font(.system(size: 18))
+                            .foregroundColor(viewModel.selectedCategory == "Tümü" ? .white : .purple)
+                            .frame(width: 44, height: 44)
+                            .background(Color.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    
+                    // Close Search Button
                     Button(action: {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                             viewModel.isSearching = false
@@ -116,13 +107,13 @@ struct RoundtableView: View {
                     }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.purple)
-                            .frame(width: 40, height: 40)
-                            .background(Color.white.opacity(0.05))
+                            .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
+                            .background(Color.white.opacity(0.1))
                             .clipShape(Circle())
                     }
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
+                .transition(.move(edge: .trailing).combined(with: .opacity))
             } else {
                 // Normal Header
                 VStack(alignment: .leading, spacing: 4) {
@@ -152,7 +143,7 @@ struct RoundtableView: View {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
-                        .frame(width: 40, height: 40)
+                        .frame(width: 44, height: 44)
                         .background(Color.white.opacity(0.1))
                         .clipShape(Circle())
                 }
@@ -191,7 +182,6 @@ struct RoundtableView: View {
     
     private var mainContentSection: some View {
         VStack(alignment: .leading, spacing: 24) {
-            // Simplified List: All sessions under "Yaklaşan Masalar" (or the selected tab name)
             let headerTitle = viewModel.selectedTab == 0 ? "Yaklaşan Masalar" : tabs[viewModel.selectedTab]
             let displayList = viewModel.selectedTab == 0 ? viewModel.upcomingRoundtables : viewModel.roundtables
             
@@ -233,10 +223,79 @@ struct RoundtableView: View {
     }
     
     private func getCategoryIcon(_ categoryName: String) -> String {
+        if categoryName == "Tümü" { return "line.3.horizontal.decrease.circle" }
         if let category = ConfigManager.shared.roundtableCategories.first(where: { ConfigManager.shared.getLocalizedValue($0) == categoryName }) {
             return category.icon ?? "tag.fill"
         }
         return "tag.fill"
+    }
+    
+    private var categorySelectionSheet: some View {
+        ZStack {
+            AppColors.background.ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Sheet Header
+                HStack {
+                    Text("Kategori Seçin")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                    Spacer()
+                    Button(action: { isCategorySheetPresented = false }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.white.opacity(0.5))
+                    }
+                }
+                .padding(20)
+                
+                ScrollView {
+                    VStack(spacing: 12) {
+                        categoryRow(name: "Tümü", icon: "line.3.horizontal.decrease.circle")
+                        
+                        ForEach(ConfigManager.shared.roundtableCategories, id: \.id) { category in
+                            categoryRow(name: ConfigManager.shared.getLocalizedValue(category), icon: category.icon ?? "tag.fill")
+                        }
+                    }
+                    .padding(20)
+                }
+            }
+        }
+    }
+    
+    private func categoryRow(name: String, icon: String) -> some View {
+        Button(action: {
+            viewModel.selectedCategory = name
+            isCategorySheetPresented = false
+        }) {
+            HStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(viewModel.selectedCategory == name ? Color.purple.opacity(0.2) : Color.white.opacity(0.05))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: icon)
+                        .foregroundColor(viewModel.selectedCategory == name ? .purple : .white)
+                }
+                
+                Text(name)
+                    .font(.system(size: 16, weight: viewModel.selectedCategory == name ? .bold : .medium))
+                    .foregroundColor(viewModel.selectedCategory == name ? .purple : .white)
+                
+                Spacer()
+                
+                if viewModel.selectedCategory == name {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.purple)
+                }
+            }
+            .padding(16)
+            .background(Color.white.opacity(0.02))
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(viewModel.selectedCategory == name ? Color.purple.opacity(0.3) : Color.clear, lineWidth: 1)
+            )
+        }
     }
     
     private var emptyStateSection: some View {
