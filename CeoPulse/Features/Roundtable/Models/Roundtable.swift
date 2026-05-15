@@ -15,6 +15,7 @@ struct Roundtable: Identifiable, Codable {
     let tableType: String?
     let imageUrl: String?
     let moderatorId: UUID?
+    var currentSpeakerId: UUID?
     let createdAt: Date
     
     enum CodingKeys: String, CodingKey {
@@ -26,6 +27,7 @@ struct Roundtable: Identifiable, Codable {
         case questions, tableType = "table_type"
         case imageUrl = "image_url"
         case moderatorId = "moderator_id"
+        case currentSpeakerId = "current_speaker_id"
         case createdAt = "created_at"
     }
 }

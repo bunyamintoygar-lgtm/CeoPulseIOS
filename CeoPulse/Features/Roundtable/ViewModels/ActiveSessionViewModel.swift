@@ -6,7 +6,7 @@ import Realtime
 import AgoraRtcKit
 
 @MainActor class ActiveSessionViewModel: ObservableObject {
-    let roundtable: Roundtable
+    @Published var roundtable: Roundtable
     
     @Published var participants: [RoundtableParticipant] = []
     @Published var messages: [RoundtableMessage] = []
@@ -16,6 +16,14 @@ import AgoraRtcKit
     
     var isRequestingFloor: Bool {
         participants.first(where: { $0.userId == currentUserId })?.isRequestingFloor ?? false
+    }
+    
+    var currentSpeakerName: String? {
+        if let speakerId = roundtable.currentSpeakerId {
+            if speakerId == currentUserId { return "Sen" }
+            return participants.first(where: { $0.userId == speakerId })?.userName ?? "Biri"
+        }
+        return nil
     }
     
     // RTC States observed from AgoraManager
@@ -34,7 +42,6 @@ import AgoraRtcKit
     }
     
     private func setupSubscribers() {
-        // Forward AgoraManager updates to our view
         agoraManager.objectWillChange
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
@@ -56,8 +63,6 @@ import AgoraRtcKit
             self.messages = try await service.fetchMessages(roundtableId: roundtable.id)
             
             await setupRealtime()
-            
-            // Setup Agora
             setupAgora()
             
             isLoading = false
@@ -69,13 +74,7 @@ import AgoraRtcKit
     
     private func setupAgora() {
         guard let userId = currentUserId else { return }
-        
-        // Convert UUID to a numeric UID for Agora
         let numericUid = UInt(abs(userId.uuidString.hashValue))
-        
-        // Check if user is a speaker or moderator based on roundtable logic
-        // For now, let's assume everyone can speak if they are in the 'broadcaster' list
-        // or if they are the moderator.
         let role: AgoraClientRole = (roundtable.moderatorId == userId) ? .broadcaster : .audience
         
         agoraManager.joinChannel(
@@ -88,6 +87,21 @@ import AgoraRtcKit
     private func setupRealtime() async {
         let channelId = "roundtable:\(roundtable.id.uuidString)"
         channel = client.realtimeV2.channel(channelId)
+        
+        // Listen for current speaker changes
+        _ = channel?.onPostgresChange(
+            UpdateAction.self,
+            schema: "public",
+            table: "roundtables",
+            filter: "id=eq.\(roundtable.id.uuidString)"
+        ) { [weak self] action in
+            guard let self = self else { return }
+            if let updatedRoundtable = try? action.decode(as: Roundtable.self) {
+                Task { @MainActor in
+                    self.roundtable.currentSpeakerId = updatedRoundtable.currentSpeakerId
+                }
+            }
+        }
         
         _ = channel?.onPostgresChange(
             InsertAction.self,
@@ -159,6 +173,26 @@ import AgoraRtcKit
     
     // MARK: - RTC Controls
     
+    func handlePTT(isPressing: Bool) {
+        Task {
+            do {
+                if isPressing {
+                    // Grab mic in DB
+                    try await service.updateCurrentSpeaker(roundtableId: roundtable.id, userId: currentUserId)
+                    // Unmute in Agora
+                    agoraManager.toggleMute() // This will unmute if it was muted
+                } else {
+                    // Release mic in DB
+                    try await service.updateCurrentSpeaker(roundtableId: roundtable.id, userId: nil)
+                    // Mute in Agora
+                    agoraManager.toggleMute() // This will mute back
+                }
+            } catch {
+                print("Error handling PTT: \(error)")
+            }
+        }
+    }
+    
     func toggleMute() {
         agoraManager.toggleMute()
     }
@@ -169,8 +203,6 @@ import AgoraRtcKit
     
     func requestFloor() {
         guard let userId = currentUserId else { return }
-        
-        // Find current participant status
         if let participant = participants.first(where: { $0.userId == userId }) {
             let newState = !participant.isRequestingFloor
             Task {

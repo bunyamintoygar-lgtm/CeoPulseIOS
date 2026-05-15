@@ -35,7 +35,6 @@ class RoundtableService {
     }
     
     func fetchParticipants(roundtableId: UUID) async throws -> [RoundtableParticipant] {
-        // In a real app, we would join with profiles table here
         let participants: [RoundtableParticipant] = try await client.from("roundtable_participants")
             .select()
             .eq("roundtable_id", value: roundtableId.uuidString)
@@ -102,6 +101,13 @@ class RoundtableService {
             .update(["is_requesting_floor": isRequesting])
             .eq("roundtable_id", value: roundtableId.uuidString)
             .eq("user_id", value: userId.uuidString)
+            .execute()
+    }
+    
+    func updateCurrentSpeaker(roundtableId: UUID, userId: UUID?) async throws {
+        try await client.from("roundtables")
+            .update(["current_speaker_id": userId?.uuidString as Any])
+            .eq("id", value: roundtableId.uuidString)
             .execute()
     }
 }

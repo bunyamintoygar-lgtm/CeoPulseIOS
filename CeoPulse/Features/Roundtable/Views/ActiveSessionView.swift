@@ -178,11 +178,7 @@ struct ActiveSessionView: View {
                     withAnimation(.spring()) {
                         isPTTPressing = isPressing
                     }
-                    if isPressing {
-                        viewModel.toggleMute() // Agora Unmute
-                    } else {
-                        viewModel.toggleMute() // Agora Mute
-                    }
+                    viewModel.handlePTT(isPressing: isPressing)
                 }, perform: {})
             }
             
@@ -207,34 +203,38 @@ struct ActiveSessionView: View {
         .padding(.vertical, 20)
     }
     
+    @ViewBuilder
     private var currentSpeakerBar: some View {
-        HStack(spacing: 12) {
-            // Waveform animation placeholder
-            HStack(spacing: 3) {
-                ForEach(0..<4) { i in
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(Color.purple)
-                        .frame(width: 3, height: CGFloat.random(in: 10...20))
+        if let speakerName = viewModel.currentSpeakerName {
+            HStack(spacing: 12) {
+                // Waveform animation
+                HStack(spacing: 3) {
+                    ForEach(0..<4) { i in
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color.purple)
+                            .frame(width: 3, height: CGFloat.random(in: 10...20))
+                    }
                 }
+                
+                Text("\(speakerName) şu anda konuşuyor")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.white)
+                
+                Spacer()
+                
+                Circle()
+                    .fill(Color.green)
+                    .frame(width: 8, height: 8)
+                    .shadow(color: .green, radius: 4)
             }
-            
-            Text("Zeynep K. şu anda konuşuyor")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.white)
-            
-            Spacer()
-            
-            Circle()
-                .fill(Color.green)
-                .frame(width: 8, height: 8)
-                .shadow(color: .green, radius: 4)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .background(Color.white.opacity(0.05))
+            .cornerRadius(16)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 8)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 14)
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(16)
-        .padding(.horizontal, 20)
-        .padding(.bottom, 8)
     }
     
     private var tabsSection: some View {
