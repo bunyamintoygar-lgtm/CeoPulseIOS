@@ -110,15 +110,11 @@ class RoundtableService {
             let is_requesting_floor: Bool
         }
         
-        print("DEBUG: updateRole starting for user \(userId) to role \(role.rawValue)")
-        
-        let response = try await client.from("roundtable_participants")
+        try await client.from("roundtable_participants")
             .update(UpdateData(role: role.rawValue, is_requesting_floor: false))
             .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
             .eq("user_id", value: userId.uuidString.lowercased())
             .execute()
-        
-        print("DEBUG: updateRole finished with status: \(response.status)")
     }
     
     func updateParticipant(id: UUID, role: RoundtableRole, isRequestingFloor: Bool) async throws {
@@ -127,20 +123,10 @@ class RoundtableService {
             let is_requesting_floor: Bool
         }
         
-        print("DEBUG: updateParticipant starting for ID \(id) to role \(role.rawValue)")
-        
-        let response = try await client.from("roundtable_participants")
+        try await client.from("roundtable_participants")
             .update(UpdateData(role: role.rawValue, is_requesting_floor: isRequestingFloor))
             .eq("id", value: id.uuidString.lowercased())
-            .select()
-            .single()
             .execute()
-        
-        if let updatedRow = response.value as? [String: Any] {
-            print("DEBUG: Update response row role: \(updatedRow["role"] ?? "nil")")
-        }
-        
-        print("DEBUG: updateParticipant finished with status: \(response.status)")
     }
     
     func updateCurrentSpeaker(roundtableId: UUID, userId: UUID?) async throws {

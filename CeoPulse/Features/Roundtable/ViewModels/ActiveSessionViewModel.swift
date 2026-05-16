@@ -166,15 +166,10 @@ import AgoraRtcKit
     }
     
     private func updateAgoraState() {
-        guard let userId = currentUserId else { 
-            print("DEBUG: updateAgoraState failed - currentUserId is nil")
-            return 
-        }
+        guard let userId = currentUserId else { return }
         
         let stageParticipants = participants.filter { $0.role == .moderator || $0.role == .speaker }
         let isOnStage = stageParticipants.contains { $0.userId == userId }
-        
-        print("DEBUG: User \(userId) is on stage: \(isOnStage). Participants count: \(participants.count)")
         
         let shouldBeBroadcaster = isOnStage
         let currentRole: AgoraClientRole = shouldBeBroadcaster ? .broadcaster : .audience
@@ -187,16 +182,12 @@ import AgoraRtcKit
         Task {
             do {
                 let refreshedParticipants = try await self.service.fetchParticipants(roundtableId: self.roundtable.id)
-                print("DEBUG: Refreshed participants count: \(refreshedParticipants.count)")
-                if let me = refreshedParticipants.first(where: { $0.userId == currentUserId }) {
-                    print("DEBUG: My role in DB is now: \(me.role)")
-                }
                 await MainActor.run {
                     self.participants = refreshedParticipants
                     self.updateAgoraState()
                 }
             } catch {
-                print("DEBUG: Error refreshing participants: \(error)")
+                print("Error refreshing participants: \(error)")
             }
         }
     }
@@ -301,6 +292,7 @@ import AgoraRtcKit
         Task {
             do {
                 try await service.updateRole(roundtableId: roundtable.id, userId: userId, role: .listener)
+                refreshParticipants()
             } catch {
                 print("Error leaving stage: \(error)")
             }
