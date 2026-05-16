@@ -271,21 +271,21 @@ import AgoraRtcKit
     }
     
     private func startTranscription() async {
-        guard let userId = currentUserId else { return }
-        let numericUid = Int(deterministicHash(userId))
-        
         do {
-            let params: [String: Any] = [
-                "roundtableId": roundtable.id.uuidString.lowercased(),
-                "channelName": roundtable.id.uuidString.lowercased(),
-                "userUid": numericUid
-            ]
+            struct TranscriptionParams: Encodable {
+                let roundtableId: String
+                let channelName: String
+            }
             
-            // Invoke the Supabase Edge Function
+            let params = TranscriptionParams(
+                roundtableId: roundtable.id.uuidString.lowercased(),
+                channelName: roundtable.id.uuidString.lowercased()
+            )
+            
             _ = try await SupabaseManager.shared.client.functions
                 .invoke("start-transcription", options: .init(body: params))
             
-            print("AI Transcription service started successfully for UID: \(numericUid)")
+            print("AI Transcription service started successfully")
         } catch {
             print("Note: AI Transcription start failed or already running: \(error)")
         }
