@@ -1,7 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { RtcTokenBuilder, RtcRole } from "https://esm.sh/agora-token"
 
 const AGORA_APP_ID = Deno.env.get('AGORA_APP_ID')!
+const AGORA_APP_CERTIFICATE = Deno.env.get('AGORA_APP_CERTIFICATE')!
 const AGORA_CUSTOMER_ID = Deno.env.get('AGORA_CUSTOMER_ID')!
 const AGORA_CUSTOMER_SECRET = Deno.env.get('AGORA_CUSTOMER_SECRET')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
@@ -20,14 +22,44 @@ serve(async (req) => {
 
     const url = `https://api.agora.io/api/speech-to-text/v1/projects/${AGORA_APP_ID}/join`
 
+    const subBotUid = 47091
+    const pubBotUid = 88222
+    
+    // Generate valid RTC tokens for STT bots because App Certificate is active
+    const expirationTimeInSeconds = 24 * 3600 // 24 hours
+    const currentTimestamp = Math.floor(Date.now() / 1000)
+    const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds
+
+    console.log(`Generating RTC tokens for subBot (${subBotUid}) and pubBot (${pubBotUid}) in channel: ${channelName}`)
+    
+    const subBotToken = RtcTokenBuilder.buildTokenWithUid(
+      AGORA_APP_ID,
+      AGORA_APP_CERTIFICATE,
+      channelName,
+      subBotUid,
+      RtcRole.PUBLISHER,
+      privilegeExpiredTs
+    )
+
+    const pubBotToken = RtcTokenBuilder.buildTokenWithUid(
+      AGORA_APP_ID,
+      AGORA_APP_CERTIFICATE,
+      channelName,
+      pubBotUid,
+      RtcRole.PUBLISHER,
+      privilegeExpiredTs
+    )
+
     const payload = {
       name: `stt-${Date.now()}`,
       languages: ["tr-TR"],
       maxIdleTime: 300,
       rtcConfig: {
         channelName: channelName,
-        subBotUid: "47091",
-        pubBotUid: "88222",
+        subBotUid: String(subBotUid),
+        pubBotUid: String(pubBotUid),
+        subBotToken: subBotToken,
+        pubBotToken: pubBotToken,
         enableJsonProtocol: true   // Send JSON instead of Protobuf — parseable without proto compiler
       }
     }
