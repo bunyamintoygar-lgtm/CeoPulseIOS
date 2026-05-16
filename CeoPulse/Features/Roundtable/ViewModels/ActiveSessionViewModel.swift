@@ -76,6 +76,11 @@ import AgoraRtcKit
             setupAgora()
             updateAgoraState()
             
+            // Start AI Transcription service
+            Task {
+                await startTranscription()
+            }
+            
             isLoading = false
         } catch {
             self.errorMessage = error.localizedDescription
@@ -247,6 +252,23 @@ import AgoraRtcKit
             try await service.sendMessage(roundtableId: roundtable.id, content: content)
         } catch {
             print("Error sending message: \(error)")
+        }
+    }
+    
+    private func startTranscription() async {
+        do {
+            let params: [String: String] = [
+                "roundtableId": roundtable.id.uuidString.lowercased(),
+                "channelName": roundtable.id.uuidString.lowercased()
+            ]
+            
+            // Invoke the Supabase Edge Function
+            _ = try await SupabaseManager.shared.client.functions
+                .invoke("start-transcription", options: .init(body: params))
+            
+            print("AI Transcription service started successfully")
+        } catch {
+            print("Note: AI Transcription start failed or already running: \(error)")
         }
     }
     
