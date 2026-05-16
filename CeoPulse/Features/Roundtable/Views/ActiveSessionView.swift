@@ -102,27 +102,61 @@ struct ActiveSessionView: View {
     
     private var participantGrid: some View {
         VStack(spacing: 16) {
+            // Header
             HStack {
-                Label("\(viewModel.participants.count) / 40 Katılımcı", systemImage: "person.2.fill")
+                HStack(spacing: 6) {
+                    Text("Aktif Konuşmacılar")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 14))
+                        .foregroundColor(.white.opacity(0.5))
+                }
                 Spacer()
-                Button("Katılımcıları Gör") {}.foregroundColor(.purple)
+                
+                let speakerCount = min(viewModel.participants.count, 4)
+                Text("\(speakerCount) / 4 Konuşmacı")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.purple)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.purple.opacity(0.15))
+                    .cornerRadius(12)
             }
-            .font(.system(size: 12))
             .padding(.horizontal, 20)
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(viewModel.participants) { participant in
-                        ParticipantCard(
-                            name: participant.userName ?? "Lider",
-                            role: participant.role.title,
-                            isMe: participant.userId == viewModel.currentUserId,
-                            isSpeaking: false // To be linked to volume detection
-                        )
-                    }
+            // Cards
+            HStack(spacing: 8) {
+                let stageParticipants = Array(viewModel.participants.prefix(4))
+                let emptyCount = max(0, 4 - stageParticipants.count)
+                
+                ForEach(stageParticipants) { participant in
+                    FilledParticipantCard(
+                        participant: participant,
+                        isSpeaking: participant.userId == viewModel.roundtable.currentSpeakerId
+                    )
                 }
-                .padding(.horizontal, 20)
+                
+                ForEach(0..<emptyCount, id: \.self) { _ in
+                    EmptyParticipantCard()
+                }
             }
+            .padding(.horizontal, 20)
+            
+            // Info text below cards
+            HStack(spacing: 8) {
+                Image(systemName: "clock")
+                    .font(.system(size: 14))
+                    .foregroundColor(.purple)
+                Text("15 saniye konuşmayan aktif konuşmacı otomatik olarak yerini sıradakine bırakır.")
+                    .font(.system(size: 11))
+                    .foregroundColor(.white.opacity(0.7))
+                Spacer()
+            }
+            .padding(12)
+            .background(Color.white.opacity(0.05))
+            .cornerRadius(12)
+            .padding(.horizontal, 20)
         }
     }
     
@@ -315,61 +349,126 @@ struct ActiveSessionView: View {
     }
 }
 
-struct ParticipantCard: View {
-    let name: String
-    let role: String
-    let isMe: Bool
+struct FilledParticipantCard: View {
+    let participant: RoundtableParticipant
     let isSpeaking: Bool
     
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Spacer()
-                Circle()
-                    .fill(Color.green)
-                    .frame(width: 6, height: 6)
-            }
-            .padding(.top, 8)
-            .padding(.trailing, 8)
-            
-            VStack(spacing: 4) {
-                Text(name)
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(isMe ? .green : .white)
-                Text(role)
-                    .font(.system(size: 10))
-                    .foregroundColor(.purple)
+        VStack(spacing: 8) {
+            // Moderator Tag
+            if participant.role == .moderator {
+                Text("Moderatör")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(6)
+                    .padding(.top, 8)
+            } else {
+                Spacer().frame(height: 20) // Placeholder
             }
             
-            ZStack {
-                Circle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 64, height: 64)
-                Image(systemName: "person.fill")
-                    .font(.system(size: 32))
-                    .foregroundColor(.white.opacity(0.5))
+            // Avatar with Mic Badge
+            ZStack(alignment: .bottomTrailing) {
+                if let avatar = participant.userAvatar, !avatar.isEmpty {
+                    AsyncImage(url: URL(string: avatar)) { image in
+                        image.resizable().scaledToFill()
+                    } placeholder: {
+                        Color.gray.opacity(0.3)
+                    }
+                    .frame(width: 48, height: 48)
+                    .clipShape(Circle())
+                } else {
+                    Circle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 48, height: 48)
+                        .overlay(
+                            Text(participant.userName?.prefix(1).uppercased() ?? "U")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.white)
+                        )
+                }
+                
+                // Mic Badge
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "0A0A0F")) // Match background roughly
+                        .frame(width: 18, height: 18)
+                    Circle()
+                        .fill(participant.isMuted ? Color.white.opacity(0.1) : Color.green.opacity(0.2))
+                        .frame(width: 14, height: 14)
+                    Image(systemName: participant.isMuted ? "mic.slash.fill" : "mic.fill")
+                        .font(.system(size: 7))
+                        .foregroundColor(participant.isMuted ? .white.opacity(0.5) : .green)
+                }
+                .offset(x: 2, y: 2)
             }
             
-            Image(systemName: "mic.fill")
-                .foregroundColor(.green)
-                .font(.system(size: 12))
+            // Info
+            VStack(spacing: 2) {
+                Text(participant.userName ?? "Kullanıcı")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                Text(participant.role.title)
+                    .font(.system(size: 9))
+                    .foregroundColor(participant.role == .listener ? .gray : .purple)
+            }
+            
+            Spacer()
             
             // Equalizer
             HStack(spacing: 2) {
-                ForEach(0..<6) { i in
+                ForEach(0..<8) { i in
                     RoundedRectangle(cornerRadius: 1)
-                        .fill(i < 4 ? Color.purple : Color.white.opacity(0.1))
-                        .frame(width: 10, height: 4)
+                        .fill(isSpeaking ? Color.purple : Color.white.opacity(0.1))
+                        .frame(width: 2.5, height: isSpeaking ? CGFloat.random(in: 4...12) : 3)
                 }
             }
             .padding(.bottom, 12)
         }
-        .frame(width: 120)
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(20)
+        .frame(maxWidth: .infinity)
+        .frame(height: 140)
+        .background(Color.white.opacity(0.03))
+        .cornerRadius(12)
         .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(isMe ? Color.purple.opacity(0.5) : Color.clear, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+        )
+    }
+}
+
+struct EmptyParticipantCard: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .stroke(Color.purple.opacity(0.3), lineWidth: 1)
+                    .frame(width: 48, height: 48)
+                Image(systemName: "person")
+                    .font(.system(size: 20))
+                    .foregroundColor(.white.opacity(0.5))
+            }
+            .padding(.top, 20)
+            
+            VStack(spacing: 2) {
+                Text("Henüz aktif")
+                Text("konuşmacı yok")
+            }
+            .font(.system(size: 9))
+            .foregroundColor(.white.opacity(0.5))
+            .multilineTextAlignment(.center)
+            
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 140)
+        .background(Color.white.opacity(0.03))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.05), lineWidth: 1)
         )
     }
 }
