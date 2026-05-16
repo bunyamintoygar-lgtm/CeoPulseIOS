@@ -180,17 +180,27 @@ import AgoraRtcKit
 
     private func refreshParticipants() {
         Task {
-            if let refreshedParticipants = try? await self.service.fetchParticipants(roundtableId: self.roundtable.id) {
-                self.participants = refreshedParticipants
-                self.updateAgoraState()
+            do {
+                let refreshedParticipants = try await self.service.fetchParticipants(roundtableId: self.roundtable.id)
+                await MainActor.run {
+                    self.participants = refreshedParticipants
+                    self.updateAgoraState()
+                }
+            } catch {
+                print("DEBUG: Error refreshing participants: \(error)")
             }
         }
     }
     
     private func refreshMessages() {
         Task {
-            if let refreshedMessages = try? await self.service.fetchMessages(roundtableId: self.roundtable.id) {
-                self.messages = refreshedMessages
+            do {
+                let refreshedMessages = try await self.service.fetchMessages(roundtableId: self.roundtable.id)
+                await MainActor.run {
+                    self.messages = refreshedMessages
+                }
+            } catch {
+                print("DEBUG: Error refreshing messages: \(error)")
             }
         }
     }

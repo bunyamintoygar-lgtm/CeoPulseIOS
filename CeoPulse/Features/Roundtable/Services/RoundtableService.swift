@@ -37,7 +37,7 @@ class RoundtableService {
     func fetchParticipants(roundtableId: UUID) async throws -> [RoundtableParticipant] {
         let participants: [RoundtableParticipant] = try await client.from("roundtable_participants")
             .select()
-            .eq("roundtable_id", value: roundtableId.uuidString)
+            .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
             .execute()
             .value
         return participants
@@ -112,8 +112,8 @@ class RoundtableService {
         
         try await client.from("roundtable_participants")
             .update(UpdateData(role: role.rawValue, is_requesting_floor: false))
-            .eq("roundtable_id", value: roundtableId.uuidString)
-            .eq("user_id", value: userId.uuidString)
+            .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
+            .eq("user_id", value: userId.uuidString.lowercased())
             .execute()
     }
     
