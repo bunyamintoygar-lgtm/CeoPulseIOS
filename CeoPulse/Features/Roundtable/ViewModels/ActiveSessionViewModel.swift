@@ -59,7 +59,15 @@ import AgoraRtcKit
         }
         
         do {
-            self.participants = try await service.fetchParticipants(roundtableId: roundtable.id)
+            var fetchedParticipants = try await service.fetchParticipants(roundtableId: roundtable.id)
+            
+            // Auto-join if not already a participant
+            if let userId = currentUserId, !fetchedParticipants.contains(where: { $0.userId == userId }) {
+                try await service.joinRoundtable(roundtableId: roundtable.id, role: .listener)
+                fetchedParticipants = try await service.fetchParticipants(roundtableId: roundtable.id)
+            }
+            
+            self.participants = fetchedParticipants
             self.messages = try await service.fetchMessages(roundtableId: roundtable.id)
             
             await setupRealtime()
