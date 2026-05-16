@@ -37,7 +37,7 @@ class RoundtableService {
     func fetchParticipants(roundtableId: UUID) async throws -> [RoundtableParticipant] {
         let participants: [RoundtableParticipant] = try await client.from("roundtable_participants")
             .select()
-            .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
+            .eq("roundtable_id", value: roundtableId.uuidString)
             .execute()
             .value
         return participants
@@ -110,11 +110,15 @@ class RoundtableService {
             let is_requesting_floor: Bool
         }
         
-        try await client.from("roundtable_participants")
+        print("DEBUG: updateRole starting for user \(userId) to role \(role.rawValue)")
+        
+        let response = try await client.from("roundtable_participants")
             .update(UpdateData(role: role.rawValue, is_requesting_floor: false))
-            .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
-            .eq("user_id", value: userId.uuidString.lowercased())
+            .eq("roundtable_id", value: roundtableId.uuidString)
+            .eq("user_id", value: userId.uuidString)
             .execute()
+        
+        print("DEBUG: updateRole finished with status: \(response.status)")
     }
     
     func updateCurrentSpeaker(roundtableId: UUID, userId: UUID?) async throws {
