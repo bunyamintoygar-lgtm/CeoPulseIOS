@@ -267,11 +267,11 @@ import AgoraRtcKit
                 do {
                     if isStageFull {
                         let newState = !participant.isRequestingFloor
-                        print("DEBUG: Stage full, requesting floor: \(newState)")
-                        try await service.requestFloor(roundtableId: roundtable.id, isRequesting: newState)
+                        print("DEBUG: Stage full, updating participant \(participant.id) isRequesting: \(newState)")
+                        try await service.updateParticipant(id: participant.id, role: participant.role, isRequestingFloor: newState)
                     } else {
-                        print("DEBUG: Stage not full, promoting to speaker")
-                        try await service.updateRole(roundtableId: roundtable.id, userId: userId, role: .speaker)
+                        print("DEBUG: Stage not full, promoting participant \(participant.id) to speaker")
+                        try await service.updateParticipant(id: participant.id, role: .speaker, isRequestingFloor: false)
                     }
                 } catch {
                     print("DEBUG: Error in requestFloor task: \(error)")
