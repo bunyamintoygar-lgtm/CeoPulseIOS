@@ -7,7 +7,8 @@ struct ActiveSessionView: View {
     @StateObject private var viewModel: ActiveSessionViewModel
     @State private var messageText = ""
     @State private var selectedTab = 0
-    @State private var isPTTPressing = false
+    @State private var showingExitAlert = false
+    @State private var isPulsing = false
     
     init(roundtable: Roundtable) {
         _viewModel = StateObject(wrappedValue: ActiveSessionViewModel(roundtable: roundtable))
@@ -280,11 +281,14 @@ struct ActiveSessionView: View {
                                 Text("Sahneden Ayrıl")
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(.white.opacity(0.6))
-                                    .padding(.vertical, 8)
-                                    .padding(.horizontal, 24)
+                                    .padding(.vertical, 12)
+                                    .padding(.horizontal, 32)
                                     .background(Color.white.opacity(0.05))
                                     .clipShape(Capsule())
                             }
+                            // Increased clickable area
+                            .padding(.top, 8)
+                            .zIndex(10)
                         }
                     } else if isStageFull {
                         if isRequesting {
@@ -339,11 +343,20 @@ struct ActiveSessionView: View {
             ZStack {
                 let glowColor = isRedEffect ? Color.red : Color.purple
                 
+                // Animated Outer pulse when mic is active
+                if isRedEffect {
+                    Circle()
+                        .stroke(glowColor.opacity(0.4), lineWidth: 1)
+                        .frame(width: 200, height: 200)
+                        .scaleEffect(isPulsing ? 1.15 : 1.0)
+                        .opacity(isPulsing ? 0 : 0.8)
+                }
+                
                 // Outer glow
                 Circle()
                     .stroke(glowColor.opacity(isActive ? 0.6 : 0.3), lineWidth: 2)
                     .frame(width: 180, height: 180)
-                    .shadow(color: glowColor.opacity(isActive ? 0.5 : 0.2), radius: 20)
+                    .shadow(color: glowColor.opacity(isActive ? 0.5 : 0.2), radius: isRedEffect ? (isPulsing ? 30 : 15) : 20)
                     .background(Circle().fill(Color(hex: "0A0A0F"))) // Solid background inside
                 
                 // Inner gradient for glowing effect
@@ -393,6 +406,11 @@ struct ActiveSessionView: View {
             }
         }
         .buttonStyle(PlainButtonStyle())
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                isPulsing.toggle()
+            }
+        }
     }
     
     @ViewBuilder
