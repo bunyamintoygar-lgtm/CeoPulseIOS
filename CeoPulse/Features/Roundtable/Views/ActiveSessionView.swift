@@ -261,13 +261,30 @@ struct ActiveSessionView: View {
                 
                 VStack {
                     if isUserOnStage {
-                        pttCircleButton(
-                            title: "Şu an aktif\nkonuşmacısınız",
-                            actionText: "Ayrıl",
-                            badge: "Aktif Konuşmacı",
-                            isActive: true
-                        ) {
-                            viewModel.leaveStage()
+                        let isMuted = viewModel.agoraManager.isMuted
+                        
+                        VStack(spacing: 16) {
+                            pttCircleButton(
+                                title: isMuted ? "Mikrofon\nKapalı" : "Mikrofon\nAçık",
+                                actionText: isMuted ? "Açmak için dokun" : "Kapatmak için dokun",
+                                badge: "Aktif Konuşmacı",
+                                isActive: true,
+                                isRedEffect: !isMuted
+                            ) {
+                                viewModel.toggleMute()
+                            }
+                            
+                            Button(action: {
+                                viewModel.leaveStage()
+                            }) {
+                                Text("Sahneden Ayrıl")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.white.opacity(0.6))
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 24)
+                                    .background(Color.white.opacity(0.05))
+                                    .clipShape(Capsule())
+                            }
                         }
                     } else if isStageFull {
                         if isRequesting {
@@ -317,20 +334,22 @@ struct ActiveSessionView: View {
         }
     }
     
-    private func pttCircleButton(title: String, actionText: String?, badge: String?, isActive: Bool, action: @escaping () -> Void) -> some View {
+    private func pttCircleButton(title: String, actionText: String?, badge: String?, isActive: Bool, isRedEffect: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             ZStack {
+                let glowColor = isRedEffect ? Color.red : Color.purple
+                
                 // Outer glow
                 Circle()
-                    .stroke(Color.purple.opacity(isActive ? 0.6 : 0.3), lineWidth: 2)
+                    .stroke(glowColor.opacity(isActive ? 0.6 : 0.3), lineWidth: 2)
                     .frame(width: 180, height: 180)
-                    .shadow(color: .purple.opacity(isActive ? 0.5 : 0.2), radius: 20)
+                    .shadow(color: glowColor.opacity(isActive ? 0.5 : 0.2), radius: 20)
                     .background(Circle().fill(Color(hex: "0A0A0F"))) // Solid background inside
                 
                 // Inner gradient for glowing effect
                 Circle()
                     .fill(
-                        RadialGradient(colors: [Color.purple.opacity(0.3), Color.clear], center: .center, startRadius: 0, endRadius: 90)
+                        RadialGradient(colors: [glowColor.opacity(0.3), Color.clear], center: .center, startRadius: 0, endRadius: 90)
                     )
                     .frame(width: 160, height: 160)
                 
@@ -351,13 +370,13 @@ struct ActiveSessionView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "waveform")
                             .font(.system(size: 16))
-                            .foregroundColor(isActive ? .purple : .white.opacity(0.5))
-                        Image(systemName: "mic.fill")
+                            .foregroundColor(isActive ? glowColor : .white.opacity(0.5))
+                        Image(systemName: isRedEffect ? "mic.fill" : "mic.slash.fill")
                             .font(.system(size: 36))
                             .foregroundColor(.white)
                         Image(systemName: "waveform")
                             .font(.system(size: 16))
-                            .foregroundColor(isActive ? .purple : .white.opacity(0.5))
+                            .foregroundColor(isActive ? glowColor : .white.opacity(0.5))
                     }
                     
                     Text(title)
