@@ -122,17 +122,21 @@ class RoundtableService {
     }
     
     func updateParticipant(id: UUID, role: RoundtableRole, isRequestingFloor: Bool) async throws {
-        struct UpdateData: Encodable {
-            let role: String
-            let is_requesting_floor: Bool
-        }
-        
         print("DEBUG: updateParticipant starting for ID \(id) to role \(role.rawValue)")
         
         let response = try await client.from("roundtable_participants")
-            .update(UpdateData(role: role.rawValue, is_requesting_floor: isRequestingFloor))
+            .update([
+                "role": role.rawValue,
+                "is_requesting_floor": isRequestingFloor
+            ])
             .eq("id", value: id.uuidString)
+            .select()
+            .single()
             .execute()
+        
+        if let updatedRow = response.value as? [String: Any] {
+            print("DEBUG: Update response row role: \(updatedRow["role"] ?? "nil")")
+        }
         
         print("DEBUG: updateParticipant finished with status: \(response.status)")
     }
