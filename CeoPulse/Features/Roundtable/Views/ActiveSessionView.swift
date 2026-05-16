@@ -302,6 +302,7 @@ struct ActiveSessionView: View {
                 }
                 .padding(.vertical, 32)
             }
+            .frame(maxWidth: .infinity, alignment: .center)
             
             // Lightning Text
             HStack(spacing: 8) {
