@@ -126,6 +126,27 @@ struct RoundtableMessage: Identifiable, Codable {
     }
 }
 
+struct RoundtableTranscript: Identifiable, Codable {
+    let id: UUID
+    let roundtableId: UUID
+    let userId: UUID
+    let content: String
+    let createdAt: Date
+    
+    // Joined profile data (for UI)
+    var userName: String?
+    var userTitle: String?
+    var userAvatar: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case roundtableId = "roundtable_id"
+        case userId = "user_id"
+        case content
+        case createdAt = "created_at"
+    }
+}
+
 extension Roundtable {
     static var mock: Roundtable {
         Roundtable(

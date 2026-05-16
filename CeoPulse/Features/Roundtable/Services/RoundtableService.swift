@@ -129,6 +129,26 @@ class RoundtableService {
             .execute()
     }
     
+    func fetchTranscripts(roundtableId: UUID) async throws -> [RoundtableTranscript] {
+        let transcripts: [RoundtableTranscript] = try await client.from("roundtable_transcripts")
+            .select()
+            .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
+            .order("created_at", ascending: true)
+            .execute()
+            .value
+        return transcripts
+    }
+    
+    func sendTranscript(roundtableId: UUID, userId: UUID, content: String) async throws {
+        let data = [
+            "roundtable_id": roundtableId.uuidString.lowercased(),
+            "user_id": userId.uuidString.lowercased(),
+            "content": content
+        ]
+        
+        try await client.from("roundtable_transcripts").insert(data).execute()
+    }
+    
     func updateCurrentSpeaker(roundtableId: UUID, userId: UUID?) async throws {
         let data: [String: String?] = ["current_speaker_id": userId?.uuidString.lowercased()]
         

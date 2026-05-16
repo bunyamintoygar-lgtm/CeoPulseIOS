@@ -10,6 +10,7 @@ import AgoraRtcKit
     
     @Published var participants: [RoundtableParticipant] = []
     @Published var messages: [RoundtableMessage] = []
+    @Published var transcripts: [RoundtableTranscript] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var currentUserId: UUID?
@@ -69,6 +70,7 @@ import AgoraRtcKit
             
             self.participants = fetchedParticipants
             self.messages = try await service.fetchMessages(roundtableId: roundtable.id)
+            self.transcripts = try await service.fetchTranscripts(roundtableId: roundtable.id)
             
             await setupRealtime()
             setupAgora()
@@ -158,6 +160,15 @@ import AgoraRtcKit
             Task { @MainActor in self.refreshParticipants() }
         }
         
+        _ = channel?.onPostgresChange(
+            InsertAction.self,
+            schema: "public",
+            table: "roundtable_transcripts"
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            Task { @MainActor in self.refreshTranscripts() }
+        }
+        
         do {
             try await channel?.subscribeWithError()
         } catch {
@@ -200,7 +211,32 @@ import AgoraRtcKit
                     self.messages = refreshedMessages
                 }
             } catch {
-                print("DEBUG: Error refreshing messages: \(error)")
+                print("Error refreshing messages: \(error)")
+            }
+        }
+    }
+    
+    private func refreshTranscripts() {
+        Task {
+            do {
+                let refreshedTranscripts = try await self.service.fetchTranscripts(roundtableId: self.roundtable.id)
+                
+                // Map user data from participants
+                let enrichedTranscripts = refreshedTranscripts.map { transcript -> RoundtableTranscript in
+                    var t = transcript
+                    if let participant = self.participants.first(where: { $0.userId == transcript.userId }) {
+                        t.userName = participant.userName
+                        t.userAvatar = participant.userAvatar
+                        t.userTitle = participant.userTitle
+                    }
+                    return t
+                }
+                
+                await MainActor.run {
+                    self.transcripts = enrichedTranscripts
+                }
+            } catch {
+                print("Error refreshing transcripts: \(error)")
             }
         }
     }

@@ -485,6 +485,74 @@ struct ActiveSessionView: View {
                     }
                 }
                 .padding(20)
+            } else if selectedTab == 1 {
+                VStack(spacing: 16) {
+                    if viewModel.transcripts.isEmpty {
+                        VStack(spacing: 20) {
+                            Image(systemName: "waveform.and.mic")
+                                .font(.system(size: 48))
+                                .foregroundColor(.purple.opacity(0.3))
+                            
+                            Text("Deşifre henüz başlamadı.\nKonuşmalar burada anlık olarak belirecek.")
+                                .font(.system(size: 14))
+                                .foregroundColor(.white.opacity(0.5))
+                                .multilineTextAlignment(.center)
+                        }
+                        .padding(.vertical, 40)
+                        .frame(maxWidth: .infinity)
+                    } else {
+                        ForEach(viewModel.transcripts) { transcript in
+                            transcriptRow(transcript: transcript)
+                        }
+                    }
+                }
+                .padding(20)
+            }
+        }
+    }
+    
+    private func transcriptRow(transcript: RoundtableTranscript) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            // Avatar
+            if let avatar = transcript.userAvatar, !avatar.isEmpty {
+                AsyncImage(url: URL(string: avatar)) { image in
+                    image.resizable().scaledToFill()
+                } placeholder: {
+                    Color.gray.opacity(0.3)
+                }
+                .frame(width: 32, height: 32)
+                .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(Color.purple.opacity(0.2))
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Text(transcript.userName?.prefix(1).uppercased() ?? "U")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.purple)
+                    )
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(transcript.userName ?? "Kullanıcı")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                    
+                    Text(transcript.createdAt.formatted(date: .omitted, time: .shortened))
+                        .font(.system(size: 11))
+                        .foregroundColor(.white.opacity(0.4))
+                }
+                
+                Text(transcript.content)
+                    .font(.system(size: 14))
+                    .foregroundColor(.white.opacity(0.9))
+                    .lineSpacing(4)
+                    .padding(12)
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(12, corners: [.topRight, .bottomLeft, .bottomRight])
             }
         }
     }
