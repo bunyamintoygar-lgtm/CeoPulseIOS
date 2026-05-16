@@ -131,34 +131,31 @@ extension AgoraManager: AgoraRtcEngineDelegate {
         }
     }
     
-    // Called when the STT pubBot (UID 88222) sends transcription data as a stream message
+    // Called when the STT pubBot (UID 88222) sends transcription data as a JSON stream message
+    // JSON format (enableJsonProtocol: true):
+    // {"transcript": {"uid": 222, "text": "Hello", "isFinal": false, "offset": ..., "duration": ...}}
     func rtcEngine(_ engine: AgoraRtcEngineKit, receiveStreamMessageFromUid uid: UInt, streamId: Int, data: Data) {
         guard uid == sttBotUid else { return }
         
-        // Try to parse the transcription JSON from Agora STT
-        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-            // Agora STT v7 format: { "words": [{"text": "...", "isFinal": true}] }
-            if let words = json["words"] as? [[String: Any]] {
-                let finalWords = words.filter { $0["isFinal"] as? Bool == true }
-                let text = finalWords.compactMap { $0["text"] as? String }.joined(separator: " ")
-                if !text.isEmpty {
-                    print("[STT] Transcript received: \(text)")
-                    DispatchQueue.main.async {
-                        self.onTranscriptReceived?(text)
-                    }
-                }
-            } else if let text = json["text"] as? String, !text.isEmpty {
-                // Alternative flat format
-                print("[STT] Transcript received (flat): \(text)")
+        print("[STT] Raw stream message received from UID \(uid), size: \(data.count) bytes")
+        
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            // Log raw bytes for debugging
+            print("[STT] Cannot parse as JSON. Raw: \(data.prefix(100).map { String(format: "%02x", $0) }.joined())")
+            return
+        }
+        
+        // Agora JSON format: {"transcript": {"text": "...", "isFinal": true/false}}
+        if let transcript = json["transcript"] as? [String: Any] {
+            let isFinal = transcript["isFinal"] as? Bool ?? false
+            let text = transcript["text"] as? String ?? ""
+            
+            print("[STT] Transcript — isFinal: \(isFinal), text: \(text)")
+            
+            if isFinal && !text.isEmpty {
                 DispatchQueue.main.async {
                     self.onTranscriptReceived?(text)
                 }
-            }
-        } else if let text = String(data: data, encoding: .utf8), !text.isEmpty {
-            // Plain text fallback
-            print("[STT] Transcript received (raw): \(text)")
-            DispatchQueue.main.async {
-                self.onTranscriptReceived?(text)
             }
         }
     }

@@ -27,7 +27,8 @@ serve(async (req) => {
       rtcConfig: {
         channelName: channelName,
         subBotUid: "47091",
-        pubBotUid: "88222"
+        pubBotUid: "88222",
+        enableJsonProtocol: true   // Send JSON instead of Protobuf — parseable without proto compiler
       }
     }
 
