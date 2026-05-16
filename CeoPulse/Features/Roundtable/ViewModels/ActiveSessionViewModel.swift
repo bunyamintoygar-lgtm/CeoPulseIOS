@@ -102,7 +102,7 @@ import AgoraRtcKit
             UpdateAction.self,
             schema: "public",
             table: "roundtables",
-            filter: "id=eq.\(roundtable.id.uuidString)"
+            filter: "id=eq.\(roundtable.id.uuidString.lowercased())"
         ) { [weak self] action in
             guard let self = self else { return }
             // Get current_speaker_id from the record
@@ -122,7 +122,7 @@ import AgoraRtcKit
             InsertAction.self,
             schema: "public",
             table: "roundtable_messages",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString.lowercased())"
         ) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in self.refreshMessages() }
@@ -132,7 +132,7 @@ import AgoraRtcKit
             InsertAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString.lowercased())"
         ) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in self.refreshParticipants() }
@@ -142,7 +142,7 @@ import AgoraRtcKit
             UpdateAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString.lowercased())"
         ) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in self.refreshParticipants() }
@@ -152,7 +152,7 @@ import AgoraRtcKit
             DeleteAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString.lowercased())"
         ) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in self.refreshParticipants() }
