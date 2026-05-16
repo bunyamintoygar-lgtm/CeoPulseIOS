@@ -114,6 +114,7 @@ class AgoraManager: NSObject, ObservableObject {
 
 extension AgoraManager: AgoraRtcEngineDelegate {
     func rtcEngine(_ engine: AgoraRtcEngineKit, didJoinedOfUid uid: UInt, elapsed: Int) {
+        print("[AGORA] Remote user joined channel: UID=\(uid)  (pubBot=88222)")
         DispatchQueue.main.async {
             self.remoteUserIds.insert(uid)
         }
@@ -135,28 +136,25 @@ extension AgoraManager: AgoraRtcEngineDelegate {
     // JSON format (enableJsonProtocol: true):
     // {"transcript": {"uid": 222, "text": "Hello", "isFinal": false, "offset": ..., "duration": ...}}
     func rtcEngine(_ engine: AgoraRtcEngineKit, receiveStreamMessageFromUid uid: UInt, streamId: Int, data: Data) {
+        // DIAGNOSTIC: log ALL stream messages, not just from pubBot
+        print("[STT-DIAG] Stream message from UID=\(uid) (pubBot=\(sttBotUid)), size=\(data.count)")
+        
         guard uid == sttBotUid else { return }
         
-        print("[STT] Raw stream message received from UID \(uid), size: \(data.count) bytes")
-        
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            // Log raw bytes for debugging
             print("[STT] Cannot parse as JSON. Raw: \(data.prefix(100).map { String(format: "%02x", $0) }.joined())")
             return
         }
         
-        // Agora JSON format: {"transcript": {"text": "...", "isFinal": true/false}}
         if let transcript = json["transcript"] as? [String: Any] {
             let isFinal = transcript["isFinal"] as? Bool ?? false
             let text = transcript["text"] as? String ?? ""
-            
             print("[STT] Transcript — isFinal: \(isFinal), text: \(text)")
-            
             if isFinal && !text.isEmpty {
-                DispatchQueue.main.async {
-                    self.onTranscriptReceived?(text)
-                }
+                DispatchQueue.main.async { self.onTranscriptReceived?(text) }
             }
+        } else {
+            print("[STT] Unexpected JSON keys: \(json.keys.joined(separator: ", "))")
         }
     }
     
