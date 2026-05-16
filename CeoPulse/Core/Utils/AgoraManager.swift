@@ -67,6 +67,11 @@ class AgoraManager: NSObject, ObservableObject {
         agoraKit?.muteLocalAudioStream(isMuted)
     }
     
+    func setMute(_ mute: Bool) {
+        isMuted = mute
+        agoraKit?.muteLocalAudioStream(mute)
+    }
+    
     func toggleCamera() {
         isCameraOn.toggle()
         if isCameraOn {

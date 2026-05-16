@@ -267,7 +267,7 @@ struct ActiveSessionView: View {
                             badge: "Aktif Konuşmacı",
                             isActive: true
                         ) {
-                            // Leave stage logic
+                            viewModel.leaveStage()
                         }
                     } else if isStageFull {
                         if isRequesting {

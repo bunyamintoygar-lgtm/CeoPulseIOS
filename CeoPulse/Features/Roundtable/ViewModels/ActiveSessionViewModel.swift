@@ -64,6 +64,7 @@ import AgoraRtcKit
             
             await setupRealtime()
             setupAgora()
+            updateAgoraState()
             
             isLoading = false
         } catch {
@@ -156,10 +157,25 @@ import AgoraRtcKit
         }
     }
     
+    private func updateAgoraState() {
+        guard let userId = currentUserId else { return }
+        
+        let stageParticipants = Array(participants.prefix(4))
+        let isOnStage = stageParticipants.contains { $0.userId == userId }
+        let isModerator = (roundtable.moderatorId == userId)
+        
+        let shouldBeBroadcaster = isOnStage || isModerator
+        let currentRole: AgoraClientRole = shouldBeBroadcaster ? .broadcaster : .audience
+        
+        agoraManager.setRole(currentRole)
+        agoraManager.setMute(!shouldBeBroadcaster)
+    }
+
     private func refreshParticipants() {
         Task {
             if let refreshedParticipants = try? await self.service.fetchParticipants(roundtableId: self.roundtable.id) {
                 self.participants = refreshedParticipants
+                self.updateAgoraState()
             }
         }
     }
@@ -231,6 +247,16 @@ import AgoraRtcKit
         Task {
             await taskChannel?.unsubscribe()
             try? await service.leaveRoundtable(roundtableId: roundtable.id)
+        }
+    }
+    
+    func leaveStage() {
+        Task {
+            do {
+                try await service.requestFloor(roundtableId: roundtable.id, isRequesting: false)
+            } catch {
+                print("Error leaving stage: \(error)")
+            }
         }
     }
 }
