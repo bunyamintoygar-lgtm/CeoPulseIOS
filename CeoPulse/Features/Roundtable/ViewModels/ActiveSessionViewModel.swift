@@ -160,11 +160,10 @@ import AgoraRtcKit
     private func updateAgoraState() {
         guard let userId = currentUserId else { return }
         
-        let stageParticipants = Array(participants.prefix(4))
+        let stageParticipants = participants.filter { $0.role == .moderator || $0.role == .speaker }
         let isOnStage = stageParticipants.contains { $0.userId == userId }
-        let isModerator = (roundtable.moderatorId == userId)
         
-        let shouldBeBroadcaster = isOnStage || isModerator
+        let shouldBeBroadcaster = isOnStage
         let currentRole: AgoraClientRole = shouldBeBroadcaster ? .broadcaster : .audience
         
         agoraManager.setRole(currentRole)
@@ -229,11 +228,19 @@ import AgoraRtcKit
     
     func requestFloor() {
         guard let userId = currentUserId else { return }
+        
+        let stageCount = participants.filter { $0.role == .moderator || $0.role == .speaker }.count
+        let isStageFull = stageCount >= 4
+        
         if let participant = participants.first(where: { $0.userId == userId }) {
-            let newState = !participant.isRequestingFloor
             Task {
                 do {
-                    try await service.requestFloor(roundtableId: roundtable.id, isRequesting: newState)
+                    if isStageFull {
+                        let newState = !participant.isRequestingFloor
+                        try await service.requestFloor(roundtableId: roundtable.id, isRequesting: newState)
+                    } else {
+                        try await service.updateRole(roundtableId: roundtable.id, userId: userId, role: .speaker)
+                    }
                 } catch {
                     print("Error requesting floor: \(error)")
                 }
@@ -251,9 +258,10 @@ import AgoraRtcKit
     }
     
     func leaveStage() {
+        guard let userId = currentUserId else { return }
         Task {
             do {
-                try await service.requestFloor(roundtableId: roundtable.id, isRequesting: false)
+                try await service.updateRole(roundtableId: roundtable.id, userId: userId, role: .listener)
             } catch {
                 print("Error leaving stage: \(error)")
             }

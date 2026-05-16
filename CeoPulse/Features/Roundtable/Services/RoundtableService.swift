@@ -104,6 +104,17 @@ class RoundtableService {
             .execute()
     }
     
+    func updateRole(roundtableId: UUID, userId: UUID, role: RoundtableRole) async throws {
+        try await client.from("roundtable_participants")
+            .update([
+                "role": role.rawValue,
+                "is_requesting_floor": false
+            ])
+            .eq("roundtable_id", value: roundtableId.uuidString)
+            .eq("user_id", value: userId.uuidString)
+            .execute()
+    }
+    
     func updateCurrentSpeaker(roundtableId: UUID, userId: UUID?) async throws {
         let data: [String: String?] = ["current_speaker_id": userId?.uuidString]
         

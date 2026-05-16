@@ -127,7 +127,7 @@ struct ActiveSessionView: View {
             
             // Cards
             HStack(spacing: 8) {
-                let stageParticipants = Array(viewModel.participants.prefix(4))
+                let stageParticipants = viewModel.participants.filter { $0.role == .moderator || $0.role == .speaker }
                 let emptyCount = max(0, 4 - stageParticipants.count)
                 
                 ForEach(stageParticipants) { participant in
@@ -161,8 +161,8 @@ struct ActiveSessionView: View {
     }
     
     private var masadakilerSection: some View {
-        let stageParticipants = Array(viewModel.participants.prefix(4))
-        let listeners = Array(viewModel.participants.dropFirst(4))
+        let stageParticipants = viewModel.participants.filter { $0.role == .moderator || $0.role == .speaker }
+        let listeners = viewModel.participants.filter { $0.role == .listener }
         let isUserOnStage = stageParticipants.contains { $0.userId == viewModel.currentUserId }
         let currentParticipant = viewModel.participants.first { $0.userId == viewModel.currentUserId }
         let isRequesting = currentParticipant?.isRequestingFloor ?? false
