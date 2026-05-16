@@ -166,10 +166,15 @@ import AgoraRtcKit
     }
     
     private func updateAgoraState() {
-        guard let userId = currentUserId else { return }
+        guard let userId = currentUserId else { 
+            print("DEBUG: updateAgoraState failed - currentUserId is nil")
+            return 
+        }
         
         let stageParticipants = participants.filter { $0.role == .moderator || $0.role == .speaker }
         let isOnStage = stageParticipants.contains { $0.userId == userId }
+        
+        print("DEBUG: User \(userId) is on stage: \(isOnStage). Participants count: \(participants.count)")
         
         let shouldBeBroadcaster = isOnStage
         let currentRole: AgoraClientRole = shouldBeBroadcaster ? .broadcaster : .audience
@@ -182,6 +187,7 @@ import AgoraRtcKit
         Task {
             do {
                 let refreshedParticipants = try await self.service.fetchParticipants(roundtableId: self.roundtable.id)
+                print("DEBUG: Refreshed participants count: \(refreshedParticipants.count)")
                 await MainActor.run {
                     self.participants = refreshedParticipants
                     self.updateAgoraState()
@@ -245,24 +251,34 @@ import AgoraRtcKit
     }
     
     func requestFloor() {
-        guard let userId = currentUserId else { return }
+        guard let userId = currentUserId else { 
+            print("DEBUG: requestFloor failed - currentUserId is nil")
+            return 
+        }
+        
+        print("DEBUG: requestFloor called for user: \(userId)")
         
         let stageCount = participants.filter { $0.role == .moderator || $0.role == .speaker }.count
         let isStageFull = stageCount >= 4
         
         if let participant = participants.first(where: { $0.userId == userId }) {
+            print("DEBUG: Found participant row, current role: \(participant.role)")
             Task {
                 do {
                     if isStageFull {
                         let newState = !participant.isRequestingFloor
+                        print("DEBUG: Stage full, requesting floor: \(newState)")
                         try await service.requestFloor(roundtableId: roundtable.id, isRequesting: newState)
                     } else {
+                        print("DEBUG: Stage not full, promoting to speaker")
                         try await service.updateRole(roundtableId: roundtable.id, userId: userId, role: .speaker)
                     }
                 } catch {
-                    print("Error requesting floor: \(error)")
+                    print("DEBUG: Error in requestFloor task: \(error)")
                 }
             }
+        } else {
+            print("DEBUG: Participant row NOT FOUND for user \(userId) in list of \(participants.count) people")
         }
     }
     
