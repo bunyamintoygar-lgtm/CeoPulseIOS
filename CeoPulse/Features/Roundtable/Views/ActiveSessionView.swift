@@ -61,14 +61,16 @@ struct ActiveSessionView: View {
             VStack(spacing: 2) {
                 Text("Masaya Katıl")
                     .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.white)
                 Text(viewModel.roundtable.title)
                     .font(.system(size: 11))
-                    .foregroundColor(AppColors.textSecondary)
+                    .foregroundColor(.white.opacity(0.7))
             }
             Spacer()
             Button(action: {}) {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 20))
+                    .foregroundColor(.white)
                     .padding(8)
                     .background(Color.white.opacity(0.1))
                     .clipShape(Circle())
@@ -90,6 +92,7 @@ struct ActiveSessionView: View {
             }
         }
         .font(.system(size: 11))
+        .foregroundColor(.white.opacity(0.8))
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(Color.white.opacity(0.05))
