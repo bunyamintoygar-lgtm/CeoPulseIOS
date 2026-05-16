@@ -101,8 +101,7 @@ import AgoraRtcKit
         _ = channel?.onPostgresChange(
             UpdateAction.self,
             schema: "public",
-            table: "roundtables",
-            filter: "id=eq.\(roundtable.id.uuidString)"
+            table: "roundtables"
         ) { [weak self] action in
             print("DEBUG: Realtime Update received for table roundtables")
             guard let self = self else { return }
@@ -122,8 +121,7 @@ import AgoraRtcKit
         _ = channel?.onPostgresChange(
             InsertAction.self,
             schema: "public",
-            table: "roundtable_messages",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+            table: "roundtable_messages"
         ) { [weak self] _ in
             print("DEBUG: Realtime Insert received for table roundtable_messages")
             guard let self = self else { return }
@@ -133,8 +131,7 @@ import AgoraRtcKit
         _ = channel?.onPostgresChange(
             InsertAction.self,
             schema: "public",
-            table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+            table: "roundtable_participants"
         ) { [weak self] _ in
             print("DEBUG: Realtime Insert received for table roundtable_participants")
             guard let self = self else { return }
@@ -144,8 +141,7 @@ import AgoraRtcKit
         _ = channel?.onPostgresChange(
             UpdateAction.self,
             schema: "public",
-            table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+            table: "roundtable_participants"
         ) { [weak self] _ in
             print("DEBUG: Realtime Update received for table roundtable_participants")
             guard let self = self else { return }
@@ -155,8 +151,7 @@ import AgoraRtcKit
         _ = channel?.onPostgresChange(
             DeleteAction.self,
             schema: "public",
-            table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
+            table: "roundtable_participants"
         ) { [weak self] _ in
             print("DEBUG: Realtime Delete received for table roundtable_participants")
             guard let self = self else { return }
