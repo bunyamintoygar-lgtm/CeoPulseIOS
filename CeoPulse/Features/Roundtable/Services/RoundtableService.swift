@@ -55,17 +55,32 @@ class RoundtableService {
     
     // MARK: - Actions
     
-    func joinRoundtable(roundtableId: UUID, role: RoundtableRole = .listener) async throws {
+    func joinRoundtable(roundtableId: UUID, role: RoundtableRole = .listener, agoraUid: UInt? = nil) async throws {
         let session = try await client.auth.session
         let userId = session.user.id
         
-        let participant = [
+        var participant: [String: Any] = [
             "roundtable_id": roundtableId.uuidString.lowercased(),
             "user_id": userId.uuidString.lowercased(),
             "role": role.rawValue
         ]
         
+        if let agoraUid = agoraUid {
+            participant["agora_uid"] = agoraUid
+        }
+        
         try await client.from("roundtable_participants").insert(participant).execute()
+    }
+    
+    func updateAgoraUid(roundtableId: UUID, agoraUid: UInt) async throws {
+        let session = try await client.auth.session
+        let userId = session.user.id
+        
+        try await client.from("roundtable_participants")
+            .update(["agora_uid": agoraUid])
+            .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
+            .eq("user_id", value: userId.uuidString.lowercased())
+            .execute()
     }
     
     func leaveRoundtable(roundtableId: UUID) async throws {
@@ -146,6 +161,18 @@ class RoundtableService {
             "content": content
         ]
         
+        try await client.from("roundtable_transcripts").insert(data).execute()
+    }
+    
+    // Saves an STT-captured transcript — userId is optional (bot may not know the speaker)
+    func saveTranscript(roundtableId: UUID, content: String, userId: UUID?) async throws {
+        var data: [String: String] = [
+            "roundtable_id": roundtableId.uuidString.lowercased(),
+            "content": content
+        ]
+        if let userId = userId {
+            data["user_id"] = userId.uuidString.lowercased()
+        }
         try await client.from("roundtable_transcripts").insert(data).execute()
     }
     

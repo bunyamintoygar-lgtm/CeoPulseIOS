@@ -17,6 +17,12 @@ class AgoraManager: NSObject, ObservableObject {
     
     private var agoraKit: AgoraRtcEngineKit?
     
+    // STT pubBot UID — matches the pubBotUid sent to start-transcription
+    private let sttBotUid: UInt = 88222
+    
+    // Called when the STT bot sends a transcription stream message
+    var onTranscriptReceived: ((String) -> Void)?
+    
     private override init() {
         super.init()
     }
@@ -122,6 +128,44 @@ extension AgoraManager: AgoraRtcEngineDelegate {
     func rtcEngine(_ engine: AgoraRtcEngineKit, didJoinChannel channel: String, withUid uid: UInt, elapsed: Int) {
         DispatchQueue.main.async {
             self.isJoined = true
+        }
+    }
+    
+    // Called when the STT pubBot (UID 88222) sends transcription data as a stream message
+    func rtcEngine(_ engine: AgoraRtcEngineKit, receiveStreamMessageFromUid uid: UInt, streamId: Int, data: Data) {
+        guard uid == sttBotUid else { return }
+        
+        // Try to parse the transcription JSON from Agora STT
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            // Agora STT v7 format: { "words": [{"text": "...", "isFinal": true}] }
+            if let words = json["words"] as? [[String: Any]] {
+                let finalWords = words.filter { $0["isFinal"] as? Bool == true }
+                let text = finalWords.compactMap { $0["text"] as? String }.joined(separator: " ")
+                if !text.isEmpty {
+                    print("[STT] Transcript received: \(text)")
+                    DispatchQueue.main.async {
+                        self.onTranscriptReceived?(text)
+                    }
+                }
+            } else if let text = json["text"] as? String, !text.isEmpty {
+                // Alternative flat format
+                print("[STT] Transcript received (flat): \(text)")
+                DispatchQueue.main.async {
+                    self.onTranscriptReceived?(text)
+                }
+            }
+        } else if let text = String(data: data, encoding: .utf8), !text.isEmpty {
+            // Plain text fallback
+            print("[STT] Transcript received (raw): \(text)")
+            DispatchQueue.main.async {
+                self.onTranscriptReceived?(text)
+            }
+        }
+    }
+    
+    func rtcEngine(_ engine: AgoraRtcEngineKit, didOccurStreamMessageErrorFromUid uid: UInt, streamId: Int, error: Int, missed: Int, cached: Int) {
+        if uid == sttBotUid {
+            print("[STT] Stream message error from pubBot: \(error)")
         }
     }
 }

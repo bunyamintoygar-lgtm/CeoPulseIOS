@@ -64,7 +64,8 @@ import AgoraRtcKit
             
             // Auto-join if not already a participant
             if let userId = currentUserId, !fetchedParticipants.contains(where: { $0.userId == userId }) {
-                try await service.joinRoundtable(roundtableId: roundtable.id, role: .listener)
+                let numericUid = deterministicHash(userId)
+                try await service.joinRoundtable(roundtableId: roundtable.id, role: .listener, agoraUid: numericUid)
                 fetchedParticipants = try await service.fetchParticipants(roundtableId: roundtable.id)
             }
             
@@ -90,14 +91,28 @@ import AgoraRtcKit
     
     private func setupAgora() {
         guard let userId = currentUserId else { return }
-        let numericUid = UInt(abs(userId.uuidString.hashValue))
+        let numericUid = deterministicHash(userId)
         let role: AgoraClientRole = (roundtable.moderatorId == userId) ? .broadcaster : .audience
+        
+        // Update agora_uid in database just in case
+        Task {
+            try? await service.updateAgoraUid(roundtableId: roundtable.id, agoraUid: numericUid)
+        }
         
         agoraManager.joinChannel(
             channelName: roundtable.id.uuidString,
             userId: numericUid,
             role: role
         )
+        
+        // Wire up STT transcript callback from pubBot stream messages
+        let roundtableId = roundtable.id
+        agoraManager.onTranscriptReceived = { [weak self] text in
+            guard let self = self else { return }
+            Task {
+                try? await self.service.saveTranscript(roundtableId: roundtableId, content: text, userId: self.currentUserId)
+            }
+        }
     }
     
     private func setupRealtime() async {
@@ -256,17 +271,21 @@ import AgoraRtcKit
     }
     
     private func startTranscription() async {
+        guard let userId = currentUserId else { return }
+        let numericUid = Int(deterministicHash(userId))
+        
         do {
-            let params: [String: String] = [
+            let params: [String: Any] = [
                 "roundtableId": roundtable.id.uuidString.lowercased(),
-                "channelName": roundtable.id.uuidString.lowercased()
+                "channelName": roundtable.id.uuidString.lowercased(),
+                "userUid": numericUid
             ]
             
             // Invoke the Supabase Edge Function
             _ = try await SupabaseManager.shared.client.functions
                 .invoke("start-transcription", options: .init(body: params))
             
-            print("AI Transcription service started successfully")
+            print("AI Transcription service started successfully for UID: \(numericUid)")
         } catch {
             print("Note: AI Transcription start failed or already running: \(error)")
         }
@@ -334,6 +353,16 @@ import AgoraRtcKit
         } else {
             print("DEBUG: Participant row NOT FOUND for user \(userId) in list of \(participants.count) people")
         }
+    }
+    
+    
+    private func deterministicHash(_ uuid: UUID) -> UInt {
+        let s = uuid.uuidString.lowercased()
+        var h: UInt = 5381
+        for byte in s.utf8 {
+            h = ((h << 5) &+ h) &+ UInt(byte)
+        }
+        return h
     }
     
     func leaveSession() {
