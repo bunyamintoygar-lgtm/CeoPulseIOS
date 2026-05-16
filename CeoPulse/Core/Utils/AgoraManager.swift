@@ -34,13 +34,25 @@ class AgoraManager: NSObject, ObservableObject {
         
         // Default settings for roundtable (Audio first)
         agoraKit?.setChannelProfile(.liveBroadcasting)
+        
+        // Enable volume indication to monitor audio activity
+        agoraKit?.enableAudioVolumeIndication(200, smooth: 3, reportVad: true)
     }
     
     func joinChannel(channelName: String, userId: UInt, role: AgoraClientRole = .audience) {
-        AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
+        let session = AVAudioSession.sharedInstance()
+        session.requestRecordPermission { [weak self] granted in
             DispatchQueue.main.async {
                 if granted {
                     print("Microphone permission granted.")
+                    do {
+                        // Configure AVAudioSession for voice chat
+                        try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker, .allowBluetooth])
+                        try session.setActive(true, options: .notifyOthersOnDeactivation)
+                        print("AVAudioSession category set to playAndRecord and activated successfully.")
+                    } catch {
+                        print("Failed to configure AVAudioSession: \(error.localizedDescription)")
+                    }
                 } else {
                     print("Microphone permission denied.")
                 }
@@ -161,6 +173,15 @@ extension AgoraManager: AgoraRtcEngineDelegate {
     func rtcEngine(_ engine: AgoraRtcEngineKit, didOccurStreamMessageErrorFromUid uid: UInt, streamId: Int, error: Int, missed: Int, cached: Int) {
         if uid == sttBotUid {
             print("[STT] Stream message error from pubBot: \(error)")
+        }
+    }
+    
+    func rtcEngine(_ engine: AgoraRtcEngineKit, reportAudioVolumeOfSpeakers speakers: [AgoraRtcAudioVolumeInfo], totalVolume: Int) {
+        for speaker in speakers {
+            if speaker.volume > 0 {
+                // Speaker UID 0 is local speaker, or speaker.uid
+                print("[AGORA-VOLUME] UID=\(speaker.uid) volume=\(speaker.volume) vad=\(speaker.vad)")
+            }
         }
     }
 }
