@@ -276,6 +276,8 @@ import AgoraRtcKit
                         print("DEBUG: Stage not full, promoting participant \(participant.id) to speaker")
                         try await service.updateParticipant(id: participant.id, role: .speaker, isRequestingFloor: false)
                     }
+                    // Fail-safe: Refresh manually after update
+                    refreshParticipants()
                 } catch {
                     print("DEBUG: Error in requestFloor task: \(error)")
                 }

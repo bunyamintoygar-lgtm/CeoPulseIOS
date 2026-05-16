@@ -23,7 +23,7 @@ class RoundtableService {
         }
         
         if let moderatorId = moderatorId {
-            query = query.eq("moderator_id", value: moderatorId.uuidString)
+            query = query.eq("moderator_id", value: moderatorId.uuidString.lowercased())
         }
         
         if let searchText = searchText, !searchText.isEmpty {
@@ -37,7 +37,7 @@ class RoundtableService {
     func fetchParticipants(roundtableId: UUID) async throws -> [RoundtableParticipant] {
         let participants: [RoundtableParticipant] = try await client.from("roundtable_participants")
             .select()
-            .eq("roundtable_id", value: roundtableId.uuidString)
+            .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
             .execute()
             .value
         return participants
@@ -46,7 +46,7 @@ class RoundtableService {
     func fetchMessages(roundtableId: UUID) async throws -> [RoundtableMessage] {
         let messages: [RoundtableMessage] = try await client.from("roundtable_messages")
             .select()
-            .eq("roundtable_id", value: roundtableId.uuidString)
+            .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
             .order("created_at", ascending: true)
             .execute()
             .value
@@ -60,8 +60,8 @@ class RoundtableService {
         let userId = session.user.id
         
         let participant = [
-            "roundtable_id": roundtableId.uuidString,
-            "user_id": userId.uuidString,
+            "roundtable_id": roundtableId.uuidString.lowercased(),
+            "user_id": userId.uuidString.lowercased(),
             "role": role.rawValue
         ]
         
@@ -74,8 +74,8 @@ class RoundtableService {
         
         try await client.from("roundtable_participants")
             .delete()
-            .eq("roundtable_id", value: roundtableId.uuidString)
-            .eq("user_id", value: userId.uuidString)
+            .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
+            .eq("user_id", value: userId.uuidString.lowercased())
             .execute()
     }
     
@@ -84,8 +84,8 @@ class RoundtableService {
         let userId = session.user.id
         
         let message = [
-            "roundtable_id": roundtableId.uuidString,
-            "user_id": userId.uuidString,
+            "roundtable_id": roundtableId.uuidString.lowercased(),
+            "user_id": userId.uuidString.lowercased(),
             "content": content,
             "type": "text"
         ]
@@ -99,23 +99,18 @@ class RoundtableService {
         
         try await client.from("roundtable_participants")
             .update(["is_requesting_floor": isRequesting])
-            .eq("roundtable_id", value: roundtableId.uuidString)
-            .eq("user_id", value: userId.uuidString)
+            .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
+            .eq("user_id", value: userId.uuidString.lowercased())
             .execute()
     }
     
     func updateRole(roundtableId: UUID, userId: UUID, role: RoundtableRole) async throws {
-        struct UpdateData: Encodable {
-            let role: String
-            let is_requesting_floor: Bool
-        }
-        
         print("DEBUG: updateRole starting for user \(userId) to role \(role.rawValue)")
         
         let response = try await client.from("roundtable_participants")
-            .update(UpdateData(role: role.rawValue, is_requesting_floor: false))
-            .eq("roundtable_id", value: roundtableId.uuidString)
-            .eq("user_id", value: userId.uuidString)
+            .update(["role": role.rawValue, "is_requesting_floor": false])
+            .eq("roundtable_id", value: roundtableId.uuidString.lowercased())
+            .eq("user_id", value: userId.uuidString.lowercased())
             .execute()
         
         print("DEBUG: updateRole finished with status: \(response.status)")
@@ -129,7 +124,7 @@ class RoundtableService {
                 "role": role.rawValue,
                 "is_requesting_floor": isRequestingFloor
             ])
-            .eq("id", value: id.uuidString)
+            .eq("id", value: id.uuidString.lowercased())
             .select()
             .single()
             .execute()
@@ -142,11 +137,11 @@ class RoundtableService {
     }
     
     func updateCurrentSpeaker(roundtableId: UUID, userId: UUID?) async throws {
-        let data: [String: String?] = ["current_speaker_id": userId?.uuidString]
+        let data: [String: String?] = ["current_speaker_id": userId?.uuidString.lowercased()]
         
         try await client.from("roundtables")
             .update(data)
-            .eq("id", value: roundtableId.uuidString)
+            .eq("id", value: roundtableId.uuidString.lowercased())
             .execute()
     }
 }
