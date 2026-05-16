@@ -109,8 +109,33 @@ import AgoraRtcKit
         let roundtableId = roundtable.id
         agoraManager.onTranscriptReceived = { [weak self] text in
             guard let self = self else { return }
-            Task {
-                try? await self.service.saveTranscript(roundtableId: roundtableId, content: text, userId: self.currentUserId)
+            
+            // Deduplication: Only the moderator (or the active speaker if moderator is absent) saves to the DB.
+            let isModerator = self.roundtable.moderatorId == self.currentUserId
+            let activeSpeakerId = self.roundtable.currentSpeakerId
+            let isCurrentSpeaker = activeSpeakerId == self.currentUserId
+            
+            // Check if moderator is currently in the active participants list
+            let isModeratorPresent = self.participants.contains { $0.userId == self.roundtable.moderatorId }
+            
+            let shouldSave = isModerator || (!isModeratorPresent && isCurrentSpeaker)
+            
+            if shouldSave {
+                print("[STT] This device is saving transcript: \"\(text)\" (Moderator: \(isModerator), Speaker: \(isCurrentSpeaker))")
+                Task {
+                    do {
+                        try await self.service.saveTranscript(
+                            roundtableId: roundtableId,
+                            content: text,
+                            userId: activeSpeakerId
+                        )
+                        print("[STT] Transcript saved successfully to Supabase")
+                    } catch {
+                        print("[STT] Error saving transcript to Supabase: \(error.localizedDescription)")
+                    }
+                }
+            } else {
+                print("[STT] Transcript received but skipping write to prevent duplicates (another peer is responsible): \"\(text)\"")
             }
         }
     }
