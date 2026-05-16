@@ -188,6 +188,9 @@ import AgoraRtcKit
             do {
                 let refreshedParticipants = try await self.service.fetchParticipants(roundtableId: self.roundtable.id)
                 print("DEBUG: Refreshed participants count: \(refreshedParticipants.count)")
+                if let me = refreshedParticipants.first(where: { $0.userId == currentUserId }) {
+                    print("DEBUG: My role in DB is now: \(me.role)")
+                }
                 await MainActor.run {
                     self.participants = refreshedParticipants
                     self.updateAgoraState()
