@@ -47,13 +47,19 @@ struct ActiveSessionView: View {
         .task {
             await viewModel.setupSession()
         }
+        .onDisappear {
+            viewModel.leaveSession()
+        }
     }
     
     // MARK: - Sections
     
     private var headerSection: some View {
         HStack {
-            Button(action: { presentationMode.wrappedValue.dismiss() }) {
+            Button(action: {
+                viewModel.leaveSession()
+                presentationMode.wrappedValue.dismiss()
+            }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
