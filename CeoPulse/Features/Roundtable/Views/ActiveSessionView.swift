@@ -280,21 +280,6 @@ struct ActiveSessionView: View {
                             ) {
                                 viewModel.toggleMute()
                             }
-                            
-                            Button(action: {
-                                viewModel.leaveStage()
-                            }) {
-                                Text("Sahneden Ayrıl")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.white.opacity(0.6))
-                                    .padding(.vertical, 12)
-                                    .padding(.horizontal, 32)
-                                    .background(Color.white.opacity(0.05))
-                                    .clipShape(Capsule())
-                            }
-                            // Increased clickable area
-                            .padding(.top, 8)
-                            .zIndex(10)
                         }
                     } else if isStageFull {
                         if isRequesting {
