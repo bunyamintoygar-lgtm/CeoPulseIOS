@@ -443,7 +443,6 @@ struct ActiveSessionView: View {
             HStack(spacing: 32) {
                 tabButton(title: "Sohbet", index: 0)
                 tabButton(title: "Katılımcılar (\(viewModel.participants.count))", index: 2)
-                tabButton(title: "AI Notları", index: 1)
                 Spacer()
             }
             .padding(.horizontal, 20)
@@ -481,28 +480,6 @@ struct ActiveSessionView: View {
                                 replies: 0,
                                 avatar: nil
                             )
-                        }
-                    }
-                }
-                .padding(20)
-            } else if selectedTab == 1 {
-                VStack(spacing: 16) {
-                    if viewModel.transcripts.isEmpty {
-                        VStack(spacing: 20) {
-                            Image(systemName: "waveform.and.mic")
-                                .font(.system(size: 48))
-                                .foregroundColor(.purple.opacity(0.3))
-                            
-                            Text("Deşifre henüz başlamadı.\nKonuşmalar burada anlık olarak belirecek.")
-                                .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.5))
-                                .multilineTextAlignment(.center)
-                        }
-                        .padding(.vertical, 40)
-                        .frame(maxWidth: .infinity)
-                    } else {
-                        ForEach(viewModel.transcripts) { transcript in
-                            transcriptRow(transcript: transcript)
                         }
                     }
                 }
