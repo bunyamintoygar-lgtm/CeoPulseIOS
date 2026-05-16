@@ -542,8 +542,11 @@ struct ActiveSessionView: View {
                 // Send Button
                 Button(action: {
                     guard !messageText.isEmpty else { return }
-                    viewModel.sendMessage(messageText)
+                    let textToSend = messageText
                     messageText = ""
+                    Task {
+                        await viewModel.sendMessage(textToSend)
+                    }
                 }) {
                     Circle()
                         .fill(Color(hex: "6B4EFF")) // Purple matching the design
