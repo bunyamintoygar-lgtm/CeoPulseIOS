@@ -100,7 +100,7 @@ import AgoraRtcKit
         }
         
         agoraManager.joinChannel(
-            channelName: roundtable.id.uuidString,
+            channelName: roundtable.id.uuidString.lowercased(),  // MUST match STT bot's channelName
             userId: numericUid,
             role: role
         )
