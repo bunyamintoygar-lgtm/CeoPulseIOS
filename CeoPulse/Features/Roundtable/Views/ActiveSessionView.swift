@@ -411,9 +411,10 @@ struct ActiveSessionView: View {
     
     private var tabsSection: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 24) {
+            HStack(spacing: 32) {
                 tabButton(title: "Sohbet", index: 0)
-                tabButton(title: "İçgörüler", index: 1)
+                tabButton(title: "Notlar", index: 1)
+                tabButton(title: "Katılımcılar (\(viewModel.participants.count))", index: 2)
                 Spacer()
             }
             .padding(.horizontal, 20)
@@ -422,14 +423,35 @@ struct ActiveSessionView: View {
             
             if selectedTab == 0 {
                 VStack(spacing: 16) {
-                    // Mini Chat List
-                    ForEach(viewModel.messages.prefix(3)) { message in
-                        HStack(spacing: 12) {
-                            Circle().fill(Color.gray).frame(width: 32, height: 32)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(message.userName ?? "Kullanıcı").font(.system(size: 12, weight: .bold))
-                                Text(message.content).font(.system(size: 12)).foregroundColor(.white.opacity(0.8))
-                            }
+                    // Chat List
+                    if viewModel.messages.isEmpty {
+                        // Show mock data for visual parity with design
+                        chatMessageRow(
+                            name: "Zeynep K.",
+                            role: "Konuşmacı",
+                            time: "20:32",
+                            content: "Sürdürülebilir büyüme için en kritik önceliğiniz sizce nedir?",
+                            replies: 0,
+                            avatar: nil
+                        )
+                        chatMessageRow(
+                            name: "Murat A.",
+                            role: "Konuşmacı",
+                            time: "20:33",
+                            content: "Teknoloji yatırımlarının etkisi hakkında ne düşünüyorsunuz?",
+                            replies: 3,
+                            avatar: nil
+                        )
+                    } else {
+                        ForEach(viewModel.messages) { message in
+                            chatMessageRow(
+                                name: message.userName ?? "Kullanıcı",
+                                role: "Katılımcı", // In real app, fetch role from participants
+                                time: "Şimdi",
+                                content: message.content,
+                                replies: 0,
+                                avatar: nil
+                            )
                         }
                     }
                 }
@@ -438,16 +460,108 @@ struct ActiveSessionView: View {
         }
     }
     
-    private var bottomActionBar: some View {
-        HStack(spacing: 40) {
-            actionButton(icon: "mic.slash.fill", label: "Mikrofon", sub: "Kapalı", color: .red)
-            actionButton(icon: "video.slash.fill", label: "Kamera", sub: "Kapalı", color: .red)
-            actionButton(icon: "face.smiling", label: "Tepki Gönder", sub: "", color: .white)
+    private func chatMessageRow(name: String, role: String, time: String, content: String, replies: Int, avatar: String?) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top, spacing: 12) {
+                // Avatar
+                Circle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Text(name.prefix(1).uppercased())
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                    )
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(name)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Text(role)
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.purple)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.purple.opacity(0.15))
+                            .cornerRadius(6)
+                        
+                        Spacer()
+                        
+                        Text(time)
+                            .font(.system(size: 12))
+                            .foregroundColor(.white.opacity(0.5))
+                    }
+                    
+                    Text(content)
+                        .font(.system(size: 13))
+                        .foregroundColor(.white.opacity(0.9))
+                        .lineSpacing(4)
+                    
+                    if replies > 0 {
+                        Button(action: {}) {
+                            HStack(spacing: 4) {
+                                Text("\(replies) yanıt")
+                                Image(systemName: "chevron.down")
+                            }
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.purple)
+                        }
+                        .padding(.top, 4)
+                    }
+                }
+            }
         }
-        .padding(.top, 12)
-        .padding(.bottom, 24)
-        .frame(maxWidth: .infinity)
-        .background(Color(hex: "0A0A0F"))
+        .padding(16)
+        .background(Color.white.opacity(0.03))
+        .cornerRadius(16)
+    }
+    
+    @ViewBuilder
+    private var bottomActionBar: some View {
+        if selectedTab == 0 {
+            HStack(spacing: 12) {
+                // Text Field
+                HStack {
+                    TextField("Mesajınızı yazın...", text: $messageText)
+                        .font(.system(size: 14))
+                        .foregroundColor(.white)
+                    
+                    Button(action: {}) {
+                        Image(systemName: "paperclip")
+                            .font(.system(size: 20))
+                            .foregroundColor(.white.opacity(0.5))
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(Color.white.opacity(0.05))
+                .cornerRadius(24)
+                
+                // Send Button
+                Button(action: {
+                    guard !messageText.isEmpty else { return }
+                    viewModel.sendMessage(messageText)
+                    messageText = ""
+                }) {
+                    Circle()
+                        .fill(Color(hex: "6B4EFF")) // Purple matching the design
+                        .frame(width: 48, height: 48)
+                        .overlay(
+                            Image(systemName: "paperplane.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(.white)
+                        )
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 24)
+            .background(Color(hex: "0A0A0F"))
+        } else {
+            Spacer().frame(height: 24)
+        }
     }
     
     // MARK: - Helpers
@@ -457,28 +571,10 @@ struct ActiveSessionView: View {
             VStack(spacing: 12) {
                 Text(title)
                     .font(.system(size: 14, weight: selectedTab == index ? .bold : .medium))
-                    .foregroundColor(selectedTab == index ? .white : .gray)
+                    .foregroundColor(selectedTab == index ? Color.purple : .white.opacity(0.7))
                 Rectangle()
                     .fill(selectedTab == index ? Color.purple : Color.clear)
                     .frame(height: 2)
-            }
-        }
-    }
-    
-    private func actionButton(icon: String, label: String, sub: String, color: Color) -> some View {
-        Button(action: {}) {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(color)
-                Text(label)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white)
-                if !sub.isEmpty {
-                    Text(sub)
-                        .font(.system(size: 9))
-                        .foregroundColor(color.opacity(0.8))
-                }
             }
         }
     }
