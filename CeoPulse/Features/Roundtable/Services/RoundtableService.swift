@@ -70,7 +70,8 @@ class RoundtableService {
             roundtable_id: roundtableId.uuidString.lowercased(),
             user_id: userId.uuidString.lowercased(),
             role: role.rawValue,
-            agora_uid: agoraUid != nil ? Int(agoraUid!) : nil
+            agora_uid: agoraUid.map { Int($0 & 0x7FFFFFFF) }  // safe UInt→Int, always positive
+
         )
         
         try await client.from("roundtable_participants").insert(participant).execute()

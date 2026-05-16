@@ -362,7 +362,7 @@ import AgoraRtcKit
         for byte in s.utf8 {
             h = ((h << 5) &+ h) &+ UInt(byte)
         }
-        return h
+        return h & 0x7FFFFFFF  // mask to 31-bit: always fits in Int, always positive
     }
     
     func leaveSession() {
