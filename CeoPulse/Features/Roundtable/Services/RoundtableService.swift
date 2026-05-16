@@ -59,15 +59,19 @@ class RoundtableService {
         let session = try await client.auth.session
         let userId = session.user.id
         
-        var participant: [String: Any] = [
-            "roundtable_id": roundtableId.uuidString.lowercased(),
-            "user_id": userId.uuidString.lowercased(),
-            "role": role.rawValue
-        ]
-        
-        if let agoraUid = agoraUid {
-            participant["agora_uid"] = agoraUid
+        struct ParticipantInsert: Encodable {
+            let roundtable_id: String
+            let user_id: String
+            let role: String
+            let agora_uid: Int?
         }
+        
+        let participant = ParticipantInsert(
+            roundtable_id: roundtableId.uuidString.lowercased(),
+            user_id: userId.uuidString.lowercased(),
+            role: role.rawValue,
+            agora_uid: agoraUid != nil ? Int(agoraUid!) : nil
+        )
         
         try await client.from("roundtable_participants").insert(participant).execute()
     }
