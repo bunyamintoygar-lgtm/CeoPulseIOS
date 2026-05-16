@@ -102,8 +102,9 @@ import AgoraRtcKit
             UpdateAction.self,
             schema: "public",
             table: "roundtables",
-            filter: "id=eq.\(roundtable.id.uuidString.lowercased())"
+            filter: "id=eq.\(roundtable.id.uuidString)"
         ) { [weak self] action in
+            print("DEBUG: Realtime Update received for table roundtables")
             guard let self = self else { return }
             // Get current_speaker_id from the record
             if let speakerIdString = action.record["current_speaker_id"]?.value as? String,
@@ -122,8 +123,9 @@ import AgoraRtcKit
             InsertAction.self,
             schema: "public",
             table: "roundtable_messages",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString.lowercased())"
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
         ) { [weak self] _ in
+            print("DEBUG: Realtime Insert received for table roundtable_messages")
             guard let self = self else { return }
             Task { @MainActor in self.refreshMessages() }
         }
@@ -132,8 +134,9 @@ import AgoraRtcKit
             InsertAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString.lowercased())"
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
         ) { [weak self] _ in
+            print("DEBUG: Realtime Insert received for table roundtable_participants")
             guard let self = self else { return }
             Task { @MainActor in self.refreshParticipants() }
         }
@@ -142,8 +145,9 @@ import AgoraRtcKit
             UpdateAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString.lowercased())"
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
         ) { [weak self] _ in
+            print("DEBUG: Realtime Update received for table roundtable_participants")
             guard let self = self else { return }
             Task { @MainActor in self.refreshParticipants() }
         }
@@ -152,8 +156,9 @@ import AgoraRtcKit
             DeleteAction.self,
             schema: "public",
             table: "roundtable_participants",
-            filter: "roundtable_id=eq.\(roundtable.id.uuidString.lowercased())"
+            filter: "roundtable_id=eq.\(roundtable.id.uuidString)"
         ) { [weak self] _ in
+            print("DEBUG: Realtime Delete received for table roundtable_participants")
             guard let self = self else { return }
             Task { @MainActor in self.refreshParticipants() }
         }
