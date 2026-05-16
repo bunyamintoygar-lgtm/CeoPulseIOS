@@ -2,6 +2,7 @@ import Foundation
 import AgoraRtcKit
 import Combine
 import SwiftUI
+import AVFoundation
 
 class AgoraManager: NSObject, ObservableObject {
     static let shared = AgoraManager()
@@ -30,6 +31,19 @@ class AgoraManager: NSObject, ObservableObject {
     }
     
     func joinChannel(channelName: String, userId: UInt, role: AgoraClientRole = .audience) {
+        AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
+            DispatchQueue.main.async {
+                if granted {
+                    print("Microphone permission granted.")
+                } else {
+                    print("Microphone permission denied.")
+                }
+                self?.performJoinChannel(channelName: channelName, userId: userId, role: role)
+            }
+        }
+    }
+    
+    private func performJoinChannel(channelName: String, userId: UInt, role: AgoraClientRole) {
         if agoraKit == nil { setupEngine() }
         
         agoraKit?.setClientRole(role)
