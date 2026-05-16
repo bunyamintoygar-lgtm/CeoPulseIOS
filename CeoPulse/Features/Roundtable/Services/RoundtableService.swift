@@ -105,10 +105,15 @@ class RoundtableService {
     }
     
     func updateRole(roundtableId: UUID, userId: UUID, role: RoundtableRole) async throws {
+        struct UpdateData: Encodable {
+            let role: String
+            let is_requesting_floor: Bool
+        }
+        
         print("DEBUG: updateRole starting for user \(userId) to role \(role.rawValue)")
         
         let response = try await client.from("roundtable_participants")
-            .update(["role": role.rawValue, "is_requesting_floor": false])
+            .update(UpdateData(role: role.rawValue, is_requesting_floor: false))
             .eq("roundtable_id", value: roundtableId.uuidString)
             .eq("user_id", value: userId.uuidString)
             .execute()
@@ -117,13 +122,15 @@ class RoundtableService {
     }
     
     func updateParticipant(id: UUID, role: RoundtableRole, isRequestingFloor: Bool) async throws {
+        struct UpdateData: Encodable {
+            let role: String
+            let is_requesting_floor: Bool
+        }
+        
         print("DEBUG: updateParticipant starting for ID \(id) to role \(role.rawValue)")
         
         let response = try await client.from("roundtable_participants")
-            .update([
-                "role": role.rawValue,
-                "is_requesting_floor": isRequestingFloor
-            ])
+            .update(UpdateData(role: role.rawValue, is_requesting_floor: isRequestingFloor))
             .eq("id", value: id.uuidString)
             .execute()
         
