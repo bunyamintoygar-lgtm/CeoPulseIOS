@@ -105,11 +105,13 @@ class RoundtableService {
     }
     
     func updateRole(roundtableId: UUID, userId: UUID, role: RoundtableRole) async throws {
+        struct UpdateData: Encodable {
+            let role: String
+            let is_requesting_floor: Bool
+        }
+        
         try await client.from("roundtable_participants")
-            .update([
-                "role": role.rawValue,
-                "is_requesting_floor": false
-            ])
+            .update(UpdateData(role: role.rawValue, is_requesting_floor: false))
             .eq("roundtable_id", value: roundtableId.uuidString)
             .eq("user_id", value: userId.uuidString)
             .execute()
