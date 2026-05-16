@@ -457,8 +457,8 @@ struct ActiveSessionView: View {
         VStack(spacing: 0) {
             HStack(spacing: 32) {
                 tabButton(title: "Sohbet", index: 0)
-                tabButton(title: "Notlar", index: 1)
                 tabButton(title: "Katılımcılar (\(viewModel.participants.count))", index: 2)
+                tabButton(title: "AI Notları", index: 1)
                 Spacer()
             }
             .padding(.horizontal, 20)
