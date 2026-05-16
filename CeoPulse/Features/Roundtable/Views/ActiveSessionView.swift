@@ -26,8 +26,8 @@ struct ActiveSessionView: View {
                     // Participant Cards Grid
                     participantGrid
                     
-                    // Central Control Center (PTT)
-                    pttControlCenter
+                    // Listeners and PTT Control
+                    masadakilerSection
                     
                     // Chat & Insights Tabs
                     tabsSection
@@ -160,84 +160,219 @@ struct ActiveSessionView: View {
         }
     }
     
-    private var pttControlCenter: some View {
-        HStack(spacing: 20) {
-            // Söz İste
-            VStack(spacing: 8) {
-                Button(action: { viewModel.requestFloor() }) {
-                    Image(systemName: "hand.raised.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(.white)
-                        .frame(width: 80, height: 80)
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(16)
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
-                }
-                Text("Söz İste")
-                    .font(.system(size: 12, weight: .bold))
-                Text("Sıraya girmek için tıkla")
-                    .font(.system(size: 10))
-                    .foregroundColor(AppColors.textSecondary)
-            }
+    private var masadakilerSection: some View {
+        let stageParticipants = Array(viewModel.participants.prefix(4))
+        let listeners = Array(viewModel.participants.dropFirst(4))
+        let isUserOnStage = stageParticipants.contains { $0.userId == viewModel.currentUserId }
+        let currentParticipant = viewModel.participants.first { $0.userId == viewModel.currentUserId }
+        let isRequesting = currentParticipant?.isRequestingFloor ?? false
+        let isStageFull = stageParticipants.count >= 4
+        
+        return VStack(alignment: .leading, spacing: 16) {
+            // Title
+            Text("Masadakiler")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
             
-            // Bas-Konuş
-            VStack(spacing: 12) {
-                ZStack {
-                    // Outer rings for animation
-                    Circle()
-                        .stroke(Color.purple.opacity(0.2), lineWidth: 2)
-                        .frame(width: 180, height: 180)
-                        .scaleEffect(isPTTPressing ? 1.1 : 1.0)
-                    
-                    Circle()
-                        .fill(
-                            RadialGradient(colors: [Color.purple.opacity(0.3), Color.clear], center: .center, startRadius: 0, endRadius: 90)
-                        )
-                        .frame(width: 160, height: 160)
-                    
-                    Circle()
-                        .fill(LinearGradient(colors: [Color(hex: "2A2A40"), Color(hex: "1A1A2E")], startPoint: .top, endPoint: .bottom))
-                        .frame(width: 140, height: 140)
-                        .shadow(color: .purple.opacity(0.5), radius: 20)
-                    
-                    VStack(spacing: 8) {
-                        Image(systemName: "mic.fill")
-                            .font(.system(size: 32))
-                            .foregroundColor(.white)
-                        Text("Bas - Konuş")
+            // Listeners or Empty State
+            if listeners.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "person.3.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.purple.opacity(0.7))
+                    VStack(spacing: 4) {
+                        Text("Henüz masada kimse yok")
                             .font(.system(size: 14, weight: .bold))
-                        Text("Konuşmak için basılı tutun")
-                            .font(.system(size: 10))
-                            .foregroundColor(AppColors.textSecondary)
+                            .foregroundColor(.white)
+                        Text("Masaya katılan kişiler burada görünecek.")
+                            .font(.system(size: 12))
+                            .foregroundColor(.white.opacity(0.5))
                     }
                 }
-                .onLongPressGesture(minimumDuration: 0, pressing: { isPressing in
-                    withAnimation(.spring()) {
-                        isPTTPressing = isPressing
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+            } else {
+                HStack {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: -12) {
+                            ForEach(listeners.prefix(8)) { listener in
+                                if let avatar = listener.userAvatar, !avatar.isEmpty {
+                                    AsyncImage(url: URL(string: avatar)) { image in
+                                        image.resizable().scaledToFill()
+                                    } placeholder: {
+                                        Color.gray
+                                    }
+                                    .frame(width: 40, height: 40)
+                                    .clipShape(Circle())
+                                    .overlay(Circle().stroke(Color(hex: "0A0A0F"), lineWidth: 2))
+                                } else {
+                                    Circle()
+                                        .fill(Color.gray.opacity(0.3))
+                                        .frame(width: 40, height: 40)
+                                        .overlay(
+                                            Text(listener.userName?.prefix(1).uppercased() ?? "U")
+                                                .font(.system(size: 16, weight: .bold))
+                                                .foregroundColor(.white)
+                                        )
+                                        .overlay(Circle().stroke(Color(hex: "0A0A0F"), lineWidth: 2))
+                                }
+                            }
+                            if listeners.count > 8 {
+                                Circle()
+                                    .fill(Color(hex: "1A1A2E"))
+                                    .frame(width: 40, height: 40)
+                                    .overlay(
+                                        Text("+\(listeners.count - 8)")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(.white)
+                                    )
+                                    .overlay(Circle().stroke(Color(hex: "0A0A0F"), lineWidth: 2))
+                            }
+                        }
+                        .padding(.horizontal, 20)
                     }
-                    viewModel.handlePTT(isPressing: isPressing)
-                }, perform: {})
+                    
+                    Spacer()
+                    
+                    Button(action: {}) {
+                        HStack(spacing: 4) {
+                            Text("Tümünü Gör")
+                            Image(systemName: "chevron.right")
+                        }
+                        .font(.system(size: 12))
+                        .foregroundColor(.purple)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.white.opacity(0.05))
+                        .cornerRadius(12)
+                    }
+                    .padding(.trailing, 20)
+                }
             }
             
-            // Sadece Dinle
-            VStack(spacing: 8) {
-                Button(action: {}) {
-                    Image(systemName: "headphones")
-                        .font(.system(size: 24))
-                        .foregroundColor(.white)
-                        .frame(width: 80, height: 80)
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(16)
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
+            // PTT Circle Section
+            ZStack {
+                if !listeners.isEmpty {
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(Color.white.opacity(0.03))
+                        .padding(.horizontal, 20)
                 }
-                Text("Sadece Dinle")
-                    .font(.system(size: 12, weight: .bold))
-                Text("Mikrofonu kapat")
-                    .font(.system(size: 10))
-                    .foregroundColor(AppColors.textSecondary)
+                
+                VStack {
+                    if isUserOnStage {
+                        pttCircleButton(
+                            title: "Şu an aktif\nkonuşmacısınız",
+                            actionText: "Ayrıl",
+                            badge: "Aktif Konuşmacı",
+                            isActive: true
+                        ) {
+                            // Leave stage logic
+                        }
+                    } else if isStageFull {
+                        if isRequesting {
+                            pttCircleButton(
+                                title: "Şu an sıradasınız",
+                                actionText: "Vazgeç",
+                                badge: "Sıradasınız",
+                                isActive: true
+                            ) {
+                                viewModel.requestFloor() // Cancel request
+                            }
+                        } else {
+                            pttCircleButton(
+                                title: "Aktif konuşmacı\nolmak için basın",
+                                actionText: "Sıraya Gir",
+                                badge: nil,
+                                isActive: false
+                            ) {
+                                viewModel.requestFloor() // Join queue
+                            }
+                        }
+                    } else {
+                        pttCircleButton(
+                            title: "Aktif konuşmacı\nolmak için basın",
+                            actionText: nil,
+                            badge: nil,
+                            isActive: false
+                        ) {
+                            viewModel.requestFloor() // Join stage directly
+                        }
+                    }
+                }
+                .padding(.vertical, 32)
+            }
+            
+            // Lightning Text
+            HStack(spacing: 8) {
+                Image(systemName: "bolt.fill")
+                    .foregroundColor(.white.opacity(0.5))
+                Text("Konuştuğunuz an 15 sn. konuşmayan aktif varsa yerine geçersiniz.")
+                    .font(.system(size: 11))
+                    .foregroundColor(.white.opacity(0.7))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, 20)
+        }
+    }
+    
+    private func pttCircleButton(title: String, actionText: String?, badge: String?, isActive: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            ZStack {
+                // Outer glow
+                Circle()
+                    .stroke(Color.purple.opacity(isActive ? 0.6 : 0.3), lineWidth: 2)
+                    .frame(width: 180, height: 180)
+                    .shadow(color: .purple.opacity(isActive ? 0.5 : 0.2), radius: 20)
+                    .background(Circle().fill(Color(hex: "0A0A0F"))) // Solid background inside
+                
+                // Inner gradient for glowing effect
+                Circle()
+                    .fill(
+                        RadialGradient(colors: [Color.purple.opacity(0.3), Color.clear], center: .center, startRadius: 0, endRadius: 90)
+                    )
+                    .frame(width: 160, height: 160)
+                
+                // Badge
+                if let badge = badge {
+                    Text(badge)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 6)
+                        .background(Color(hex: "1A1A2E"))
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1))
+                        .offset(y: -90)
+                }
+                
+                VStack(spacing: 12) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "waveform")
+                            .font(.system(size: 16))
+                            .foregroundColor(isActive ? .purple : .white.opacity(0.5))
+                        Image(systemName: "mic.fill")
+                            .font(.system(size: 36))
+                            .foregroundColor(.white)
+                        Image(systemName: "waveform")
+                            .font(.system(size: 16))
+                            .foregroundColor(isActive ? .purple : .white.opacity(0.5))
+                    }
+                    
+                    Text(title)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                    
+                    if let actionText = actionText {
+                        Text(actionText)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
             }
         }
-        .padding(.vertical, 20)
+        .buttonStyle(PlainButtonStyle())
     }
     
     @ViewBuilder
