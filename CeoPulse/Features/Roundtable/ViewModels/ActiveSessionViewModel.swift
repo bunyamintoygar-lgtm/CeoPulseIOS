@@ -306,7 +306,12 @@ import AgoraRtcKit
             struct TranscriptionParams: Encodable {
                 let roundtableId: String
                 let channelName: String
-                let userUid: UInt  // so Edge Function can generate a token for this user
+                let userUid: UInt
+            }
+            
+            struct TranscriptionResponse: Decodable {
+                let agent_id: String?
+                let userToken: String?
             }
             
             let params = TranscriptionParams(
@@ -315,22 +320,12 @@ import AgoraRtcKit
                 userUid: numericUid
             )
             
-            struct TranscriptionResponse: Decodable {
-                let agent_id: String?
-                let userToken: String?
-            }
-            
-            let data = try await SupabaseManager.shared.client.functions
+            // Supabase SDK v2 generic invoke — auto-decodes the response body
+            let response: TranscriptionResponse = try await SupabaseManager.shared.client.functions
                 .invoke("start-transcription", options: .init(body: params))
             
-            let response = try JSONDecoder().decode(TranscriptionResponse.self, from: data)
             print("AI Transcription service started successfully")
-            
-            if let token = response.userToken {
-                print("[AGORA-TOKEN] Received RTC token from Edge Function ✓")
-            } else {
-                print("[AGORA-TOKEN] No userToken in response — will join without token (may fail)")
-            }
+            print("[AGORA-TOKEN] \(response.userToken != nil ? "Received RTC token from Edge Function ✓" : "No userToken in response")")
             
             return response.userToken
         } catch {
@@ -338,6 +333,8 @@ import AgoraRtcKit
             return nil
         }
     }
+
+
     
     // MARK: - RTC Controls
     
