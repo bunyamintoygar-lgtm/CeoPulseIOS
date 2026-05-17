@@ -108,27 +108,25 @@ import AgoraRtcKit
         
         // Wire up STT transcript callback from pubBot stream messages
         let roundtableId = roundtable.id
-        agoraManager.onTranscriptReceived = { [weak self] text in
+        agoraManager.onTranscriptReceived = { [weak self] text, speakerUid in
             guard let self = self else { return }
             
-            // Deduplication: Only the moderator (or the active speaker if moderator is absent) saves to the DB.
-            let isModerator = self.roundtable.moderatorId == self.currentUserId
-            let activeSpeakerId = self.roundtable.currentSpeakerId
-            let isCurrentSpeaker = activeSpeakerId == self.currentUserId
+            // Current user's numeric Agora UID
+            let myAgoraUid = numericUid
             
-            // Check if moderator is currently in the active participants list
-            let isModeratorPresent = self.participants.contains { $0.userId == self.roundtable.moderatorId }
-            
-            let shouldSave = isModerator || (!isModeratorPresent && isCurrentSpeaker)
+            // Robust deduplication: the device OF THE SPEAKING USER is the one responsible for saving their own transcript.
+            // Since only one user has this Agora UID at any time, exactly one device will write, preventing any duplicates
+            // and avoiding missing transcripts if the moderator is stale or offline.
+            let shouldSave = (speakerUid == myAgoraUid)
             
             if shouldSave {
-                print("[STT] This device is saving transcript: \"\(text)\" (Moderator: \(isModerator), Speaker: \(isCurrentSpeaker))")
+                print("[STT] This device IS the speaker (\(speakerUid)) -> saving transcript: \"\(text)\"")
                 Task {
                     do {
                         try await self.service.saveTranscript(
                             roundtableId: roundtableId,
                             content: text,
-                            userId: activeSpeakerId
+                            userId: self.currentUserId
                         )
                         print("[STT] Transcript saved successfully to Supabase")
                     } catch {
@@ -136,10 +134,11 @@ import AgoraRtcKit
                     }
                 }
             } else {
-                print("[STT] Transcript received but skipping write (another peer is responsible): \"\(text)\"")
+                print("[STT] Transcript received but skipping write (speaker UID is \(speakerUid), my Agora UID is \(myAgoraUid)): \"\(text)\"")
             }
         }
     }
+
     
     private func setupRealtime() async {
         let channelId = "roundtable:\(roundtable.id.uuidString)"

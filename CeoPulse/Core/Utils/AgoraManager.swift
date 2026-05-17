@@ -22,7 +22,7 @@ class AgoraManager: NSObject, ObservableObject {
     private let sttBotUid: UInt = 88222
     
     // Called when the STT bot sends a transcription stream message
-    var onTranscriptReceived: ((String) -> Void)?
+    var onTranscriptReceived: ((String, UInt) -> Void)?
     
     private override init() {
         super.init()
@@ -192,9 +192,22 @@ extension AgoraManager: AgoraRtcEngineDelegate {
         if let transcript = json["transcript"] as? [String: Any] {
             let isFinal = transcript["isFinal"] as? Bool ?? false
             let text = transcript["text"] as? String ?? ""
-            print("[STT] Transcript — isFinal: \(isFinal), text: \(text)")
+            
+            // Extract speaker Agora UID
+            let speakerUid: UInt
+            if let uidVal = transcript["uid"] as? UInt {
+                speakerUid = uidVal
+            } else if let doubleVal = transcript["uid"] as? Double {
+                speakerUid = UInt(doubleVal)
+            } else if let stringVal = transcript["uid"] as? String, let parsedVal = UInt(stringVal) {
+                speakerUid = parsedVal
+            } else {
+                speakerUid = 0
+            }
+            
+            print("[STT] Transcript — isFinal: \(isFinal), text: \(text), speakerUid: \(speakerUid)")
             if isFinal && !text.isEmpty {
-                DispatchQueue.main.async { self.onTranscriptReceived?(text) }
+                DispatchQueue.main.async { self.onTranscriptReceived?(text, speakerUid) }
             }
         } else {
             print("[STT] Unexpected JSON keys: \(json.keys.joined(separator: ", "))")
