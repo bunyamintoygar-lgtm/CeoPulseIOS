@@ -76,11 +76,17 @@ class AgoraManager: NSObject, ObservableObject {
         options.autoSubscribeVideo = true
         options.clientRoleType = role
         
+        // CRITICAL: Audience must be on lowLatency to receive stream messages from the STT bot.
+        // Default audienceLatencyLevel may not deliver data stream messages.
+        if role == .audience {
+            options.audienceLatencyLevel = .lowLatency
+        }
+        
         // Use provided token; byToken: nil only works when App Certificate is disabled
         let result = agoraKit?.joinChannel(byToken: token, channelId: channelName, uid: userId, mediaOptions: options)
         
         if result == 0 {
-            print("Successfully joined channel: \(channelName)")
+            print("Successfully joined channel: \(channelName) (role: \(role == .broadcaster ? "broadcaster" : "audience"))")
             isJoined = true
         } else {
             print("Failed to join channel: \(result ?? -1)")
