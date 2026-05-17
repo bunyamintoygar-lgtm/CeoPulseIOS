@@ -358,7 +358,36 @@ import AgoraRtcKit
     }
     
     func toggleMute() {
-        agoraManager.toggleMute()
+        let newMuteState = !agoraManager.isMuted
+        
+        // 1. Update Agora SDK local mute state
+        agoraManager.setMute(newMuteState)
+        
+        // 2. If unmuting, set current speaker to self so STT is active.
+        // If muting, release current speaker state in the DB.
+        let rId = roundtable.id
+        let uId = currentUserId
+        Task {
+            do {
+                if !newMuteState {
+                    // Unmuted -> We are speaking! Set current speaker in DB
+                    try await service.updateCurrentSpeaker(roundtableId: rId, userId: uId)
+                } else {
+                    // Muted -> If we are the current speaker, set to nil
+                    if roundtable.currentSpeakerId == uId {
+                        try await service.updateCurrentSpeaker(roundtableId: rId, userId: nil)
+                    }
+                }
+                
+                // 3. Update participant is_muted field in Supabase so other clients see it
+                if let userId = uId,
+                   let participant = participants.first(where: { $0.userId == userId }) {
+                    try await service.updateParticipantMuteState(id: participant.id, isMuted: newMuteState)
+                }
+            } catch {
+                print("Error updating mute state in database: \(error)")
+            }
+        }
     }
     
     func toggleCamera() {
@@ -412,17 +441,29 @@ import AgoraRtcKit
     func leaveSession() {
         agoraManager.leaveChannel()
         let taskChannel = channel
+        let rId = roundtable.id
+        let uId = currentUserId
         Task {
             await taskChannel?.unsubscribe()
-            try? await service.leaveRoundtable(roundtableId: roundtable.id)
+            
+            // Release current speaker role if this user was the active speaker
+            if let userId = uId, roundtable.currentSpeakerId == userId {
+                try? await service.updateCurrentSpeaker(roundtableId: rId, userId: nil)
+            }
+            
+            try? await service.leaveRoundtable(roundtableId: rId)
         }
     }
     
     func leaveStage() {
         guard let userId = currentUserId else { return }
+        let rId = roundtable.id
         Task {
             do {
-                try await service.updateRole(roundtableId: roundtable.id, userId: userId, role: .listener)
+                if roundtable.currentSpeakerId == userId {
+                    try await service.updateCurrentSpeaker(roundtableId: rId, userId: nil)
+                }
+                try await service.updateRole(roundtableId: rId, userId: userId, role: .listener)
                 refreshParticipants()
             } catch {
                 print("Error leaving stage: \(error)")

@@ -189,4 +189,15 @@ class RoundtableService {
             .eq("id", value: roundtableId.uuidString.lowercased())
             .execute()
     }
+    
+    func updateParticipantMuteState(id: UUID, isMuted: Bool) async throws {
+        struct UpdateData: Encodable {
+            let is_muted: Bool
+        }
+        
+        try await client.from("roundtable_participants")
+            .update(UpdateData(is_muted: isMuted))
+            .eq("id", value: id.uuidString.lowercased())
+            .execute()
+    }
 }
