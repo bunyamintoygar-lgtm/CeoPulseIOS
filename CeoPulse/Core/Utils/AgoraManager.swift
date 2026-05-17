@@ -40,14 +40,13 @@ class AgoraManager: NSObject, ObservableObject {
         agoraKit?.enableAudioVolumeIndication(200, smooth: 3, reportVad: true)
     }
     
-    func joinChannel(channelName: String, userId: UInt, role: AgoraClientRole = .audience) {
+    func joinChannel(channelName: String, userId: UInt, role: AgoraClientRole = .audience, token: String? = nil) {
         let session = AVAudioSession.sharedInstance()
         session.requestRecordPermission { [weak self] granted in
             DispatchQueue.main.async {
                 if granted {
                     print("Microphone permission granted.")
                     do {
-                        // Configure AVAudioSession for voice chat
                         try session.setCategory(.playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker, .allowBluetooth])
                         try session.setActive(true, options: .notifyOthersOnDeactivation)
                         print("AVAudioSession category set to playAndRecord and activated successfully.")
@@ -57,12 +56,12 @@ class AgoraManager: NSObject, ObservableObject {
                 } else {
                     print("Microphone permission denied.")
                 }
-                self?.performJoinChannel(channelName: channelName, userId: userId, role: role)
+                self?.performJoinChannel(channelName: channelName, userId: userId, role: role, token: token)
             }
         }
     }
     
-    private func performJoinChannel(channelName: String, userId: UInt, role: AgoraClientRole) {
+    private func performJoinChannel(channelName: String, userId: UInt, role: AgoraClientRole, token: String? = nil) {
         if agoraKit == nil { setupEngine() }
         
         agoraKit?.setClientRole(role)
@@ -77,7 +76,8 @@ class AgoraManager: NSObject, ObservableObject {
         options.autoSubscribeVideo = true
         options.clientRoleType = role
         
-        let result = agoraKit?.joinChannel(byToken: nil, channelId: channelName, uid: userId, mediaOptions: options)
+        // Use provided token; byToken: nil only works when App Certificate is disabled
+        let result = agoraKit?.joinChannel(byToken: token, channelId: channelName, uid: userId, mediaOptions: options)
         
         if result == 0 {
             print("Successfully joined channel: \(channelName)")

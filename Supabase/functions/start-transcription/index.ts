@@ -14,23 +14,24 @@ serve(async (req) => {
     const body = await req.json()
     console.log("Request:", JSON.stringify(body))
 
-    const { channelName, roundtableId } = body
+    // channelName: Agora channel (roundtable UUID lowercased)
+    // roundtableId: Supabase roundtable UUID (for saving agent_id)
+    // userUid: numeric Agora UID of the calling iOS user (for token generation)
+    const { channelName, roundtableId, userUid } = body
     if (!channelName) throw new Error("channelName is required")
 
     const basicAuth = `Basic ${btoa(`${AGORA_CUSTOMER_ID}:${AGORA_CUSTOMER_SECRET}`)}`
-    const callbackUrl = `${SUPABASE_URL}/functions/v1/agora-stt-callback`
-
     const url = `https://api.agora.io/api/speech-to-text/v1/projects/${AGORA_APP_ID}/join`
 
     const pubBotUid = 88222
-    
-    // Generate valid RTC token for STT pubBot because App Certificate is active
-    const expirationTimeInSeconds = 24 * 3600 // 24 hours
+
+    // Token expiry: 24 hours
+    const expirationTimeInSeconds = 24 * 3600
     const currentTimestamp = Math.floor(Date.now() / 1000)
     const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds
 
     console.log(`Generating RTC token for pubBot (${pubBotUid}) in channel: ${channelName}`)
-    
+
     const pubBotToken = RtcTokenBuilder.buildTokenWithUid(
       AGORA_APP_ID,
       AGORA_APP_CERTIFICATE,
@@ -40,6 +41,25 @@ serve(async (req) => {
       privilegeExpiredTs
     )
 
+    // Generate a token for the iOS client — REQUIRED because App Certificate is active.
+    // Without this token the iOS client cannot join the same Agora channel as the STT bot
+    // and therefore cannot receive stream messages.
+    let userToken: string | null = null
+    if (userUid) {
+      const numericUid = parseInt(String(userUid), 10)
+      if (!isNaN(numericUid)) {
+        userToken = RtcTokenBuilder.buildTokenWithUid(
+          AGORA_APP_ID,
+          AGORA_APP_CERTIFICATE,
+          channelName,
+          numericUid,
+          RtcRole.PUBLISHER,
+          privilegeExpiredTs
+        )
+        console.log(`Generated userToken for UID ${numericUid}`)
+      }
+    }
+
     const payload = {
       name: `stt-${Date.now()}`,
       languages: ["tr-TR"],
@@ -48,11 +68,9 @@ serve(async (req) => {
         channelName: channelName,
         pubBotUid: String(pubBotUid),
         pubBotToken: pubBotToken
-        // enableJsonProtocol omitted → defaults to false (Protobuf, no gzip)
-        // This avoids needing to gzip-decompress on the iOS client
+        // enableJsonProtocol omitted → defaults to false (Protobuf)
       }
     }
-
 
     console.log(`Calling STT v7: POST ${url}`)
     const response = await fetch(url, {
@@ -86,7 +104,8 @@ serve(async (req) => {
         }
       }
 
-      return new Response(JSON.stringify(result), {
+      // Return STT agent info + the userToken for iOS to use when joining Agora
+      return new Response(JSON.stringify({ ...result, userToken }), {
         status: 200,
         headers: { "Content-Type": "application/json" }
       })

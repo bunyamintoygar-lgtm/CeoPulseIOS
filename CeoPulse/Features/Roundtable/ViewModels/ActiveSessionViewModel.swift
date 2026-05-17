@@ -74,13 +74,13 @@ import AgoraRtcKit
             self.transcripts = try await service.fetchTranscripts(roundtableId: roundtable.id)
             
             await setupRealtime()
-            setupAgora()
-            updateAgoraState()
             
-            // Start AI Transcription service
-            Task {
-                await startTranscription()
-            }
+            // Start AI transcription FIRST to get a valid RTC token for this user.
+            // The token is required because App Certificate is active on this Agora project.
+            // We join the Agora channel only AFTER we have the token.
+            let agoraToken = await startTranscription()
+            setupAgora(token: agoraToken)
+            updateAgoraState()
             
             isLoading = false
         } catch {
@@ -89,7 +89,7 @@ import AgoraRtcKit
         }
     }
     
-    private func setupAgora() {
+    private func setupAgora(token: String? = nil) {
         guard let userId = currentUserId else { return }
         let numericUid = deterministicHash(userId)
         let role: AgoraClientRole = (roundtable.moderatorId == userId) ? .broadcaster : .audience
@@ -102,7 +102,8 @@ import AgoraRtcKit
         agoraManager.joinChannel(
             channelName: roundtable.id.uuidString.lowercased(),  // MUST match STT bot's channelName
             userId: numericUid,
-            role: role
+            role: role,
+            token: token
         )
         
         // Wire up STT transcript callback from pubBot stream messages
@@ -135,7 +136,7 @@ import AgoraRtcKit
                     }
                 }
             } else {
-                print("[STT] Transcript received but skipping write to prevent duplicates (another peer is responsible): \"\(text)\"")
+                print("[STT] Transcript received but skipping write (another peer is responsible): \"\(text)\"")
             }
         }
     }
@@ -295,24 +296,46 @@ import AgoraRtcKit
         }
     }
     
-    private func startTranscription() async {
+    // Returns the RTC token for the calling user, or nil if unavailable.
+    @discardableResult
+    private func startTranscription() async -> String? {
+        guard let userId = currentUserId else { return nil }
+        let numericUid = deterministicHash(userId)
+        
         do {
             struct TranscriptionParams: Encodable {
                 let roundtableId: String
                 let channelName: String
+                let userUid: UInt  // so Edge Function can generate a token for this user
             }
             
             let params = TranscriptionParams(
                 roundtableId: roundtable.id.uuidString.lowercased(),
-                channelName: roundtable.id.uuidString.lowercased()
+                channelName: roundtable.id.uuidString.lowercased(),
+                userUid: numericUid
             )
             
-            _ = try await SupabaseManager.shared.client.functions
+            struct TranscriptionResponse: Decodable {
+                let agent_id: String?
+                let userToken: String?
+            }
+            
+            let data = try await SupabaseManager.shared.client.functions
                 .invoke("start-transcription", options: .init(body: params))
             
+            let response = try JSONDecoder().decode(TranscriptionResponse.self, from: data)
             print("AI Transcription service started successfully")
+            
+            if let token = response.userToken {
+                print("[AGORA-TOKEN] Received RTC token from Edge Function ✓")
+            } else {
+                print("[AGORA-TOKEN] No userToken in response — will join without token (may fail)")
+            }
+            
+            return response.userToken
         } catch {
             print("Note: AI Transcription start failed or already running: \(error)")
+            return nil
         }
     }
     
