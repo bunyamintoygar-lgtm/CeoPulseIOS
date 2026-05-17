@@ -63,7 +63,7 @@ serve(async (req) => {
     const payload = {
       name: `stt-${Date.now()}`,
       languages: ["tr-TR"],
-      maxIdleTime: 300,
+      maxIdleTime: 120, // 2 minutes of complete silence/idle state before automatic shutdown
       rtcConfig: {
         channelName: channelName,
         pubBotUid: String(pubBotUid),
