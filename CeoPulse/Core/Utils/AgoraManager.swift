@@ -3,6 +3,7 @@ import AgoraRtcKit
 import Combine
 import SwiftUI
 import AVFoundation
+import Compression
 
 class AgoraManager: NSObject, ObservableObject {
     static let shared = AgoraManager()
@@ -144,17 +145,41 @@ extension AgoraManager: AgoraRtcEngineDelegate {
         }
     }
     
-    // Called when the STT pubBot (UID 88222) sends transcription data as a JSON stream message
-    // JSON format (enableJsonProtocol: true):
-    // {"transcript": {"uid": 222, "text": "Hello", "isFinal": false, "offset": ..., "duration": ...}}
+    // Called when the STT pubBot (UID 88222) sends transcription data.
+    // Default format is Protobuf; if enableJsonProtocol:true it is gzip-compressed JSON.
+    // We handle both: try gzip→JSON first, then raw JSON, then log binary.
     func rtcEngine(_ engine: AgoraRtcEngineKit, receiveStreamMessageFromUid uid: UInt, streamId: Int, data: Data) {
-        // DIAGNOSTIC: log ALL stream messages, not just from pubBot
-        print("[STT-DIAG] Stream message from UID=\(uid) (pubBot=\(sttBotUid)), size=\(data.count)")
+        let firstBytes = data.prefix(4).map { String(format: "%02x", $0) }.joined(separator: " ")
+        print("[STT-DIAG] Stream message from UID=\(uid) size=\(data.count) first4=\(firstBytes)")
         
         guard uid == sttBotUid else { return }
         
-        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            print("[STT] Cannot parse as JSON. Raw: \(data.prefix(100).map { String(format: "%02x", $0) }.joined())")
+        // Try to get a JSON-parseable Data object
+        let jsonData: Data
+        
+        // gzip magic bytes: 1f 8b
+        let isGzipped = data.count >= 2 && data[0] == 0x1f && data[1] == 0x8b
+        
+        if isGzipped {
+            if let decompressed = gunzip(data) {
+                print("[STT] Gzip decompressed OK, size=\(decompressed.count)")
+                jsonData = decompressed
+            } else {
+                print("[STT] Gzip decompression FAILED. Hex: \(data.prefix(20).map { String(format:"%02x",$0) }.joined())")
+                return
+            }
+        } else {
+            // Not gzip – try as raw JSON (default Protobuf will fail JSON parse and we log it)
+            jsonData = data
+        }
+        
+        // Log raw string for diagnostics
+        if let rawStr = String(data: jsonData, encoding: .utf8) {
+            print("[STT-RAW] \(rawStr.prefix(400))")
+        }
+        
+        guard let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
+            print("[STT] Not valid JSON (likely Protobuf). Hex: \(jsonData.prefix(30).map { String(format:"%02x",$0) }.joined())")
             return
         }
         
@@ -168,6 +193,33 @@ extension AgoraManager: AgoraRtcEngineDelegate {
         } else {
             print("[STT] Unexpected JSON keys: \(json.keys.joined(separator: ", "))")
         }
+    }
+    
+    /// Decompresses gzip-encoded Data using iOS Compression framework.
+    private func gunzip(_ data: Data) -> Data? {
+        // gzip header is 10 bytes; trailer is 8 bytes
+        guard data.count > 18 else { return nil }
+        // Strip 10-byte gzip header to get the raw deflate stream
+        let deflatePayload = data.subdata(in: 10..<data.count - 8)
+        
+        // Use a generous output buffer (10× input is usually sufficient)
+        let bufferSize = max(data.count * 10, 65536)
+        var outputData = Data(count: bufferSize)
+        
+        let result = outputData.withUnsafeMutableBytes { outPtr -> Int in
+            deflatePayload.withUnsafeBytes { inPtr -> Int in
+                guard let outBase = outPtr.baseAddress,
+                      let inBase = inPtr.baseAddress else { return 0 }
+                return compression_decode_buffer(
+                    outBase.assumingMemoryBound(to: UInt8.self), bufferSize,
+                    inBase.assumingMemoryBound(to: UInt8.self), deflatePayload.count,
+                    nil, COMPRESSION_ZLIB
+                )
+            }
+        }
+        
+        guard result > 0 else { return nil }
+        return outputData.prefix(result)
     }
     
     func rtcEngine(_ engine: AgoraRtcEngineKit, didOccurStreamMessageErrorFromUid uid: UInt, streamId: Int, error: Int, missed: Int, cached: Int) {

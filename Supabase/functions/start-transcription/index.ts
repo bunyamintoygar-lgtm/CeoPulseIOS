@@ -47,8 +47,9 @@ serve(async (req) => {
       rtcConfig: {
         channelName: channelName,
         pubBotUid: String(pubBotUid),
-        pubBotToken: pubBotToken,
-        enableJsonProtocol: true   // Send JSON instead of Protobuf — parseable without proto compiler
+        pubBotToken: pubBotToken
+        // enableJsonProtocol omitted → defaults to false (Protobuf, no gzip)
+        // This avoids needing to gzip-decompress on the iOS client
       }
     }
 
