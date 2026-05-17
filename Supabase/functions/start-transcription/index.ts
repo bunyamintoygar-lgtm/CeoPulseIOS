@@ -22,25 +22,15 @@ serve(async (req) => {
 
     const url = `https://api.agora.io/api/speech-to-text/v1/projects/${AGORA_APP_ID}/join`
 
-    const subBotUid = 47091
     const pubBotUid = 88222
     
-    // Generate valid RTC tokens for STT bots because App Certificate is active
+    // Generate valid RTC token for STT pubBot because App Certificate is active
     const expirationTimeInSeconds = 24 * 3600 // 24 hours
     const currentTimestamp = Math.floor(Date.now() / 1000)
     const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds
 
-    console.log(`Generating RTC tokens for subBot (${subBotUid}) and pubBot (${pubBotUid}) in channel: ${channelName}`)
+    console.log(`Generating RTC token for pubBot (${pubBotUid}) in channel: ${channelName}`)
     
-    const subBotToken = RtcTokenBuilder.buildTokenWithUid(
-      AGORA_APP_ID,
-      AGORA_APP_CERTIFICATE,
-      channelName,
-      subBotUid,
-      RtcRole.PUBLISHER,
-      privilegeExpiredTs
-    )
-
     const pubBotToken = RtcTokenBuilder.buildTokenWithUid(
       AGORA_APP_ID,
       AGORA_APP_CERTIFICATE,
@@ -56,13 +46,12 @@ serve(async (req) => {
       maxIdleTime: 300,
       rtcConfig: {
         channelName: channelName,
-        subBotUid: String(subBotUid),
         pubBotUid: String(pubBotUid),
-        subBotToken: subBotToken,
         pubBotToken: pubBotToken,
         enableJsonProtocol: true   // Send JSON instead of Protobuf — parseable without proto compiler
       }
     }
+
 
     console.log(`Calling STT v7: POST ${url}`)
     const response = await fetch(url, {
