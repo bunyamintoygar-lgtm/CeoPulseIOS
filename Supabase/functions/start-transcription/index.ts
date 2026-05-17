@@ -67,8 +67,8 @@ serve(async (req) => {
       rtcConfig: {
         channelName: channelName,
         pubBotUid: String(pubBotUid),
-        pubBotToken: pubBotToken
-        // enableJsonProtocol omitted → defaults to false (Protobuf)
+        pubBotToken: pubBotToken,
+        enableJsonProtocol: true  // gzip-compressed JSON; iOS gunzip() handles decompression
       }
     }
 
